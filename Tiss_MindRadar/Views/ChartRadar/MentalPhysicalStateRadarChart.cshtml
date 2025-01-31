@@ -1,0 +1,41 @@
+﻿@model IEnumerable<Tiss_MindRadar.Models.RadarChartVIewModel>
+@using Newtonsoft.Json
+@{
+    ViewBag.Title = "身心狀態檢測向度雷達圖";
+    Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>身心狀態檢測向度雷達圖</title>
+    <script src="~/RadarChartJS/chart.js"></script>
+    <link href="~/MindRadarCss/MentalPhysicalStateRadarChart.css" rel="stylesheet" />
+    <script src="~/RadarChartJS/MentalPhysicalStateRadarChart.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-6">
+        <div class="header-container">
+            <div class="user-info">
+                受訪者: @ViewBag.UserName | 年齡: @ViewBag.Age | 隊伍: @ViewBag.TeamName
+            </div>
+            <div class="button-container">
+                <a href="@Url.Action("MentalPhysicalState", "Survey")" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md">
+                    返回身心狀態檢測題目頁
+                </a>
+            </div>
+        </div>
+        <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">身心狀態檢測向度雷達圖</h1>
+        <div class="radar-chart-container">
+            <canvas id="radarChart" width="580" height="580"></canvas>
+        </div>
+    </div>
+    <script>
+        const radarData = @Html.Raw(JsonConvert.SerializeObject(Model));
+        document.addEventListener("DOMContentLoaded", function () {
+        renderRadarChart("radarChart", radarData);
+    });
+    </script>
+</body>
+</html>

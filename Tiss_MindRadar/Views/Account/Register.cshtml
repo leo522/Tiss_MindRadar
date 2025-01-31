@@ -1,0 +1,109 @@
+﻿@model IEnumerable<Tiss_MindRadar.Models.Team>
+@{
+    ViewBag.Title = "帳號註冊";
+    Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>帳號註冊</title>
+    <link rel="icon" href="~/img/favicon.svg" />
+    <link href="~/MindRadarCss/RegisterStyle.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="register-container">
+        <div class="text-center">
+            <img src="~/img/logo.svg" style="height: 45px; width: 100%;" />
+        </div>
+        <form id="registerForm" action="/Account/Register" method="post">
+            <div class="form-group">
+                <label for="AccountID" title="帳號">帳號</label>
+                <input type="text" class="form-control" id="AccountID" name="Jobcode" placeholder="請輸入帳號" required>
+            </div>
+            <div class="form-group">
+                <label for="Username" title="姓名">姓名</label>
+                <input type="text" class="form-control" id="Username" name="UserName" placeholder="請輸入名稱" required>
+            </div>
+            <div class="form-group">
+                <label for="Password" title="密碼">密碼</label>
+                <input type="password" class="form-control" id="Password" name="pwd" placeholder="請輸入密碼" required>
+                <small id="passwordError"></small>
+            </div>
+            <div class="form-group">
+                <label for="Email" title="電子郵件">電子郵件</label>
+                <input type="email" class="form-control" id="Email" name="Email" placeholder="請輸入電子郵件" required>
+            </div>
+            <div class="form-group">
+                <label for="Age" title="年齡">年齡</label>
+                <input type="number" class="form-control" id="Age" name="Age" placeholder="請輸入年齡" required>
+            </div>
+            <div class="form-group">
+                <label for="TeamID" title="所屬隊伍">所屬隊伍</label>
+                <select class="form-control" id="TeamID" name="TeamID" required>
+                    <option value="" disabled selected>請選擇隊伍</option>
+                    @foreach (var team in ViewBag.Teams)
+                    {
+                        <option value="@team.TeamID">@team.TeamName</option>
+                    }
+                </select>
+                <small id="teamError" class="text-danger"></small>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" title="註冊">註冊</button>
+        </form>
+    </div>
+
+    <script>
+        // 密碼即時驗證
+        document.getElementById("Password").addEventListener("input", function () {
+            const password = this.value;
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/; // 至少6碼，包含大小寫字母和數字
+            const message = document.getElementById("passwordError");
+
+            if (!passwordRegex.test(password)) {
+                message.textContent = "密碼必須至少包含 6 碼，並且包含大小寫字母和數字";
+                message.style.color = "red";
+            } else {
+                message.textContent = "密碼格式正確";
+                message.style.color = "green";
+            }
+        });
+
+        // 表單提交處理
+        document.getElementById("registerForm").addEventListener("submit", function (e) {
+            e.preventDefault(); // 阻止默認提交
+
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: "POST",
+                body: new URLSearchParams(formData),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "成功",
+                            text: data.message,
+                        }).then(() => {
+                            window.location.href = "/Account/Login"; // 成功後跳轉到登入頁面
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "錯誤",
+                            text: data.message,
+                        });
+                    }
+                })
+                .catch(() => {
+                    Swal.fire({
+                        icon: "error",
+                        title: "錯誤",
+                        text: "發生未知錯誤，請稍後再試。",
+                    });
+                });
+        });
+    </script>
+</body>
+</html>

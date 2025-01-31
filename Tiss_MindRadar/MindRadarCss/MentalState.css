@@ -1,0 +1,11 @@
+﻿.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0; /* 上下留白 */
+}
+
+    .logo-container img {
+        max-width: 200px; /* 限制圖片寬度 */
+        height: auto; /* 確保等比例縮放 */
+    }

@@ -1,0 +1,80 @@
+﻿@{
+    ViewBag.Title = "帳號登入";
+    Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>登入</title>
+    <link rel="icon" href="~/img/favicon.svg" />
+    <link href="~/MindRadarCss/LoginStyle.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="login-container">
+        <div class="text-center">
+            <img src="~/img/logo.svg" style="height: 45px; width: 100%;">
+        </div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="Jobcode">帳號</label>
+                <input type="text" class="form-control" id="Jobcode" name="Jobcode" placeholder="請輸入帳號" required>
+            </div>
+            <div class="form-group">
+                <label for="Password">密碼</label>
+                <input type="password" class="form-control" id="pwd" name="pwd" placeholder="請輸入密碼" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">登入</button>
+        </form>
+        <div class="text-center mt-3">
+            <a href="/Account/Register">註冊帳號</a>
+        </div>
+        <hr>
+        <div class="text-center">
+            <a href="/Account/ForgotPassword" class="btn btn-link">忘記密碼</a>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $("#loginForm").submit(function (e) {
+                e.preventDefault(); // 阻止表單默認提交
+
+                const formData = $(this).serialize();
+
+                $.ajax({
+                    url: "/Account/Login",
+                    type: "POST",
+                    data: formData,
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "成功",
+                                text: "登入成功！",
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                // 確保跳轉到需要 Session 的頁面
+                                window.location.href = "/Survey/MentalPhysicalState";
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "錯誤",
+                                text: "帳號或密碼錯誤，請重新輸入！"
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: "error",
+                            title: "錯誤",
+                            text: "發生錯誤，請稍後再試！"
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
