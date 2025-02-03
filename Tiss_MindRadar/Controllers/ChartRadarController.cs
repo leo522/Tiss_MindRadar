@@ -13,7 +13,7 @@ namespace Tiss_MindRadar.Controllers
         private TISS_MindRadarEntities _db = new TISS_MindRadarEntities(); //資料庫
 
         #region 身心狀態檢測雷達圖
-        public ActionResult MentalPhysicalStateRadarChart(int? batchId = null)
+        public ActionResult MentalPhysicalStateRadarChart(DateTime? surveyDate = null)
         {
             try
             {
@@ -23,23 +23,22 @@ namespace Tiss_MindRadar.Controllers
                 }
 
                 int userId = Convert.ToInt32(Session["UserID"]);
-
                 ViewBag.UserName = Session["UserName"];
                 ViewBag.Age = Session["Age"];
                 ViewBag.TeamName = Session["TeamName"];
+                ViewBag.SelectedDate = surveyDate ?? DateTime.Now;
 
-                // **簡化 SQL 查詢**
                 string query = @"SELECT c.CategoryName, AVG(ur.Score) AS AverageScore FROM UserResponse ur
-                                INNER JOIN QuestionCategory qc ON ur.QuestionID = qc.QuestionID
-                                INNER JOIN Category c ON qc.CategoryID = c.ID WHERE ur.UserID = @p0 {0}
-                                GROUP BY c.CategoryName";
+                          INNER JOIN QuestionCategory qc ON ur.QuestionID = qc.QuestionID
+                          INNER JOIN Category c ON qc.CategoryID = c.ID WHERE ur.UserID = @p0 {0}
+                          GROUP BY c.CategoryName";
 
                 object[] parameters;
 
-                if (batchId.HasValue)
+                if (surveyDate.HasValue)
                 {
-                    query = string.Format(query, "AND ur.BatchID = @p1");
-                    parameters = new object[] { userId, batchId.Value };
+                    query = string.Format(query, "AND ur.SurveyDate = @p1");
+                    parameters = new object[] { userId, surveyDate.Value };
                 }
                 else
                 {
@@ -48,7 +47,6 @@ namespace Tiss_MindRadar.Controllers
                 }
 
                 var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();
-
                 return View(data);
             }
             catch (Exception ex)

@@ -201,6 +201,7 @@
           <Property Name="Score" Type="int" Nullable="false" />
           <Property Name="BatchID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="CreatedDate" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="SurveyDate" Type="date" />
         </EntityType>
         <EntityType Name="Users">
           <Key>
@@ -606,6 +607,7 @@
           <Property Name="BatchID" Type="Guid" Nullable="false" />
           <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="7" />
           <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" FromRole="UserResponse" ToRole="Users" />
+          <Property Name="SurveyDate" Type="DateTime" Precision="0" />
         </EntityType>
         <EntityType Name="Users">
           <Key>
@@ -918,6 +920,7 @@
           <EntitySetMapping Name="UserResponse">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.UserResponse">
               <MappingFragment StoreEntitySet="UserResponse">
+                <ScalarProperty Name="SurveyDate" ColumnName="SurveyDate" />
                 <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
                 <ScalarProperty Name="BatchID" ColumnName="BatchID" />
                 <ScalarProperty Name="Score" ColumnName="Score" />

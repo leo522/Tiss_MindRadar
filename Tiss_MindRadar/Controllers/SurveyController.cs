@@ -38,60 +38,40 @@ namespace Tiss_MindRadar.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
-                int userId = Convert.ToInt32(Session["UserID"]); //確保 UserID 有效
+                int userId = Convert.ToInt32(Session["UserID"]);
+                DateTime surveyDate = DateTime.Parse(form["SurveyDate"]);
                 var responses = new Dictionary<int, int>();
 
-                foreach (var key in form.AllKeys) //解析表單數據
+                foreach (var key in form.AllKeys)
                 {
-                    if (key.StartsWith("responses[") && key.EndsWith("]"))
+                    if (key.StartsWith("responses["))
                     {
                         int questionId = int.Parse(key.Replace("responses[", "").Replace("]", ""));
-                        int.TryParse(form[key], out int score); //未填寫時默認為 0
+                        int.TryParse(form[key], out int score);
                         responses[questionId] = score;
                     }
                 }
 
-                if (!responses.Any())
+                foreach (var response in responses)
                 {
-                    ViewBag.ErrorMessage = "請選擇至少一個答案。";
-                    var mentalPhysicalStateItems = _db.MentalPhysicalState.ToList();
-                    return View("MentalPhysicalState", mentalPhysicalStateItems);
-                }
-
-                foreach (var response in responses) //保存用戶的回答
-                {
-                    var question = _db.MentalPhysicalState.Find(response.Key);
-                    if (question != null)
+                    var userResponse = new UserResponse
                     {
-                        // 查詢該問題所屬的分類
-                        var categoryId = _db.Database.SqlQuery<int>(
-                            "SELECT CategoryID FROM QuestionCategory WHERE QuestionID = @p0", question.ID
-                        ).FirstOrDefault();
-
-                        var score = response.Value; //確保分數範圍有效
-                        if (score < 0 || score > 6) score = 0;
-
-                        var userResponse = new UserResponse
-                        {
-                            QuestionID = question.ID,
-                            CategoryID = categoryId,
-                            Score = score, //保存正確的分數
-                            UserID = userId, //關聯當前用戶
-                            BatchID = Guid.NewGuid(), //每次提交生成唯一的 BatchID
-                            CreatedDate = DateTime.Now
-                        };
-                        _db.UserResponse.Add(userResponse);
-                    }
+                        QuestionID = response.Key,
+                        UserID = userId,
+                        Score = response.Value,
+                        SurveyDate = surveyDate, // 儲存填寫日期
+                        CreatedDate = DateTime.Now
+                    };
+                    _db.UserResponse.Add(userResponse);
                 }
 
                 _db.SaveChanges();
-                return RedirectToAction("MentalPhysicalStateRadarChart", "ChartRadar");
+                return RedirectToAction("MentalPhysicalStateRadarChart", "ChartRadar", new { date = surveyDate.ToString("yyyy-MM-dd") });
             }
             catch (Exception ex)
             {
                 ViewBag.ErrorMessage = $"提交失敗：{ex.Message}";
-                var mentalPhysicalStateItems = _db.MentalPhysicalState.ToList();
-                return View("MentalPhysicalState", mentalPhysicalStateItems);
+                return View("MentalPhysicalState", _db.MentalPhysicalState.ToList());
             }
         }
         #endregion
