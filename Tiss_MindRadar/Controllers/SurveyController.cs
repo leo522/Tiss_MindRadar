@@ -59,6 +59,8 @@ namespace Tiss_MindRadar.Controllers
                         QuestionID = response.Key,
                         UserID = userId,
                         Score = response.Value,
+                        CategoryID = response.Key,
+                        BatchID = Guid.NewGuid(),
                         SurveyDate = surveyDate, // 儲存填寫日期
                         CreatedDate = DateTime.Now
                     };
@@ -83,6 +85,8 @@ namespace Tiss_MindRadar.Controllers
             ViewBag.Age = Session["Age"];
             ViewBag.TeamName = Session["TeamName"];
 
+            int userId = Convert.ToInt32(Session["UserID"]);
+
             var MentalStateItems = _db.MentalState.ToList();
             return View("MentalState", MentalStateItems);
         }
@@ -95,58 +99,48 @@ namespace Tiss_MindRadar.Controllers
         {
             try
             {
-                if (Session["UserID"] == null)
+                if (Session["UserID"] == null || Session["UserName"] == null)
                 {
                     return RedirectToAction("Login", "Account");
                 }
 
                 int userId = Convert.ToInt32(Session["UserID"]);
+                DateTime surveyDate = DateTime.Parse(form["SurveyDate"]); //取得選擇的日期
                 var responses = new Dictionary<int, int>();
 
-                foreach (var key in form.AllKeys) //解析表單數據
+                foreach (var key in form.AllKeys)
                 {
                     if (key.StartsWith("responses[") && key.EndsWith("]"))
                     {
                         int questionId = int.Parse(key.Replace("responses[", "").Replace("]", ""));
-                        int.TryParse(form[key], out int score); //未填寫時默認為 0
+                        int.TryParse(form[key], out int score);
 
-                        //**反向計分 (第15~18題)**
-                        if (questionId >= 15 && questionId <= 18)
+                        if (questionId >= 15 && questionId <= 18) // **反向計分 (第15~18題)**
                         {
-                            score = 6 - score; //反轉計分，例如 5 變成 1，4 變成 2，3 不變
+                            score = 6 - score;
                         }
 
                         responses[questionId] = score;
                     }
                 }
 
-                if (!responses.Any())
+                foreach (var response in responses)
                 {
-                    ViewBag.ErrorMessage = "請至少選擇一個答案。";
-                    var mentalStateItems = _db.MentalState.ToList();
-                    return View("MentalState", mentalStateItems);
-                }
-
-                foreach (var response in responses) //保存數據
-                {
-                    var categoryId = _db.Database.SqlQuery<int>(
-                        "SELECT CategoryID FROM PsychologicalStateQuestionCategory WHERE QuestionID = @p0", response.Key
-                    ).FirstOrDefault();
-
                     var userResponse = new PsychologicalResponse
                     {
                         QuestionID = response.Key,
-                        CategoryID = categoryId,
-                        Score = response.Value,
                         UserID = userId,
+                        Score = response.Value,
+                        CategoryID = response.Key,
                         BatchID = Guid.NewGuid(),
+                        SurveyDate = surveyDate, // 儲存選擇的填寫日期
                         CreatedDate = DateTime.Now
                     };
                     _db.PsychologicalResponse.Add(userResponse);
                 }
 
                 _db.SaveChanges();
-                return RedirectToAction("MentalStateRadarChart", "ChartRadar");
+                return RedirectToAction("MentalStateRadarChart", "ChartRadar", new { surveyDate = surveyDate.ToString("yyyy-MM-dd") });
             }
             catch (Exception ex)
             {

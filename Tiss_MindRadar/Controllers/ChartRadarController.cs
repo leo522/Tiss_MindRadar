@@ -27,14 +27,14 @@ namespace Tiss_MindRadar.Controllers
                 ViewBag.Age = Session["Age"];
                 ViewBag.TeamName = Session["TeamName"];
 
-                // **取得該用戶最新的檢測日期**
+                //取得該用戶最新的檢測日期
                 DateTime? latestSurveyDate = _db.UserResponse
                     .Where(ur => ur.UserID == userId)
                     .OrderByDescending(ur => ur.SurveyDate)
                     .Select(ur => ur.SurveyDate)
                     .FirstOrDefault();
 
-                // **如果 surveyDate 沒有提供，則使用最新的檢測日期**
+                //如果 surveyDate 沒有提供，則使用最新的檢測日期
                 if (!surveyDate.HasValue)
                 {
                     surveyDate = latestSurveyDate;
@@ -42,13 +42,8 @@ namespace Tiss_MindRadar.Controllers
 
                 ViewBag.SelectedDate = surveyDate;
 
-                string query = @"
-            SELECT c.CategoryName, AVG(ur.Score) AS AverageScore
-            FROM UserResponse ur
-            INNER JOIN QuestionCategory qc ON ur.QuestionID = qc.QuestionID
-            INNER JOIN Category c ON qc.CategoryID = c.ID
-            WHERE ur.UserID = @p0 AND ur.SurveyDate = @p1
-            GROUP BY c.CategoryName";
+                string query = @"SELECT c.CategoryName, AVG(ur.Score) AS AverageScore FROM UserResponse ur
+                                INNER JOIN QuestionCategory qc ON ur.QuestionID = qc.QuestionID INNER JOIN Category c ON qc.CategoryID = c.ID WHERE ur.UserID = @p0 AND ur.SurveyDate = @p1 GROUP BY c.CategoryName";
 
                 object[] parameters = { userId, surveyDate.Value };
 
@@ -64,37 +59,38 @@ namespace Tiss_MindRadar.Controllers
         #endregion
 
         #region 心理狀態檢測雷達圖
-        public ActionResult MentalStateRadarChart(int? batchId = null)
+        public ActionResult MentalStateRadarChart(DateTime? surveyDate = null)
         {
             try
             {
-                if (Session["UserID"] == null) //確保 Session 存在
+                if (Session["UserID"] == null)
                 {
                     return RedirectToAction("Login", "Account");
                 }
 
                 int userId = Convert.ToInt32(Session["UserID"]);
-
                 ViewBag.UserName = Session["UserName"];
                 ViewBag.Age = Session["Age"];
                 ViewBag.TeamName = Session["TeamName"];
 
-                // **修正 SQL，確保結果是整數**
-                string query = @"SELECT c.CategoryName, ROUND(AVG(pr.Score), 0) AS AverageScore
-                                FROM PsychologicalResponse pr INNER JOIN PsychologicalStateQuestionCategory qc ON     pr.QuestionID = qc.QuestionID INNER JOIN PsychologicalStateCategory c ON   
-                                qc.CategoryID = c.ID WHERE pr.UserID = @p0 {0} GROUP BY c.CategoryName";
+                //取得該用戶最新的檢測日期
+                DateTime? latestSurveyDate = _db.PsychologicalResponse
+                    .Where(ur => ur.UserID == userId)
+                    .OrderByDescending(ur => ur.SurveyDate)
+                    .Select(ur => ur.SurveyDate)
+                    .FirstOrDefault();
 
-                object[] parameters;
-                if (batchId.HasValue)
+                //如果 surveyDate 沒有提供，則使用最新的檢測日期
+                if (!surveyDate.HasValue)
                 {
-                    query = string.Format(query, "AND pr.BatchID = @p1");
-                    parameters = new object[] { userId, batchId.Value };
+                    surveyDate = latestSurveyDate;
                 }
-                else
-                {
-                    query = string.Format(query, "");
-                    parameters = new object[] { userId };
-                }
+
+                ViewBag.SelectedDate = surveyDate;
+
+                string query = @"SELECT c.CategoryName, AVG(pr.Score) AS AverageScore FROM PsychologicalResponse pr INNER JOIN sychologicalStateQuestionCategory qc ON pr.QuestionID = qc.QuestionID INNER JOIN PsychologicalStateCategory c ON qc.CategoryID = c.ID WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1 GROUP BY c.CategoryName";
+
+                object[] parameters = { userId, surveyDate.Value };
 
                 var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();
 

@@ -20,7 +20,7 @@
             <img src="~/img/TissLogo.jpg" alt="Logo" class="h-16 mx-auto">
         </div>
     </div>
-    <div class="container mx-auto px-4 py-6">
+    <div class="container mx-auto p-4">
         <h1 class="text-2xl font-bold text-center mb-6">身心狀態檢測</h1>
         <p class="text-gray-700 text-center mb-4">
             請問您在過去三天內下列敘述內容的出現頻率，請仔細閱讀每個題目的敘述內容後，根據您的真實想法或感覺，在題目的右方數字中圈選出您對該內容的同意程度。<br />0=從不、1=很少、2=有時、3=多次、4=經常、5=常常、6=總是。
@@ -30,30 +30,26 @@
                class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg">
                 查看身心狀態檢測結果記錄
             </a>
-
             <div class="flex items-center space-x-2">
                 <label for="surveyDate" class="text-gray-700">選擇填寫日期：</label>
-                <input type="date" id="surveyDate" name="SurveyDate"
-                       value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                <input type="date" id="surveyDate" name="SurveyDate" value="@DateTime.Now.ToString("yyyy-MM-dd")"
                        class="form-input rounded border-gray-300 px-3 py-2" />
             </div>
-
             <a href="@Url.Action("MentalState", "Survey")"
                class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-6 rounded-lg">
                 心理狀態檢測問卷
             </a>
         </div>
-
         @using (Html.BeginForm("SubmitMentalPhysicalState", "Survey", FormMethod.Post, new { id = "surveyForm" }))
         {
             @Html.AntiForgeryToken()
             <input type="hidden" name="SurveyDate" id="hiddenSurveyDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
             <div class="overflow-x-auto">
-                <table class="min-w-full bg-white shadow-md rounded-lg">
+                <table class="min-w-full bg-white shadow-md rounded">
                     <thead>
                         <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                            <th class="py-3 px-4 text-left">題號</th>
-                            <th class="py-3 px-4 text-left">題目</th>
+                            <th class="py-3 px-6 text-left">題號</th>
+                            <th class="py-3 px-6 text-left">題目</th>
                             @for (int i = 0; i <= 6; i++)
                             {
                                 <th class="py-3 px-4 text-center">@i</th>
@@ -78,7 +74,7 @@
                 </table>
             </div>
             <div class="mt-6 text-center">
-                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
                     提交答案
                 </button>
             </div>

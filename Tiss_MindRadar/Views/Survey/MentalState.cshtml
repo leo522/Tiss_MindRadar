@@ -1,5 +1,6 @@
 ﻿@model IEnumerable<Tiss_MindRadar.Models.MentalState>
 @{
+    ViewBag.Title = "心理狀態檢測";
     Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
 }
 <!DOCTYPE html>
@@ -28,6 +29,11 @@
                class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg">
                 查看心理狀態檢測結果記錄
             </a>
+            <div class="flex items-center space-x-2">
+                <label for="surveyDate" class="text-gray-700">選擇填寫日期：</label>
+                <input type="date" id="surveyDate" name="SurveyDate" value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       class="form-input rounded border-gray-300 px-3 py-2" />
+            </div>
             <a href="@Url.Action("MentalPhysicalState", "Survey")"
                class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-6 rounded-lg">
                 身心狀態檢測問卷
@@ -36,6 +42,7 @@
         @using (Html.BeginForm("SubmitMentalState", "Survey", FormMethod.Post, new { id = "mentalStateForm" }))
         {
             @Html.AntiForgeryToken()
+            <input type="hidden" name="SurveyDate" id="hiddenSurveyDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
             <div class="overflow-x-auto">
                 <table class="min-w-full bg-white shadow-md rounded">
                     <thead>
@@ -73,5 +80,34 @@
             </div>
         }
     </div>
+    <script>
+        document.getElementById("surveyDate").addEventListener("change", function () {
+            document.getElementById("hiddenSurveyDate").value = this.value;
+        });
+
+        document.getElementById('mentalStateForm').addEventListener('submit', function (e) {
+            let missingQuestions = [];
+
+            document.querySelectorAll('tbody tr').forEach(row => {
+                const questionNumber = row.querySelector('td:first-child').textContent.trim();
+                const radioButtons = row.querySelectorAll('input[type="radio"]');
+                const isChecked = [...radioButtons].some(radio => radio.checked);
+
+                if (!isChecked) {
+                    missingQuestions.push(questionNumber);
+                }
+            });
+
+            if (missingQuestions.length > 0) {
+                e.preventDefault(); // 阻止表單提交
+                Swal.fire({
+                    icon: 'error',
+                    title: '未填寫答案',
+                    html: `請填寫以下題號的答案：<br><strong>${missingQuestions.join(", ")}</strong>`,
+                    confirmButtonText: '確定'
+                });
+            }
+        });
+    </script>
 </body>
 </html>

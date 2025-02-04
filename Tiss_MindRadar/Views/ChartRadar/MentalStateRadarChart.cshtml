@@ -27,20 +27,43 @@
             </div>
         </div>
         <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">心理狀態檢測向度雷達圖</h1>
+        <label for="selectedDate" class="block text-gray-700">選擇查看的日期：</label>
+        <input type="date" id="selectedDate" name="selectedDate" class="form-input rounded border-gray-300 px-3 py-2 mb-4" value="@ViewBag.SelectedDate?.ToString(" yyyy-MM-dd")" />
+        <button onclick="updateRadarChart()" class="bg-green-500 text-white py-2 px-6 rounded">查詢</button>
+        <p class="text-gray-600 text-center mt-2">當前顯示日期: @ViewBag.SelectedDate.ToString("yyyy/MM/dd")</p>
         <div class="radar-chart-container">
             <canvas id="radarChart" width="580" height="580"></canvas>
         </div>
     </div>
     <script>
-        var radarData = @Html.Raw(JsonConvert.SerializeObject(Model.ToList())); // 確保 Model 是陣列
+         const radarData = @Html.Raw(JsonConvert.SerializeObject(Model));
 
         document.addEventListener("DOMContentLoaded", function () {
-            if (Array.isArray(radarData)) {
-                renderRadarChart("radarChart", radarData);
-            } else {
-                console.error("雷達圖數據不是陣列！");
-            }
-        });
+        if (radarData.length > 0) {
+            renderRadarChart("radarChart", radarData);
+        } else {
+            Swal.fire({
+                icon: 'warning',
+                title: '沒有檢測數據',
+                text: '當前日期沒有檢測數據，請選擇其他日期！',
+                confirmButtonText: '確定'
+            });
+        }
+    });
+
+    function updateRadarChart() {
+        const selectedDate = document.getElementById("selectedDate").value;
+        if (!selectedDate) {
+            Swal.fire({
+                icon: 'error',
+                title: '日期未選擇',
+                text: '請選擇日期',
+                confirmButtonText: '確定'
+            });
+            return;
+        }
+        window.location.href = "@Url.Action("MentalStateRadarChart", "ChartRadar")?surveyDate=" + encodeURIComponent(selectedDate);
+    }
     </script>
 </body>
 </html>

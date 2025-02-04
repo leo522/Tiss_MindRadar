@@ -21,6 +21,7 @@ namespace Tiss_MindRadar.Models
         public int Score { get; set; }
         public System.Guid BatchID { get; set; }
         public System.DateTime CreatedDate { get; set; }
+        public Nullable<System.DateTime> SurveyDate { get; set; }
     
         public virtual MentalState MentalState { get; set; }
         public virtual Users Users { get; set; }

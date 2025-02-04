@@ -132,6 +132,7 @@
           <Property Name="Score" Type="int" Nullable="false" />
           <Property Name="BatchID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="SurveyDate" Type="date" />
         </EntityType>
         <EntityType Name="PsychologicalStateCategory">
           <Key>
@@ -576,6 +577,7 @@
           <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="MentalState" Relationship="TISS_MindRadarModel.FK_PsychologicalResponse_QuestionID" FromRole="PsychologicalResponse" ToRole="MentalState" />
           <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK_PsychologicalResponse_UserID" FromRole="PsychologicalResponse" ToRole="Users" />
+          <Property Name="SurveyDate" Type="DateTime" Precision="0" />
         </EntityType>
         <EntityType Name="SelfEfficacy">
           <Key>
@@ -887,6 +889,7 @@
           <EntitySetMapping Name="PsychologicalResponse">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.PsychologicalResponse">
               <MappingFragment StoreEntitySet="PsychologicalResponse">
+                <ScalarProperty Name="SurveyDate" ColumnName="SurveyDate" />
                 <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
                 <ScalarProperty Name="BatchID" ColumnName="BatchID" />
                 <ScalarProperty Name="Score" ColumnName="Score" />
