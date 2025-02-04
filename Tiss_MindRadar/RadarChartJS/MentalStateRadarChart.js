@@ -55,7 +55,7 @@ function renderRadarChart(canvasId, radarData) {
                 r: {
                     angleLines: { display: true },
                     suggestedMin: 0,
-                    suggestedMax: 6,
+                    suggestedMax: 5,
                     pointLabels: {
                         font: { size: 20 }
                     },

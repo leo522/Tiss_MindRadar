@@ -88,7 +88,8 @@ namespace Tiss_MindRadar.Controllers
 
                 ViewBag.SelectedDate = surveyDate;
 
-                string query = @"SELECT c.CategoryName, AVG(pr.Score) AS AverageScore FROM PsychologicalResponse pr INNER JOIN sychologicalStateQuestionCategory qc ON pr.QuestionID = qc.QuestionID INNER JOIN PsychologicalStateCategory c ON qc.CategoryID = c.ID WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1 GROUP BY c.CategoryName";
+                string query = @"SELECT c.CategoryName, COALESCE(AVG(pr.Score), 0) AS AverageScore FROM PsychologicalStateCategory c
+                                LEFT JOIN QuestionCategory qc ON qc.CategoryID = c.ID LEFT JOIN PsychologicalResponse pr ON pr.QuestionID = qc.QuestionID AND pr.UserID = @p0 AND pr.SurveyDate = @p1 GROUP BY c.CategoryName";
 
                 object[] parameters = { userId, surveyDate.Value };
 

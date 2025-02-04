@@ -82,6 +82,7 @@ namespace Tiss_MindRadar.Controllers
         public ActionResult MentalState()
         {
             ViewBag.Title = "心理狀態檢測";
+            ViewBag.UserName = Session["UserName"];
             ViewBag.Age = Session["Age"];
             ViewBag.TeamName = Session["TeamName"];
 
