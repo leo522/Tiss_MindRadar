@@ -32,11 +32,18 @@ namespace Tiss_MindRadar.Controllers
                     return Json(new { success = false, message = "該帳號已存在。" });
                 }
 
-                // 密碼規則驗證
+                //密碼規則驗證
                 var passwordRegex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$");
                 if (!passwordRegex.IsMatch(pwd))
                 {
                     return Json(new { success = false, message = "密碼必須至少包含6碼，並包含大小寫字母和數字。" });
+                }
+
+                //Email規則驗證
+                var emailRegex = new Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$");
+                if (!emailRegex.IsMatch(Email))
+                {
+                    return Json(new { success = false, message = "請輸入正確的電子郵件格式。" });
                 }
 
                 var hashedPwd = ComputeSha256Hash(pwd); // 密碼加密
