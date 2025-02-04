@@ -26,25 +26,31 @@ namespace Tiss_MindRadar.Controllers
                 ViewBag.UserName = Session["UserName"];
                 ViewBag.Age = Session["Age"];
                 ViewBag.TeamName = Session["TeamName"];
-                ViewBag.SelectedDate = surveyDate ?? DateTime.Now;
 
-                string query = @"SELECT c.CategoryName, AVG(ur.Score) AS AverageScore FROM UserResponse ur
-                          INNER JOIN QuestionCategory qc ON ur.QuestionID = qc.QuestionID
-                          INNER JOIN Category c ON qc.CategoryID = c.ID WHERE ur.UserID = @p0 {0}
-                          GROUP BY c.CategoryName";
+                // **取得該用戶最新的檢測日期**
+                DateTime? latestSurveyDate = _db.UserResponse
+                    .Where(ur => ur.UserID == userId)
+                    .OrderByDescending(ur => ur.SurveyDate)
+                    .Select(ur => ur.SurveyDate)
+                    .FirstOrDefault();
 
-                object[] parameters;
-
-                if (surveyDate.HasValue)
+                // **如果 surveyDate 沒有提供，則使用最新的檢測日期**
+                if (!surveyDate.HasValue)
                 {
-                    query = string.Format(query, "AND ur.SurveyDate = @p1");
-                    parameters = new object[] { userId, surveyDate.Value };
+                    surveyDate = latestSurveyDate;
                 }
-                else
-                {
-                    query = string.Format(query, "");
-                    parameters = new object[] { userId };
-                }
+
+                ViewBag.SelectedDate = surveyDate;
+
+                string query = @"
+            SELECT c.CategoryName, AVG(ur.Score) AS AverageScore
+            FROM UserResponse ur
+            INNER JOIN QuestionCategory qc ON ur.QuestionID = qc.QuestionID
+            INNER JOIN Category c ON qc.CategoryID = c.ID
+            WHERE ur.UserID = @p0 AND ur.SurveyDate = @p1
+            GROUP BY c.CategoryName";
+
+                object[] parameters = { userId, surveyDate.Value };
 
                 var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();
                 return View(data);

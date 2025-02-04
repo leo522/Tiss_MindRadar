@@ -54,7 +54,6 @@
                                 timer: 2000,
                                 showConfirmButton: false
                             }).then(() => {
-                                // 確保跳轉到需要 Session 的頁面
                                 window.location.href = "/Survey/MentalPhysicalState";
                             });
                         } else {
@@ -62,6 +61,8 @@
                                 icon: "error",
                                 title: "錯誤",
                                 text: "帳號或密碼錯誤，請重新輸入！"
+                            }).then(() => {
+                                $("body").css("overflow", "auto"); // 確保彈窗關閉後恢復滾動
                             });
                         }
                     },
@@ -70,6 +71,8 @@
                             icon: "error",
                             title: "錯誤",
                             text: "發生錯誤，請稍後再試！"
+                        }).then(() => {
+                            $("body").css("overflow", "auto");
                         });
                     }
                 });

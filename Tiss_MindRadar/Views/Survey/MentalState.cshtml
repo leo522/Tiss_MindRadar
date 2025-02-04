@@ -26,11 +26,11 @@
         <div class="flex justify-between items-center mb-4">
             <a href="@Url.Action("MentalStateRadarChart", "ChartRadar")"
                class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg">
-                查看上一次心理狀態檢測結果
+                查看心理狀態檢測結果記錄
             </a>
             <a href="@Url.Action("MentalPhysicalState", "Survey")"
                class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-6 rounded-lg">
-                跳轉到身心狀態檢測
+                身心狀態檢測問卷
             </a>
         </div>
         @using (Html.BeginForm("SubmitMentalState", "Survey", FormMethod.Post, new { id = "mentalStateForm" }))
