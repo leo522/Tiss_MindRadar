@@ -37,19 +37,20 @@
     </div>
     <script>
          const radarData = @Html.Raw(JsonConvert.SerializeObject(Model));
+console.log("Radar Data:", radarData);  // 確保數據正確輸出
 
-        document.addEventListener("DOMContentLoaded", function () {
-        if (radarData.length > 0) {
-            renderRadarChart("radarChart", radarData);
-        } else {
-            Swal.fire({
-                icon: 'warning',
-                title: '沒有檢測數據',
-                text: '當前日期沒有檢測數據，請選擇其他日期！',
-                confirmButtonText: '確定'
-            });
-        }
-    });
+document.addEventListener("DOMContentLoaded", function () {
+    if (radarData.length > 0) {
+        renderRadarChart("radarChart", radarData);
+    } else {
+        Swal.fire({
+            icon: 'warning',
+            title: '沒有檢測數據',
+            text: '當前日期沒有檢測數據，請選擇其他日期！',
+            confirmButtonText: '確定'
+        });
+    }
+});
 
     function updateRadarChart() {
         const selectedDate = document.getElementById("selectedDate").value;

@@ -27,6 +27,11 @@ namespace Tiss_MindRadar.Controllers
         {
             try
             {
+                if (Jobcode.Length > 20)
+                {
+                    return Json(new { success = false, message = "帳號長度不能超過 20 個字！" });
+                }
+
                 if (_db.Users.Any(u => u.Jobcode == Jobcode)) //確認帳號是否已存在
                 {
                     return Json(new { success = false, message = "該帳號已存在。" });
@@ -75,7 +80,7 @@ namespace Tiss_MindRadar.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"發生錯誤：{ex.Message}" });
+                return Json(new { success = false, message = $"發生錯誤：帳號註冊失敗!" });
             }
         }
         #endregion

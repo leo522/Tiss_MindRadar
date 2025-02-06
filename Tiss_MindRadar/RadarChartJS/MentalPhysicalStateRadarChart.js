@@ -21,12 +21,15 @@ function renderRadarChart(chartId, radarData) {
         orange: 'rgba(255, 159, 64, 1)'
     };
 
-    const selectedColor = 'purple'; // 你可以改成 'red', 'green', 'purple', 'orange'
+    const selectedColor = 'purple';
 
     const labels = radarData.map(item => item.CategoryName);
-    const scores = radarData.map(item => item.AverageScore);
+    const scores = radarData.map(item => Math.round(item.AverageScore || 0)); // **強制轉整數**
+
+    console.log("Radar Data Processed:", scores); // 確保數據正確
 
     const ctx = document.getElementById(chartId).getContext('2d');
+
     new Chart(ctx, {
         type: 'radar',
         data: {
@@ -49,15 +52,11 @@ function renderRadarChart(chartId, radarData) {
                     angleLines: { display: true },
                     suggestedMin: 0,
                     suggestedMax: 5,
-                    pointLabels: {
-                        font: {
-                            size: 18
-                        }
-                    },
+                    pointLabels: { font: { size: 18 } },
                     ticks: {
-                        font: {
-                            size: 18
-                        }
+                        font: { size: 18 },
+                        stepSize: 1,  // **確保刻度間隔為 1**
+                        callback: function (value) { return Math.round(value); } // **顯示整數**
                     }
                 }
             },
@@ -65,11 +64,7 @@ function renderRadarChart(chartId, radarData) {
                 legend: {
                     display: true,
                     position: 'top',
-                    labels: {
-                        font: {
-                            size: 18
-                        }
-                    }
+                    labels: { font: { size: 18 } }
                 }
             }
         }

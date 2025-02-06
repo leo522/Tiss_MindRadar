@@ -1,49 +1,32 @@
 ﻿//MentalStateRadarChart.js
 function renderRadarChart(canvasId, radarData) {
-    if (!Array.isArray(radarData)) {
-        console.error("錯誤: radarData 不是陣列！", radarData);
+    if (!Array.isArray(radarData) || radarData.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: '沒有檢測數據',
+            text: '當前日期沒有檢測數據，請選擇其他日期！',
+            confirmButtonText: '確定'
+        });
         return;
     }
+
+    console.log("Rendering Radar Chart with Data:", radarData);  // 確保數據正確
 
     const labels = radarData.map(item => item.CategoryName);
-    const scores = radarData.map(item => item.AverageScore);
+    const scores = radarData.map(item => item.AverageScore ? Math.round(parseFloat(item.AverageScore)) : 0); // **取整數**
 
-    const chartColors = {
-        red: 'rgba(255, 99, 132, 0.2)',
-        blue: 'rgba(54, 162, 235, 0.2)',
-        green: 'rgba(75, 192, 192, 0.2)',
-        purple: 'rgba(153, 102, 255, 0.2)',
-        orange: 'rgba(255, 159, 64, 0.2)'
-    };
+    const ctx = document.getElementById(canvasId).getContext('2d');
 
-    const borderColors = {
-        red: 'rgba(255, 99, 132, 1)',
-        blue: 'rgba(54, 162, 235, 1)',
-        green: 'rgba(75, 192, 192, 1)',
-        purple: 'rgba(153, 102, 255, 1)',
-        orange: 'rgba(255, 159, 64, 1)'
-    };
-
-    const selectedColor = 'orange';
-    const chartElement = document.getElementById(canvasId);
-
-    if (!chartElement) {
-        console.error("錯誤: 找不到 #" + canvasId);
-        return;
-    }
-
-    const ctx = chartElement.getContext('2d');
-
-    new Chart(ctx, {
+    let radarChartInstance = new Chart(ctx, {
         type: 'radar',
         data: {
             labels: labels,
             datasets: [{
                 label: '平均分數',
                 data: scores,
-                backgroundColor: chartColors[selectedColor],
-                borderColor: borderColors[selectedColor],
-                pointBackgroundColor: borderColors[selectedColor],
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                pointBackgroundColor: 'rgba(255, 159, 64, 1)',
                 pointBorderColor: '#fff',
                 borderWidth: 2
             }]
@@ -56,11 +39,11 @@ function renderRadarChart(canvasId, radarData) {
                     angleLines: { display: true },
                     suggestedMin: 0,
                     suggestedMax: 5,
-                    pointLabels: {
-                        font: { size: 20 }
-                    },
+                    pointLabels: { font: { size: 16 } },
                     ticks: {
-                        font: { size: 18 }
+                        font: { size: 14 },
+                        stepSize: 1,  // **確保刻度間隔為 1**
+                        callback: function (value) { return Math.round(value); } // **顯示整數**
                     }
                 }
             },
@@ -68,9 +51,7 @@ function renderRadarChart(canvasId, radarData) {
                 legend: {
                     display: true,
                     position: 'top',
-                    labels: {
-                        font: { size: 18 }
-                    }
+                    labels: { font: { size: 14 } }
                 }
             }
         }
