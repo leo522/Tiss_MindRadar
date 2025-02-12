@@ -1,4 +1,6 @@
-﻿.logo-container {
+﻿/*心理狀態檢測*/
+
+.logo-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -9,3 +11,101 @@
         max-width: 200px; /* 限制圖片寬度 */
         height: auto; /* 確保等比例縮放 */
     }
+
+/* 讓表格根據內容展開，不會強制滾動 */
+.table-container {
+    height: auto; /* 讓表格依據內容增長 */
+    max-height: none; /* 取消最大高度限制 */
+    overflow-x: auto; /* 允許橫向滾動 */
+    overflow-y: hidden; /* 禁止垂直滾動條 */
+    border: 1px solid #ccc;
+    position: relative;
+}
+
+/* 固定表頭 */
+.sticky-header thead {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 20;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 固定題號 & 題目 */
+.sticky-left td:first-child,
+.sticky-left td:nth-child(2) {
+    position: sticky;
+    left: 0;
+    background-color: white;
+    z-index: 15;
+    border-right: 1px solid #ddd;
+    min-width: 200px; /* 增加寬度，確保桌機版完整顯示 */
+    max-width: 300px; /* 避免過寬 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 桌機版的題目完整顯示 */
+@media screen and (min-width: 1024px) {
+    .sticky-left td:nth-child(2) {
+        white-space: normal; /* 允許換行 */
+        word-wrap: break-word;
+        max-width: 350px;
+    }
+}
+
+/* 讓表格不會拉太寬 */
+.responsive-table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+}
+
+    /* 增加網底，讓表格更清晰 */
+    .responsive-table tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+/* 放大 radio 按鈕 */
+input[type="radio"] {
+    transform: scale(1.8); /* 調大按鈕 */
+    margin: 5px;
+}
+
+/* 固定底部按鈕，確保不會被表格蓋住 */
+.sticky-footer {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* RWD 響應式設計 */
+@media screen and (max-width: 768px) {
+    /* 讓表格橫向滾動 */
+    .table-container {
+        overflow-x: auto;
+    }
+
+    /* 題目欄位允許換行，避免被截斷 */
+    .sticky-left td:nth-child(2) {
+        min-width: 250px; /* 增加題目欄寬度 */
+        max-width: none;
+        white-space: normal; /* 允許換行 */
+        word-wrap: break-word;
+    }
+
+    /* 增加表格 padding，避免過於擠壓 */
+    .responsive-table td {
+        padding: 10px 5px;
+    }
+
+    /* 調整 radio button 間距，避免過於擠壓 */
+    input[type="radio"] {
+        transform: scale(2.0);
+    }
+}
