@@ -12,8 +12,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>身心狀態檢測向度雷達圖</title>
     <script src="~/RadarChartJS/chart.js"></script>
-    <link href="~/MindRadarCss/MentalPhysicalStateRadarChart.css" rel="stylesheet" />
+    <script src="~/RadarChartJS/chartjs-plugin-datalabels@2.2.js"></script> @*雷達圖插件*@
     <script src="~/RadarChartJS/MentalPhysicalStateRadarChart.js"></script>
+    <link href="~/MindRadarCss/MentalPhysicalStateRadarChart.css" rel="stylesheet" />
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto p-6">
@@ -28,9 +29,20 @@
             </div>
         </div>
         <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">身心狀態檢測向度雷達圖</h1>
-        <label for="selectedDate" class="block text-gray-700">選擇查看的日期：</label>
+
+        @*<label for="selectedDate" class="block text-gray-700">選擇查看的日期：</label>
         <input type="date" id="selectedDate" name="selectedDate" class="form-input rounded border-gray-300 px-3 py-2 mb-4"               value="@ViewBag.SelectedDate?.ToString("yyyy-MM-dd")" />
         <button onclick="updateRadarChart()" class="bg-green-500 text-white py-2 px-6 rounded">查詢</button>
+        <p class="text-gray-600 text-center mt-2">當前顯示檢測結果日期: @selectedDate.ToString("yyyy/MM/dd")</p>*@
+        <label for="surveyDate" class="block text-gray-700">選擇查看的日期：</label>
+        <select id="surveyDate" class="form-input rounded border-gray-300 px-3 py-2 mb-4" onchange="updateRadarChart()">
+            @foreach (var date in ViewBag.SurveyDates as List<DateTime>)
+            {
+                <option value="@date.ToString("yyyy-MM-dd")" @(date == ViewBag.SelectedDate ? "selected" : "")>
+                    @date.ToString("yyyy/MM/dd")
+                </option>
+            }
+        </select>
         <p class="text-gray-600 text-center mt-2">當前顯示檢測結果日期: @selectedDate.ToString("yyyy/MM/dd")</p>
         <div class="radar-chart-container">
             <canvas id="radarChart" width="580" height="580"></canvas>
@@ -51,20 +63,10 @@
             });
         }
     });
-
-    function updateRadarChart() {
-        const selectedDate = document.getElementById("selectedDate").value;
-        if (!selectedDate) {
-            Swal.fire({
-                icon: 'error',
-                title: '日期未選擇',
-                text: '請選擇日期',
-                confirmButtonText: '確定'
-            });
-            return;
-        }
-        window.location.href = "@Url.Action("MentalPhysicalStateRadarChart", "ChartRadar")?surveyDate=" + encodeURIComponent(selectedDate);
-    }
+        function updateRadarChart() {
+    const selectedDate = document.getElementById("surveyDate").value;
+    window.location.href = "@Url.Action("MentalPhysicalStateRadarChart", "ChartRadar")?surveyDate=" + encodeURIComponent(selectedDate);
+}
     </script>
 </body>
 </html>

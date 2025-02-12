@@ -1,4 +1,4 @@
-﻿//MentalStateRadarChart.js
+﻿//心理狀態檢測向度雷達圖.js
 function renderRadarChart(canvasId, radarData) {
     if (!Array.isArray(radarData) || radarData.length === 0) {
         Swal.fire({
@@ -15,6 +15,20 @@ function renderRadarChart(canvasId, radarData) {
     const labels = radarData.map(item => item.CategoryName);
     const scores = radarData.map(item => item.AverageScore ? Math.round(parseFloat(item.AverageScore)) : 0); // **取整數**
 
+    // 找出最高分 & 最低分
+    const maxScore = Math.max(...scores);
+    const minScore = Math.min(...scores);
+
+    // 依分數來決定點的樣式
+    const pointBackgroundColors = scores.map(score =>
+        score === maxScore ? 'red' :
+            score === minScore ? 'blue' : 'rgba(255, 159, 64, 1)'
+    );
+
+    const pointRadius = scores.map(score =>
+        score === maxScore || score === minScore ? 8 : 5 // **最高 & 最低分點加大**
+    );
+
     const ctx = document.getElementById(canvasId).getContext('2d');
 
     let radarChartInstance = new Chart(ctx, {
@@ -26,8 +40,9 @@ function renderRadarChart(canvasId, radarData) {
                 data: scores,
                 backgroundColor: 'rgba(255, 159, 64, 0.2)',
                 borderColor: 'rgba(255, 159, 64, 1)',
-                pointBackgroundColor: 'rgba(255, 159, 64, 1)',
+                pointBackgroundColor: pointBackgroundColors, // **變色**
                 pointBorderColor: '#fff',
+                pointRadius: pointRadius, // **最大 & 最小點加大**
                 borderWidth: 2
             }]
         },
@@ -52,8 +67,21 @@ function renderRadarChart(canvasId, radarData) {
                     display: true,
                     position: 'top',
                     labels: { font: { size: 14 } }
+                },
+                datalabels: {
+                    color: 'black', // 文字顏色
+                    anchor: 'end', // 文字對齊方式
+                    align: 'top', // 文字位置
+                    font: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    formatter: function (value) {
+                        return value.toFixed(1); // 顯示 1 位小數
+                    }
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels] // **啟用 DataLabels 插件**
     });
 }

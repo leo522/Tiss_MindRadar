@@ -239,6 +239,7 @@
     <Content Include="img\favicon.svg" />
     <Content Include="img\logo.svg" />
     <Content Include="img\TissLogo.jpg" />
+    <Content Include="RadarChartJS\chartjs-plugin-datalabels%402.2.js" />
     <Content Include="RadarChartJS\MentalPhysicalStateRadarChart.js" />
     <Content Include="RadarChartJS\MentalStateRadarChart.js" />
     <Content Include="MindRadarCss\LoginStyle.css" />

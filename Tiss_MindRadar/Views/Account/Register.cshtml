@@ -73,13 +73,17 @@
             const jobcode = this.value;
             const jobcodeError = document.getElementById("jobcodeError");
 
-            if (jobcode.length > 50) {
-                jobcodeError.textContent = "帳號長度不能超過 20 個字！";
+            // 只允許輸入中文和英文，禁止數字和符號
+            const jobcodeRegex = /^[\u4e00-\u9fa5a-zA-Z]+$/;
+
+            if (!jobcodeRegex.test(jobcode)) {
+                jobcodeError.textContent = "帳號只能包含中文和英文，不能包含數字或符號！";
                 jobcodeError.style.color = "red";
             } else {
                 jobcodeError.textContent = "";
             }
         });
+
 
         // 表單提交處理
         document.getElementById("registerForm").addEventListener("submit", function (e) {

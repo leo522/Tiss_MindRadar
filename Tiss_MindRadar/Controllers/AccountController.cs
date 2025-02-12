@@ -32,28 +32,20 @@ namespace Tiss_MindRadar.Controllers
                     return Json(new { success = false, message = "帳號長度不能超過 20 個字！" });
                 }
 
-                if (_db.Users.Any(u => u.Jobcode == Jobcode)) //確認帳號是否已存在
+                // 只允許中文和英文，不允許數字和符號
+                var jobcodeRegex = new Regex(@"^[\u4e00-\u9fa5a-zA-Z]+$");
+                if (!jobcodeRegex.IsMatch(Jobcode))
+                {
+                    return Json(new { success = false, message = "帳號只能包含中文和英文，不能包含數字或符號！" });
+                }
+
+                if (_db.Users.Any(u => u.Jobcode == Jobcode))
                 {
                     return Json(new { success = false, message = "該帳號已存在。" });
                 }
 
-                //密碼規則驗證
-                var passwordRegex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$");
-                if (!passwordRegex.IsMatch(pwd))
-                {
-                    return Json(new { success = false, message = "密碼必須至少包含6碼，並包含大小寫字母和數字。" });
-                }
-
-                //Email規則驗證
-                var emailRegex = new Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$");
-                if (!emailRegex.IsMatch(Email))
-                {
-                    return Json(new { success = false, message = "請輸入正確的電子郵件格式。" });
-                }
-
                 var hashedPwd = ComputeSha256Hash(pwd); // 密碼加密
 
-                // 先建立 Users
                 var newUser = new Users
                 {
                     Jobcode = Jobcode,
@@ -64,23 +56,23 @@ namespace Tiss_MindRadar.Controllers
                 };
 
                 _db.Users.Add(newUser);
-                _db.SaveChanges(); // 先存入 Users，取得 UserID
+                _db.SaveChanges();
 
                 var newUserProfile = new UserProfile
                 {
-                    UserID = newUser.UserID, // 關聯剛剛建立的 Users
+                    UserID = newUser.UserID,
                     Age = Age,
                     TeamID = TeamID
                 };
 
                 _db.UserProfile.Add(newUserProfile);
-                _db.SaveChanges(); // 儲存 UserProfile
+                _db.SaveChanges();
 
                 return Json(new { success = true, message = "帳號註冊成功。" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"發生錯誤：帳號註冊失敗!" });
+                return Json(new { success = false, message = "發生錯誤：帳號註冊失敗！" });
             }
         }
         #endregion

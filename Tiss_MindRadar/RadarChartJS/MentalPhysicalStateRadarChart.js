@@ -1,4 +1,6 @@
-﻿// MentalPhysicalStateRadarChart.js
+﻿//身心狀態檢測向度雷達圖.js
+Chart.register(ChartDataLabels);
+
 function renderRadarChart(chartId, radarData) {
     if (!radarData || radarData.length === 0) {
         console.warn("Radar chart data is empty.");
@@ -24,9 +26,14 @@ function renderRadarChart(chartId, radarData) {
     const selectedColor = 'purple';
 
     const labels = radarData.map(item => item.CategoryName);
-    const scores = radarData.map(item => Math.round(item.AverageScore || 0)); // **強制轉整數**
+    const scores = radarData.map(item => Math.round(item.AverageScore || 0));
 
-    console.log("Radar Data Processed:", scores); // 確保數據正確
+    const maxScore = Math.max(...scores);
+    const minScore = Math.min(...scores);
+    const maxIndexes = scores.map((s, i) => s === maxScore ? i : -1).filter(i => i !== -1);
+    const minIndexes = scores.map((s, i) => s === minScore ? i : -1).filter(i => i !== -1);
+
+    console.log("Radar Data Processed:", scores);
 
     const ctx = document.getElementById(chartId).getContext('2d');
 
@@ -39,9 +46,14 @@ function renderRadarChart(chartId, radarData) {
                 data: scores,
                 backgroundColor: chartColors[selectedColor],
                 borderColor: borderColors[selectedColor],
-                pointBackgroundColor: borderColors[selectedColor],
+                pointBackgroundColor: scores.map((s, i) =>
+                    maxIndexes.includes(i) ? 'rgba(255, 0, 0, 1)' :
+                        minIndexes.includes(i) ? 'rgba(0, 0, 255, 1)' :
+                            borderColors[selectedColor]),
                 pointBorderColor: '#fff',
-                borderWidth: 2
+                borderWidth: 2,
+                pointRadius: scores.map((s, i) => maxIndexes.includes(i) || minIndexes.includes(i) ? 7 : 5),
+                pointHoverRadius: 10
             }]
         },
         options: {
@@ -55,8 +67,8 @@ function renderRadarChart(chartId, radarData) {
                     pointLabels: { font: { size: 18 } },
                     ticks: {
                         font: { size: 18 },
-                        stepSize: 1,  // **確保刻度間隔為 1**
-                        callback: function (value) { return Math.round(value); } // **顯示整數**
+                        stepSize: 1,
+                        callback: function (value) { return Math.round(value); }
                     }
                 }
             },
@@ -65,6 +77,15 @@ function renderRadarChart(chartId, radarData) {
                     display: true,
                     position: 'top',
                     labels: { font: { size: 18 } }
+                },
+                datalabels: {
+                    color: '#000',
+                    font: { size: 14, weight: 'bold' },
+                    align: 'end',
+                    anchor: 'end',
+                    formatter: function (value) {
+                        return value.toFixed(1);
+                    }
                 }
             }
         }

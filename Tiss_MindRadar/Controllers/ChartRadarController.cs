@@ -27,29 +27,24 @@ namespace Tiss_MindRadar.Controllers
                 ViewBag.Age = Session["Age"];
                 ViewBag.TeamName = Session["TeamName"];
 
-                //取得該用戶最新的檢測日期
-                DateTime? latestSurveyDate = _db.UserResponse
-                    .Where(ur => ur.UserID == userId)
-                    .OrderByDescending(ur => ur.SurveyDate)
-                    .Select(ur => ur.SurveyDate)
-                    .FirstOrDefault();
+                // 取得該用戶所有有填寫問卷的日期，並按時間排序
+                List<DateTime> surveyDates = _db.UserResponse.Where(ur => ur.UserID == userId && ur.SurveyDate.HasValue)
+                    .Select(ur => ur.SurveyDate.Value).Distinct().OrderByDescending(d => d).ToList();
 
-                //如果 surveyDate 沒有提供，則使用最新的檢測日期
-                if (!surveyDate.HasValue)
+
+                ViewBag.SurveyDates = surveyDates;  // 送到前端
+                
+                if (!surveyDate.HasValue && surveyDates.Any()) //如果 surveyDate 沒有提供，則使用最新的檢測日期
                 {
-                    surveyDate = latestSurveyDate;
+                    surveyDate = surveyDates.First();
                 }
 
                 ViewBag.SelectedDate = surveyDate;
 
-                string query = @"
-    SELECT c.CategoryName, CAST(ROUND(AVG(ur.Score), 0) AS INT) AS AverageScore
-    FROM UserResponse ur
-    INNER JOIN QuestionCategory qc ON ur.QuestionID = qc.QuestionID
-    INNER JOIN Category c ON qc.CategoryID = c.ID
-    WHERE ur.UserID = @p0 AND ur.SurveyDate = @p1
-    GROUP BY c.CategoryName";
-
+                string query = @"SELECT c.CategoryName, CAST(ROUND(AVG(ur.Score), 0) AS INT) AS AverageScore
+                                FROM UserResponse ur INNER JOIN QuestionCategory qc ON ur.QuestionID = qc.QuestionID
+                                INNER JOIN Category c ON qc.CategoryID = c.ID WHERE ur.UserID = @p0 AND ur.SurveyDate = @p1
+                                GROUP BY c.CategoryName";
 
                 object[] parameters = { userId, surveyDate.Value };
 
@@ -79,30 +74,23 @@ namespace Tiss_MindRadar.Controllers
                 ViewBag.Age = Session["Age"];
                 ViewBag.TeamName = Session["TeamName"];
 
-                // 取得該用戶最新的檢測日期
-                DateTime? latestSurveyDate = _db.PsychologicalResponse
-                    .Where(ur => ur.UserID == userId)
-                    .OrderByDescending(ur => ur.SurveyDate)
-                    .Select(ur => ur.SurveyDate)
-                    .FirstOrDefault();
+                // 取得該用戶所有有填寫問卷的日期，並按時間排序
+                List<DateTime> surveyDates = _db.PsychologicalResponse.Where(ur => ur.UserID == userId && ur.SurveyDate.HasValue).Select(ur => ur.SurveyDate.Value).Distinct()
+                    .OrderByDescending(d => d).ToList();
+
+                ViewBag.SurveyDates = surveyDates;
 
                 // 如果 surveyDate 沒有提供，則使用最新的檢測日期
-                if (!surveyDate.HasValue)
+                if (!surveyDate.HasValue && surveyDates.Any())
                 {
-                    surveyDate = latestSurveyDate;
+                    surveyDate = surveyDates.First();
                 }
 
                 ViewBag.SelectedDate = surveyDate;
 
                 // 修正 SQL 查詢，確保 AVG 計算不受 NULL 影響
-                string query = @"
-            SELECT c.CategoryName, COALESCE(AVG(pr.Score), 0) AS AverageScore
-            FROM PsychologicalStateCategory c
-            LEFT JOIN PsychologicalStateQuestionCategory qc ON qc.CategoryID = c.ID
-            LEFT JOIN PsychologicalResponse pr ON pr.QuestionID = qc.QuestionID 
-                 AND pr.UserID = @p0 
-                 AND pr.SurveyDate = @p1
-            GROUP BY c.CategoryName";
+                string query = @"SELECT c.CategoryName, COALESCE(AVG(pr.Score), 0) AS AverageScore FROM PsychologicalStateCategory c
+                                LEFT JOIN PsychologicalStateQuestionCategory qc ON qc.CategoryID = c.ID LEFT JOIN PsychologicalResponse pr ON pr.QuestionID = qc.QuestionID AND pr.UserID = @p0 AND pr.SurveyDate = @p1 GROUP BY c.CategoryName";
 
                 object[] parameters = { userId, surveyDate.Value };
 
