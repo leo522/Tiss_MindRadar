@@ -29,11 +29,6 @@
             </div>
         </div>
         <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">身心狀態檢測向度雷達圖</h1>
-
-        @*<label for="selectedDate" class="block text-gray-700">選擇查看的日期：</label>
-        <input type="date" id="selectedDate" name="selectedDate" class="form-input rounded border-gray-300 px-3 py-2 mb-4"               value="@ViewBag.SelectedDate?.ToString("yyyy-MM-dd")" />
-        <button onclick="updateRadarChart()" class="bg-green-500 text-white py-2 px-6 rounded">查詢</button>
-        <p class="text-gray-600 text-center mt-2">當前顯示檢測結果日期: @selectedDate.ToString("yyyy/MM/dd")</p>*@
         <label for="surveyDate" class="block text-gray-700">選擇查看的日期：</label>
         <select id="surveyDate" class="form-input rounded border-gray-300 px-3 py-2 mb-4" onchange="updateRadarChart()">
             @foreach (var date in ViewBag.SurveyDates as List<DateTime>)

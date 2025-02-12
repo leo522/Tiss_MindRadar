@@ -9,3 +9,53 @@
         max-width: 200px; /* 限制圖片寬度 */
         height: auto; /* 確保等比例縮放 */
     }
+
+body {
+    background-image: url('/img/grid-pattern.png'); /* 請自行放置背景圖 */
+    background-size: cover;
+}
+
+/* 確保表格不會超出畫面 */
+.table-container {
+    max-height: calc(100vh - 250px); /* 預留更多空間，確保最後一題不會被裁切 */
+    overflow-y: auto; /* 允許上下滾動 */
+    overflow-x: auto; /* 保持水平方向可滑動 */
+    border: 1px solid #ccc;
+    position: relative;
+}
+
+/* 表頭固定 */
+.sticky-header thead {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 20;
+}
+
+/* 讓表格調整佈局 */
+.responsive-table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+}
+
+/* 凍結第一欄和第二欄 */
+.sticky-left td:first-child,
+.sticky-left td:nth-child(2) {
+    position: sticky;
+    left: 0;
+    background-color: white;
+    z-index: 10;
+    border-right: 1px solid #ddd;
+}
+
+/* 控制表格行高，確保可視範圍內顯示完整 */
+.responsive-table tbody tr {
+    height: 4vh; /* 根據視窗高度調整 */
+}
+
+/* 滾動條隱藏 */
+.table-container::-webkit-scrollbar {
+    display: none;
+}
