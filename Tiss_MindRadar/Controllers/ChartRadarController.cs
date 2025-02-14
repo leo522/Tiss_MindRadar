@@ -22,7 +22,7 @@ namespace Tiss_MindRadar.Controllers
             {
                 if (Session["UserID"] == null)
                 {
-                    return Json(new { success = false, message = "請先登入" });
+                    return RedirectToAction("Login", "UserAccount");
                 }
 
                 if (!int.TryParse(Session["UserID"]?.ToString(), out int userId))
@@ -105,7 +105,7 @@ namespace Tiss_MindRadar.Controllers
             {
                 if (Session["UserID"] == null)
                 {
-                    return Json(new { success = false, message = "請先登入" });
+                    return RedirectToAction("Login", "UserAccount");
                 }
 
                 if (!int.TryParse(Session["UserID"]?.ToString(), out int userId))
