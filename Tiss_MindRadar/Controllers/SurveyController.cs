@@ -35,7 +35,7 @@ namespace Tiss_MindRadar.Controllers
             {
                 if (Session["UserID"] == null || Session["UserName"] == null)
                 {
-                    return RedirectToAction("Login", "Account");
+                    return RedirectToAction("Login", "UserAccount");
                 }
 
                 int userId = Convert.ToInt32(Session["UserID"]);
@@ -102,7 +102,7 @@ namespace Tiss_MindRadar.Controllers
             {
                 if (Session["UserID"] == null || Session["UserName"] == null)
                 {
-                    return RedirectToAction("Login", "Account");
+                    return RedirectToAction("Login", "UserAccount");
                 }
 
                 int userId = Convert.ToInt32(Session["UserID"]);

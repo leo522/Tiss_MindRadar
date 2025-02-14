@@ -128,7 +128,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\UserAccountController.cs" />
     <Compile Include="Controllers\ChartRadarController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\SurveyController.cs" />
@@ -304,9 +304,9 @@
     <Content Include="Views\Survey\MentalPhysicalState.cshtml" />
     <Content Include="Views\Survey\MentalState.cshtml" />
     <Content Include="Views\ChartRadar\MentalPhysicalStateRadarChart.cshtml" />
-    <Content Include="Views\Account\Register.cshtml" />
-    <Content Include="Views\Account\Login.cshtml" />
-    <Content Include="Views\Account\ForgotPassword.cshtml" />
+    <Content Include="Views\UserAccount\Register.cshtml" />
+    <Content Include="Views\UserAccount\Login.cshtml" />
+    <Content Include="Views\UserAccount\ForgotPassword.cshtml" />
     <Content Include="Views\ChartRadar\MentalStateRadarChart.cshtml" />
   </ItemGroup>
   <ItemGroup>

@@ -9,6 +9,7 @@ namespace Tiss_MindRadar.Models
     {
         public string CategoryName { get; set; } // 分類名稱
         public int AverageScore { get; set; } // 平均分數
+        public string SurveyDate { get; set; }
         public List<RadarChartModel> Scores { get; set; }
 
         public class RadarChartModel

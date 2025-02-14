@@ -27,11 +27,11 @@
             <button type="submit" class="btn btn-primary btn-block">登入</button>
         </form>
         <div class="text-center mt-3">
-            <a href="/Account/Register" class="btn btn-link">註冊帳號</a>
+            <a href="/UserAccount/Register" class="btn btn-link">註冊帳號</a>
         </div>
         <hr>
         <div class="text-center">
-            <a href="/Account/ForgotPassword" class="btn btn-link">忘記密碼</a>
+            <a href="/UserAccount/ForgotPassword" class="btn btn-link">忘記密碼</a>
         </div>
     </div>
     <script>
@@ -42,7 +42,7 @@
                 const formData = $(this).serialize();
 
                 $.ajax({
-                    url: "/Account/Login",
+                    url: "/UserAccount/Login",
                     type: "POST",
                     data: formData,
                     success: function (response) {

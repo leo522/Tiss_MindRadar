@@ -11,7 +11,7 @@ using Tiss_MindRadar.Models;
 
 namespace Tiss_MindRadar.Controllers
 {
-    public class AccountController : Controller
+    public class UserAccountController : Controller
     {
         private TISS_MindRadarEntities _db = new TISS_MindRadarEntities(); //資料庫
 

@@ -15,7 +15,7 @@
         <div class="text-center">
             <img src="~/img/logo.svg" style="height: 45px; width: 100%;" />
         </div>
-        <form id="registerForm" action="/Account/Register" method="post">
+        <form id="registerForm" action="/UserAccount/Register" method="post">
             <div class="form-group">
                 <label for="AccountID" title="帳號">帳號</label>
                 <input type="text" class="form-control" id="AccountID" name="Jobcode" placeholder="請輸入帳號" required>
@@ -103,7 +103,7 @@
                             title: "成功",
                             text: data.message,
                         }).then(() => {
-                            window.location.href = "/Account/Login"; // 成功後跳轉到登入頁面
+                            window.location.href = "/UserAccount/Login"; // 成功後跳轉到登入頁面
                         });
                     } else {
                         Swal.fire({

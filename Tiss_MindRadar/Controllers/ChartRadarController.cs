@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -60,7 +61,9 @@ namespace Tiss_MindRadar.Controllers
         #endregion
 
         #region 心理狀態檢測雷達圖
-        public ActionResult MentalStateRadarChart(DateTime? surveyDate = null)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult MentalStateRadarChart(FormCollection form)
         {
             try
             {
@@ -69,34 +72,70 @@ namespace Tiss_MindRadar.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
-                int userId = Convert.ToInt32(Session["UserID"]);
+                if (!int.TryParse(Session["UserID"]?.ToString(), out int userId))
+                {
+                    return RedirectToAction("Login", "UserAccount");
+                }
+
                 ViewBag.UserName = Session["UserName"];
                 ViewBag.Age = Session["Age"];
                 ViewBag.TeamName = Session["TeamName"];
 
                 // 取得該用戶所有有填寫問卷的日期，並按時間排序
-                List<DateTime> surveyDates = _db.PsychologicalResponse.Where(ur => ur.UserID == userId && ur.SurveyDate.HasValue).Select(ur => ur.SurveyDate.Value).Distinct()
-                    .OrderByDescending(d => d).ToList();
+                List<DateTime> surveyDatesList = _db.PsychologicalResponse.Where(ur => ur.UserID == userId && ur.SurveyDate.HasValue)
+                .Select(ur => ur.SurveyDate.Value).Distinct().OrderByDescending(d => d).ToList();
 
-                ViewBag.SurveyDates = surveyDates;
+                ViewBag.SurveyDates = surveyDatesList;
 
-                // 如果 surveyDate 沒有提供，則使用最新的檢測日期
-                if (!surveyDate.HasValue && surveyDates.Any())
+                string[] surveyDatesRaw = form.GetValues("surveyDates");
+
+                List<DateTime> selectedDates = new List<DateTime>();
+
+                if (surveyDatesRaw != null)
                 {
-                    surveyDate = surveyDates.First();
+                    try
+                    {
+                        selectedDates = surveyDatesRaw
+                            .Select(d => DateTime.ParseExact(d, "yyyy-MM-dd", CultureInfo.InvariantCulture))
+                            .ToList();
+                    }
+                    catch (FormatException)
+                    {
+                        ViewBag.ErrorMessage = "提交失敗：日期格式錯誤";
+                        return View("MentalStateRadarChart", new List<RadarChartVIewModel>());
+                    }
+                }
+                else if (surveyDatesList.Any())
+                {
+                    selectedDates.Add(surveyDatesList.First()); // 預設選擇最新日期
                 }
 
-                ViewBag.SelectedDate = surveyDate;
+                ViewBag.SelectedDates = selectedDates;
 
-                // 修正 SQL 查詢，確保 AVG 計算不受 NULL 影響
-                string query = @"SELECT c.CategoryName, COALESCE(AVG(pr.Score), 0) AS AverageScore FROM PsychologicalStateCategory c
-                                LEFT JOIN PsychologicalStateQuestionCategory qc ON qc.CategoryID = c.ID LEFT JOIN PsychologicalResponse pr ON pr.QuestionID = qc.QuestionID AND pr.UserID = @p0 AND pr.SurveyDate = @p1 GROUP BY c.CategoryName";
+                // 查詢所有選擇的日期的數據
+                List<RadarChartVIewModel> radarData = new List<RadarChartVIewModel>();
 
-                object[] parameters = { userId, surveyDate.Value };
+                foreach (var date in selectedDates)
+                {
+                    string query = @"
+        SELECT c.CategoryName, 
+               COALESCE(AVG(pr.Score), 0) AS AverageScore 
+        FROM PsychologicalResponse pr
+        INNER JOIN PsychologicalStateCategory c ON pr.CategoryID = c.ID 
+        WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1 
+        GROUP BY c.CategoryName";
 
-                var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();
+                    object[] parameters = { userId, date };
+                    var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();
 
-                return View(data);
+                    foreach (var item in data)
+                    {
+                        item.SurveyDate = date.ToString("yyyy-MM-dd"); // 存入日期以便前端區分數據
+                    }
+
+                    radarData.AddRange(data);
+                }
+                return View(radarData);
             }
             catch (Exception ex)
             {
@@ -104,6 +143,7 @@ namespace Tiss_MindRadar.Controllers
                 return View(new List<RadarChartVIewModel>());
             }
         }
+
         #endregion
     }
 }
