@@ -1,60 +1,71 @@
 ﻿//身心狀態檢測向度雷達圖.js
-Chart.register(ChartDataLabels);
-
-function renderRadarChart(chartId, radarData) {
-    if (!radarData || radarData.length === 0) {
-        console.warn("Radar chart data is empty.");
+function renderRadarChart(canvasId, radarData) {
+    if (!Array.isArray(radarData) || radarData.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: '沒有檢測數據',
+            text: '當前日期沒有檢測數據，請選擇其他日期！',
+            confirmButtonText: '確定'
+        });
         return;
     }
 
-    const chartColors = {
-        red: 'rgba(255, 99, 132, 0.2)',
-        blue: 'rgba(54, 162, 235, 0.2)',
-        green: 'rgba(75, 192, 192, 0.2)',
-        purple: 'rgba(153, 102, 255, 0.2)',
-        orange: 'rgba(255, 159, 64, 0.2)'
-    };
+    const ctx = document.getElementById(canvasId).getContext('2d');
 
-    const borderColors = {
-        red: 'rgba(255, 99, 132, 1)',
-        blue: 'rgba(54, 162, 235, 1)',
-        green: 'rgba(75, 192, 192, 1)',
-        purple: 'rgba(153, 102, 255, 1)',
-        orange: 'rgba(255, 159, 64, 1)'
-    };
+    // **改進配色方案，確保不同日期顏色明顯**
+    const colorPalette = [
+        "rgba(255, 99, 132, 0.6)",   // 粉紅
+        "rgba(54, 162, 235, 0.6)",   // 藍色
+        "rgba(255, 206, 86, 0.6)",   // 黃色
+        "rgba(75, 192, 192, 0.6)",   // 綠松色
+        "rgba(153, 102, 255, 0.6)",  // 紫色
+        "rgba(255, 159, 64, 0.6)"    // 橘色
+    ];
 
-    const selectedColor = 'purple';
+    const groupedData = {};
+    radarData.forEach(item => {
+        if (!groupedData[item.SurveyDate]) {
+            groupedData[item.SurveyDate] = [];
+        }
+        groupedData[item.SurveyDate].push({
+            category: item.CategoryName,
+            score: Math.round(parseFloat(item.AverageScore))
+        });
+    });
 
-    const labels = radarData.map(item => item.CategoryName);
-    const scores = radarData.map(item => Math.round(item.AverageScore || 0));
+    const datasets = Object.keys(groupedData).map((date, index) => {
+        const categoryData = groupedData[date];
 
-    const maxScore = Math.max(...scores);
-    const minScore = Math.min(...scores);
-    const maxIndexes = scores.map((s, i) => s === maxScore ? i : -1).filter(i => i !== -1);
-    const minIndexes = scores.map((s, i) => s === minScore ? i : -1).filter(i => i !== -1);
+        // **計算每個 `surveyDate` 的最高分 & 最低分**
+        const scores = categoryData.map(item => item.score);
+        const maxScore = Math.max(...scores);
+        const minScore = Math.min(...scores);
 
-    console.log("Radar Data Processed:", scores);
+        return {
+            label: `日期: ${date}`,
+            data: scores,
+            backgroundColor: colorPalette[index % colorPalette.length],  // **改進顏色選擇**
+            borderColor: colorPalette[index % colorPalette.length].replace("0.6", "1"),  // **加深邊框顏色**
+            pointBackgroundColor: categoryData.map(item =>
+                item.score === maxScore ? 'red' :
+                    item.score === minScore ? 'blue' :
+                        colorPalette[index % colorPalette.length].replace("0.6", "1")
+            ),
+            pointBorderColor: "#fff",
+            pointRadius: categoryData.map(item =>
+                item.score === maxScore || item.score === minScore ? 8 : 5
+            ),
+            borderWidth: 2
+        };
+    });
 
-    const ctx = document.getElementById(chartId).getContext('2d');
+    const labels = radarData.map(item => item.CategoryName).filter((v, i, a) => a.indexOf(v) === i);
 
-    new Chart(ctx, {
-        type: 'radar',
+    let radarChartInstance = new Chart(ctx, {
+        type: "radar",
         data: {
             labels: labels,
-            datasets: [{
-                label: '平均分數',
-                data: scores,
-                backgroundColor: chartColors[selectedColor],
-                borderColor: borderColors[selectedColor],
-                pointBackgroundColor: scores.map((s, i) =>
-                    maxIndexes.includes(i) ? 'rgba(255, 0, 0, 1)' :
-                        minIndexes.includes(i) ? 'rgba(0, 0, 255, 1)' :
-                            borderColors[selectedColor]),
-                pointBorderColor: '#fff',
-                borderWidth: 2,
-                pointRadius: scores.map((s, i) => maxIndexes.includes(i) || minIndexes.includes(i) ? 7 : 5),
-                pointHoverRadius: 10
-            }]
+            datasets: datasets
         },
         options: {
             responsive: true,
@@ -64,30 +75,41 @@ function renderRadarChart(chartId, radarData) {
                     angleLines: { display: true },
                     suggestedMin: 0,
                     suggestedMax: 5,
-                    pointLabels: { font: { size: 18 } },
+                    pointLabels: { font: { size: 16 } },
                     ticks: {
-                        font: { size: 18 },
+                        font: { size: 14 },
                         stepSize: 1,
-                        callback: function (value) { return Math.round(value); }
+                        callback: function (value) {
+                            return Math.round(value);
+                        }
                     }
                 }
             },
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top',
-                    labels: { font: { size: 18 } }
+                    position: "top",
+                    labels: {
+                        font: { size: 14 },
+                        boxWidth: 20, // **讓圖例的顏色框更清楚**
+                    }
                 },
                 datalabels: {
-                    color: '#000',
-                    font: { size: 14, weight: 'bold' },
-                    align: 'end',
-                    anchor: 'end',
+                    color: "black",
+                    anchor: "end",   // **調整錨點，使數字靠外顯示**
+                    align: "start",  // **調整對齊方式，防止遮住標籤**
+                    offset: -10,       // **讓數值遠離數據點**
+                    align: "top",
+                    font: {
+                        size: 14,
+                        weight: "bold"
+                    },
                     formatter: function (value) {
                         return value.toFixed(1);
                     }
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     });
 }

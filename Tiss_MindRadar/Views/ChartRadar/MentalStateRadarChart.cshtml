@@ -136,7 +136,7 @@
         // **確保 `mainContent` 存在**
         const mainContent = document.getElementById("mainContent");
         if (!mainContent) {
-            console.error("Error: #mainContent 不存在，無法更新內容");
+            console.error("Error: 頁面不存在，無法更新內容");
             return;
         }
 
@@ -151,7 +151,7 @@
         // **解析新的 `radarData`，避免 `null` 或 `undefined` 錯誤**
         const newRadarDataElement = tempDiv.querySelector("#radarData");
         if (!newRadarDataElement) {
-            console.error("Error: 新的 `#radarData` 不存在，無法更新");
+            console.error("Error: 日期不存在，無法更新");
             Swal.fire({
                 icon: 'error',
                 title: '數據錯誤',

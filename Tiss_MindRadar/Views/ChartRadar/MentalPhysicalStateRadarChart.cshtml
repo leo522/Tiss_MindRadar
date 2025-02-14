@@ -3,7 +3,6 @@
 @{
     ViewBag.Title = "身心狀態檢測向度雷達圖";
     Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
-    DateTime selectedDate = ViewBag.SelectedDate ?? DateTime.Now;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -29,23 +28,169 @@
             </div>
         </div>
         <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">身心狀態檢測向度雷達圖</h1>
-        <label for="surveyDate" class="block text-gray-700">選擇查看的日期：</label>
-        <select id="surveyDate" class="form-input rounded border-gray-300 px-3 py-2 mb-4" onchange="updateRadarChart()">
-            @foreach (var date in ViewBag.SurveyDates as List<DateTime>)
-            {
-                <option value="@date.ToString("yyyy-MM-dd")" @(date == ViewBag.SelectedDate ? "selected" : "")>
-                    @date.ToString("yyyy/MM/dd")
-                </option>
-            }
-        </select>
-        <p class="text-gray-600 text-center mt-2">當前顯示檢測結果日期: @selectedDate.ToString("yyyy/MM/dd")</p>
-        <div class="radar-chart-container">
-            <canvas id="radarChart" width="580" height="580"></canvas>
+        <div id="mainContent">
+            <form id="radarChartForm" method="POST" action="@Url.Action("MentalPhysicalStateRadarChart", "ChartRadar")">
+                @Html.AntiForgeryToken()
+                <label class="block text-gray-700 font-bold mb-2">選擇要比較的日期：</label>
+                <div id="dateCheckboxContainer" class="flex flex-wrap gap-2 mb-4">
+                    @foreach (var date in ViewBag.SurveyDates as List<DateTime>)
+                    {
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" name="surveyDates" class="form-checkbox h-5 w-5 text-blue-600" value="@date.ToString("yyyy-MM-dd")"
+                                   @(ViewBag.SelectedDates != null && ViewBag.SelectedDates.Contains(date) ? "checked" : "")>
+                            <span class="ml-2">@date.ToString("yyyy/MM/dd")</span>
+                        </label>
+                    }
+                </div>
+                <button type="button" id="updateChartBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                    更新雷達圖
+                </button>
+            </form>
+            <div class="radar-chart-container">
+                <canvas id="radarChart" width="580" height="580"></canvas>
+            </div>
+
+            <script id="radarData" type="application/json">
+            @Html.Raw(JsonConvert.SerializeObject(Model))
+            </script>
         </div>
     </div>
-    <script>
-         const radarData = @Html.Raw(JsonConvert.SerializeObject(Model));
 
+    <script>
+        const radarData = @Html.Raw(JsonConvert.SerializeObject(Model));
+
+        document.addEventListener("DOMContentLoaded", function () {
+            attachEventListeners();
+            initRadarChart();
+        });
+
+        function attachEventListeners() {
+            document.querySelectorAll("#dateCheckboxContainer input[type='checkbox']").forEach(checkbox => {
+                checkbox.addEventListener("change", function () {
+                    enforceMaxSelection();
+                });
+            });
+
+            document.getElementById("updateChartBtn").addEventListener("click", function () {
+                updateRadarChart();
+            });
+        }
+
+        function enforceMaxSelection() {
+            const checkboxes = document.querySelectorAll("#dateCheckboxContainer input[type='checkbox']");
+            const checked = document.querySelectorAll("#dateCheckboxContainer input:checked");
+
+            if (checked.length > 3) {
+                checked[checked.length - 1].checked = false;
+                Swal.fire({
+                    icon: 'warning',
+                    title: '最多只能選擇 3 個日期',
+                    text: '請取消一個再選擇其他日期！',
+                    confirmButtonText: '確定'
+                });
+            }
+        }
+
+        function updateRadarChart() {
+            const selectedDates = [];
+
+    document.querySelectorAll("#dateCheckboxContainer input:checked").forEach(checkbox => {
+        selectedDates.push(checkbox.value);
+    });
+
+    if (selectedDates.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: '請選擇至少一個日期',
+            text: '請勾選至少一個日期以生成雷達圖！',
+            confirmButtonText: '確定'
+        });
+        return;
+    }
+
+    // **獲取 CSRF Token**
+    const csrfTokenElement = document.querySelector("input[name='__RequestVerificationToken']");
+    if (!csrfTokenElement) {
+        console.error("CSRF Token 不存在");
+        return;
+    }
+    const csrfToken = csrfTokenElement.value;
+
+    // **轉換為 `application/x-www-form-urlencoded` 格式**
+    const formData = new URLSearchParams();
+    selectedDates.forEach(date => formData.append("surveyDates", date));
+    formData.append("__RequestVerificationToken", csrfToken);
+
+    fetch("@Url.Action("MentalPhysicalStateRadarChart", "ChartRadar")", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: formData.toString()
+    })
+    .then(response => response.text())
+    .then(html => {
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = html;
+
+        // **確保 `mainContent` 存在**
+        const mainContent = document.getElementById("mainContent");
+        if (!mainContent) {
+            console.error("Error: 頁面不存在，無法更新內容");
+            return;
+        }
+
+        // **更新雷達圖區塊**
+        const newChartContainer = tempDiv.querySelector(".radar-chart-container");
+        const chartContainer = document.querySelector(".radar-chart-container");
+
+        if (chartContainer && newChartContainer) {
+            chartContainer.innerHTML = newChartContainer.innerHTML;
+        }
+
+        // **解析新的 `radarData`，避免 `null` 或 `undefined` 錯誤**
+        const newRadarDataElement = tempDiv.querySelector("#radarData");
+        if (!newRadarDataElement) {
+            console.error("Error: 日期不存在，無法更新");
+            Swal.fire({
+                icon: 'error',
+                title: '數據錯誤',
+                text: '請重新載入頁面',
+                confirmButtonText: '確定'
+            });
+            return;
+        }
+
+        const newRadarData = JSON.parse(newRadarDataElement.textContent || "[]");
+
+        console.log("新的 Radar Data:", newRadarData);
+
+        // **刪除舊的 Chart，避免重複繪製**
+        if (window.myRadarChart) {
+            window.myRadarChart.destroy();
+        }
+
+        if (newRadarData.length > 0) {
+            renderRadarChart("radarChart", newRadarData);
+        } else {
+            Swal.fire({
+                icon: 'warning',
+                title: '沒有檢測數據',
+                text: '當前日期沒有檢測數據，請選擇其他日期！',
+                confirmButtonText: '確定'
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Fetch Error:", error);
+        Swal.fire({
+            icon: 'error',
+            title: '發生錯誤',
+            text: '請稍後再試！',
+            confirmButtonText: '確定'
+        });
+    });
+}
     document.addEventListener("DOMContentLoaded", function () {
         if (radarData.length > 0) {
             renderRadarChart("radarChart", radarData);
@@ -58,10 +203,15 @@
             });
         }
     });
-        function updateRadarChart() {
-    const selectedDate = document.getElementById("surveyDate").value;
-    window.location.href = "@Url.Action("MentalPhysicalStateRadarChart", "ChartRadar")?surveyDate=" + encodeURIComponent(selectedDate);
-}
+
+        function initRadarChart() {
+            const radarDataElement = document.getElementById("radarData");
+            const radarData = radarDataElement ? JSON.parse(radarDataElement.textContent) : [];
+
+            if (radarData.length > 0) {
+                renderRadarChart("radarChart", radarData);
+            }
+        }
     </script>
 </body>
 </html>
