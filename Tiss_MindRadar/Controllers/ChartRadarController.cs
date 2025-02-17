@@ -167,6 +167,13 @@ namespace Tiss_MindRadar.Controllers
 
                     radarData.AddRange(data);
                 }
+
+                //取得心理狀態技能描述
+                var psy = _db.PsychologicalStateDescription
+                    .OrderBy(d => d.ID).ToList();
+
+                ViewBag.PsychologicalDescriptions = psy;
+
                 return View(radarData);
             }
             catch (Exception ex)

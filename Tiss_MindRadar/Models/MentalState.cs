@@ -17,8 +17,8 @@ namespace Tiss_MindRadar.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public MentalState()
         {
-            this.PsychologicalResponse = new HashSet<PsychologicalResponse>();
             this.PsychologicalStateQuestionCategory = new HashSet<PsychologicalStateQuestionCategory>();
+            this.PsychologicalResponse = new HashSet<PsychologicalResponse>();
         }
     
         public int ID { get; set; }
@@ -31,8 +31,8 @@ namespace Tiss_MindRadar.Models
         public string Option5 { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<PsychologicalResponse> PsychologicalResponse { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PsychologicalStateQuestionCategory> PsychologicalStateQuestionCategory { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<PsychologicalResponse> PsychologicalResponse { get; set; }
     }
 }

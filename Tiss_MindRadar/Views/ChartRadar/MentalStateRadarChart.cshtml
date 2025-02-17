@@ -13,6 +13,7 @@
     <script src="~/RadarChartJS/chart.js"></script>
     <script src="~/RadarChartJS/chartjs-plugin-datalabels@2.2.js"></script> @*雷達圖插件*@
     <link href="~/MindRadarCss/MentalStateRadarChart.css" rel="stylesheet" />
+    <link href="~/MindRadarCss/PsychologicalDescriptionsStyle.css" rel="stylesheet" />
     <script src="~/RadarChartJS/MentalStateRadarChart.js"></script>
 </head>
 <body class="bg-gray-100">
@@ -55,6 +56,54 @@
                 @Html.Raw(JsonConvert.SerializeObject(Model))
             </script>
         </div>
+
+        <div class="mt-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">心理狀態技能說明</h2>
+            <table class="min-w-full bg-white shadow-md rounded border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                        <th class="py-3 px-6 text-left w-1/4">類別</th>
+                        <th class="py-3 px-6 text-left w-1/4">心理技能</th>
+                        <th class="py-3 px-6 text-left">描述</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.PsychologicalDescriptions != null)
+                    {
+                        var descriptions = ViewBag.PsychologicalDescriptions as List<Tiss_MindRadar.Models.PsychologicalStateDescription>;
+                        if (descriptions != null)
+                        {
+                            string currentCategory = null;
+                            Dictionary<string, int> categoryRowSpans = descriptions
+                                .GroupBy(d => d.CategoryName)
+                                .ToDictionary(g => g.Key, g => g.Count());
+
+                            foreach (var item in descriptions)
+                            {
+                                // 設定背景顏色類別
+                                string categoryClass = item.CategoryName.Contains("基礎心理技能") ? "bg-yellow-200" :
+                                                       item.CategoryName.Contains("身體心理技能") ? "bg-orange-300" :
+                                                       item.CategoryName.Contains("認知技能") ? "bg-blue-300" : "";
+
+                                <tr class="border-b border-gray-200">
+                                    @if (currentCategory != item.CategoryName)
+                                    {
+                                        int categoryRowSpan = categoryRowSpans[item.CategoryName];
+                                        <td class="py-3 px-6 text-left font-bold @categoryClass" rowspan="@categoryRowSpan">
+                                            @item.CategoryName
+                                        </td>
+                                        currentCategory = item.CategoryName;
+                                    }
+                                    <td class="py-3 px-6 text-left">@item.SubCategory</td>
+                                    <td class="py-3 px-6 text-left">@item.DescriptionContent</td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
     <script>

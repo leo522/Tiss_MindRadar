@@ -1,0 +1,28 @@
+﻿.bg-yellow-200 {
+    background-color: #fef9c3; /* 淡黃色 */
+    font-weight: bold;
+}
+
+.bg-orange-300 {
+    background-color: #fdba74; /* 橙色 */
+    font-weight: bold;
+}
+
+.bg-blue-300 {
+    background-color: #93c5fd; /* 藍色 */
+    font-weight: bold;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+th {
+    background-color: #f3f4f6;
+}

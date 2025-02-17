@@ -38,13 +38,14 @@ namespace Tiss_MindRadar.Models
         public virtual DbSet<PhysicalDiscomfort> PhysicalDiscomfort { get; set; }
         public virtual DbSet<PhysiologicalRelaxation> PhysiologicalRelaxation { get; set; }
         public virtual DbSet<PsychologicalResponse> PsychologicalResponse { get; set; }
+        public virtual DbSet<PsychologicalStateCategory> PsychologicalStateCategory { get; set; }
+        public virtual DbSet<PsychologicalStateDescription> PsychologicalStateDescription { get; set; }
+        public virtual DbSet<PsychologicalStateQuestionCategory> PsychologicalStateQuestionCategory { get; set; }
         public virtual DbSet<SelfEfficacy> SelfEfficacy { get; set; }
         public virtual DbSet<Successful> Successful { get; set; }
-        public virtual DbSet<UserResponse> UserResponse { get; set; }
-        public virtual DbSet<Users> Users { get; set; }
         public virtual DbSet<Team> Team { get; set; }
         public virtual DbSet<UserProfile> UserProfile { get; set; }
-        public virtual DbSet<PsychologicalStateCategory> PsychologicalStateCategory { get; set; }
-        public virtual DbSet<PsychologicalStateQuestionCategory> PsychologicalStateQuestionCategory { get; set; }
+        public virtual DbSet<UserResponse> UserResponse { get; set; }
+        public virtual DbSet<Users> Users { get; set; }
     }
 }

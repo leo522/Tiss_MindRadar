@@ -192,6 +192,9 @@
     <Compile Include="Models\PsychologicalStateCategory.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\PsychologicalStateDescription.cs">
+      <DependentUpon>MindRadarModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\PsychologicalStateQuestionCategory.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
@@ -239,6 +242,7 @@
     <Content Include="img\favicon.svg" />
     <Content Include="img\logo.svg" />
     <Content Include="img\TissLogo.jpg" />
+    <Content Include="MindRadarCss\PsychologicalDescriptionsStyle.css" />
     <Content Include="RadarChartJS\chartjs-plugin-datalabels%402.2.js" />
     <Content Include="RadarChartJS\MentalPhysicalStateRadarChart.js" />
     <Content Include="RadarChartJS\MentalStateRadarChart.js" />
