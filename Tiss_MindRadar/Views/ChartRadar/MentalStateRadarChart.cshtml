@@ -58,10 +58,10 @@
         </div>
 
         <div class="mt-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">心理狀態技能說明</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">運動心理技能說明</h2>
             <table class="min-w-full bg-white shadow-md rounded border border-gray-300">
                 <thead>
-                    <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                    <tr class="bg-gray-200 text-gray-600 uppercase text-lg leading-normal">
                         <th class="py-3 px-6 text-left w-1/4">類別</th>
                         <th class="py-3 px-6 text-left w-1/4">心理技能</th>
                         <th class="py-3 px-6 text-left">描述</th>
@@ -74,9 +74,14 @@
                         if (descriptions != null)
                         {
                             string currentCategory = null;
+
+                            // 預先計算 category 的 rowspan
                             Dictionary<string, int> categoryRowSpans = descriptions
                                 .GroupBy(d => d.CategoryName)
                                 .ToDictionary(g => g.Key, g => g.Count());
+
+                            // 追蹤每個類別的編號
+                            Dictionary<string, int> categoryItemIndex = new Dictionary<string, int>();
 
                             foreach (var item in descriptions)
                             {
@@ -84,6 +89,16 @@
                                 string categoryClass = item.CategoryName.Contains("基礎心理技能") ? "bg-yellow-200" :
                                                        item.CategoryName.Contains("身體心理技能") ? "bg-orange-300" :
                                                        item.CategoryName.Contains("認知技能") ? "bg-blue-300" : "";
+
+                                // 確保該類別的計數存在
+                                if (!categoryItemIndex.ContainsKey(item.CategoryName))
+                                {
+                                    categoryItemIndex[item.CategoryName] = 1;
+                                }
+                                else
+                                {
+                                    categoryItemIndex[item.CategoryName]++;
+                                }
 
                                 <tr class="border-b border-gray-200">
                                     @if (currentCategory != item.CategoryName)
@@ -94,7 +109,7 @@
                                         </td>
                                         currentCategory = item.CategoryName;
                                     }
-                                    <td class="py-3 px-6 text-left">@item.SubCategory</td>
+                                    <td class="py-3 px-6 text-left">@categoryItemIndex[item.CategoryName]. @item.SubCategory</td>
                                     <td class="py-3 px-6 text-left">@item.DescriptionContent</td>
                                 </tr>
                             }
