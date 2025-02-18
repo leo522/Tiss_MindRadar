@@ -15,7 +15,7 @@ namespace Tiss_MindRadar.Controllers
 
         #region 身心狀態檢測雷達圖
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public ActionResult MentalPhysicalStateRadarChart(FormCollection form)
         {
             try
@@ -98,7 +98,7 @@ namespace Tiss_MindRadar.Controllers
 
         #region 心理狀態檢測雷達圖
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public ActionResult MentalStateRadarChart(FormCollection form)
         {
             try

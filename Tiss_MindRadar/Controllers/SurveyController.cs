@@ -28,7 +28,7 @@ namespace Tiss_MindRadar.Controllers
 
         #region 提交身心狀態檢測數據並保存到 MentalPhysicalStateUserResponse 表
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public ActionResult SubmitMentalPhysicalState(FormCollection form)
         {
             try
@@ -95,7 +95,7 @@ namespace Tiss_MindRadar.Controllers
 
         #region 提交心理狀態檢測數據並保存到 MentalStateCategory 表
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public ActionResult SubmitMentalState(FormCollection form)
         {
             try
@@ -106,7 +106,12 @@ namespace Tiss_MindRadar.Controllers
                 }
 
                 int userId = Convert.ToInt32(Session["UserID"]);
-                DateTime surveyDate = DateTime.Parse(form["SurveyDate"]); //取得選擇的日期
+
+                if (!DateTime.TryParse(form["SurveyDate"], out DateTime surveyDate))
+                {
+                    surveyDate = DateTime.Now; // 如果沒有選擇日期，預設當天
+                }
+
                 var responses = new Dictionary<int, int>();
 
                 foreach (var key in form.AllKeys)
@@ -141,7 +146,9 @@ namespace Tiss_MindRadar.Controllers
                 }
 
                 _db.SaveChanges();
-                return RedirectToAction("MentalStateRadarChart", "ChartRadar", new { surveyDate = surveyDate.ToString("yyyy-MM-dd") });
+                //return RedirectToAction("MentalStateRadarChart", "ChartRadar", new { surveyDate = surveyDate.ToString("yyyy-MM-dd") });
+                return RedirectToAction("MentalStateRadarChart", "ChartRadar", new { date = surveyDate.ToString("yyyy-MM-dd") });
+
             }
             catch (Exception ex)
             {

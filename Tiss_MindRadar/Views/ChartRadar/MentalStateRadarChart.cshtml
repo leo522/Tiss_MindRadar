@@ -31,7 +31,7 @@
         <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">心理狀態檢測向度雷達圖</h1>
         <div id="mainContent">
             <form id="radarChartForm" method="POST" action="@Url.Action("MentalStateRadarChart", "ChartRadar")">
-                @Html.AntiForgeryToken()
+                @*@Html.AntiForgeryToken()*@
                 <label class="block text-gray-700 font-bold mb-2">選擇要比較的日期：</label>
                 <div id="dateCheckboxContainer" class="flex flex-wrap gap-2 mb-4">
                     @foreach (var date in ViewBag.SurveyDates as List<DateTime>)
@@ -173,12 +173,12 @@
     }
 
     // **獲取 CSRF Token**
-    const csrfTokenElement = document.querySelector("input[name='__RequestVerificationToken']");
-    if (!csrfTokenElement) {
-        console.error("CSRF Token 不存在");
-        return;
-    }
-    const csrfToken = csrfTokenElement.value;
+    //const csrfTokenElement = document.querySelector("input[name='__RequestVerificationToken']");
+    //if (!csrfTokenElement) {
+    //    console.error("CSRF Token 不存在");
+    //    return;
+    //}
+    //const csrfToken = csrfTokenElement.value;
 
     // **轉換為 `application/x-www-form-urlencoded` 格式**
     const formData = new URLSearchParams();

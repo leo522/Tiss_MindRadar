@@ -27,7 +27,7 @@
         </p>
         <div class="flex justify-between items-center mb-4">
             <form id="resultForm" method="POST" action="@Url.Action("MentalPhysicalStateRadarChart", "ChartRadar")">
-                @Html.AntiForgeryToken()
+                @*@Html.AntiForgeryToken()*@
                 <input type="hidden" name="surveyDates" id="selectedSurveyDates" />
                 <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg">
                     查看身心狀態檢測結果記錄
@@ -45,7 +45,7 @@
         </div>
         @using (Html.BeginForm("SubmitMentalPhysicalState", "Survey", FormMethod.Post, new { id = "surveyForm" }))
         {
-            @Html.AntiForgeryToken()
+            @*@Html.AntiForgeryToken()*@
             <input type="hidden" name="SurveyDate" id="hiddenSurveyDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
             <div class="table-container">
                 <table class="responsive-table sticky-header">
@@ -86,7 +86,8 @@
 
     <script>
         document.getElementById("surveyDate").addEventListener("change", function () {
-            document.getElementById("hiddenSurveyDate").value = this.value;
+            let selectedDate = this.value;
+            document.getElementById("hiddenSurveyDate").value = selectedDate;
         });
 
         document.getElementById('surveyForm').addEventListener('submit', function (e) {
