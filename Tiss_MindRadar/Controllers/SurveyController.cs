@@ -28,7 +28,7 @@ namespace Tiss_MindRadar.Controllers
 
         #region 提交身心狀態檢測數據並保存到 MentalPhysicalStateUserResponse 表
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public ActionResult SubmitMentalPhysicalState(FormCollection form)
         {
             try
@@ -95,7 +95,7 @@ namespace Tiss_MindRadar.Controllers
 
         #region 提交心理狀態檢測數據並保存到 MentalStateCategory 表
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public ActionResult SubmitMentalState(FormCollection form)
         {
             try
@@ -146,9 +146,7 @@ namespace Tiss_MindRadar.Controllers
                 }
 
                 _db.SaveChanges();
-                //return RedirectToAction("MentalStateRadarChart", "ChartRadar", new { surveyDate = surveyDate.ToString("yyyy-MM-dd") });
                 return RedirectToAction("MentalStateRadarChart", "ChartRadar", new { date = surveyDate.ToString("yyyy-MM-dd") });
-
             }
             catch (Exception ex)
             {

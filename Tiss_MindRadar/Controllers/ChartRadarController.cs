@@ -14,8 +14,14 @@ namespace Tiss_MindRadar.Controllers
         private TISS_MindRadarEntities _db = new TISS_MindRadarEntities(); //資料庫
 
         #region 身心狀態檢測雷達圖
+        [HttpGet]
+        public ActionResult MentalPhysicalStateRadarChart(string date)
+        {
+            var form = new FormCollection { { "surveyDates", date } };
+            return MentalPhysicalStateRadarChart(form);
+        }
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public ActionResult MentalPhysicalStateRadarChart(FormCollection form)
         {
             try
@@ -97,8 +103,14 @@ namespace Tiss_MindRadar.Controllers
         #endregion
 
         #region 心理狀態檢測雷達圖
+        [HttpGet]
+        public ActionResult MentalStateRadarChart(string date)
+        {
+            var form = new FormCollection { { "surveyDates", date } };
+            return MentalStateRadarChart(form);
+        }
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public ActionResult MentalStateRadarChart(FormCollection form)
         {
             try
@@ -153,9 +165,7 @@ namespace Tiss_MindRadar.Controllers
 
                 foreach (var date in selectedDates)
                 {
-                    string query = @"SELECT c.CategoryName, COALESCE(AVG(pr.Score), 0) AS AverageScore FROM PsychologicalResponse pr
-                                   INNER JOIN PsychologicalStateCategory c ON pr.CategoryID = c.ID WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1 
-                                   GROUP BY c.CategoryName";
+                    string query = @"SELECT c.CategoryName, COALESCE(CAST(AVG(CAST(pr.Score AS FLOAT)) AS DECIMAL(4,1)), 0) AS AverageScore FROM PsychologicalResponse pr INNER JOIN PsychologicalStateCategory c ON pr.CategoryID = c.ID WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1 GROUP BY c.CategoryName;";
 
                     object[] parameters = { userId, date };
                     var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();
@@ -182,7 +192,6 @@ namespace Tiss_MindRadar.Controllers
                 return View(new List<RadarChartVIewModel>());
             }
         }
-
         #endregion
     }
 }
