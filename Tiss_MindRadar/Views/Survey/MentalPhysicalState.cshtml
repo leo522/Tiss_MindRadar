@@ -53,9 +53,12 @@
                         <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
                             <th class="py-3 px-6 text-left">題號</th>
                             <th class="py-3 px-6 text-left">題目</th>
+                            @{
+                                string[] scoreLabels = { "從不", "很少", "有時", "多次", "經常", "常常", "總是" };
+                            }
                             @for (int i = 0; i <= 6; i++)
                             {
-                                <th class="py-3 px-4 text-center">@i</th>
+                                <th class="py-3 px-4 text-center">@scoreLabels[i]</th>
                             }
                         </tr>
                     </thead>
