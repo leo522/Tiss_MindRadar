@@ -45,13 +45,21 @@ namespace Tiss_MindRadar.Controllers
 
                 var hashedPwd = ComputeSha256Hash(pwd); // 密碼加密
 
+                // 取得 TeamName
+                var selectedTeam = _db.Team.FirstOrDefault(t => t.TeamID == TeamID);
+                if (selectedTeam == null)
+                {
+                    return Json(new { success = false, message = "所選隊伍不存在！" });
+                }
+
                 var newUser = new Users
                 {
                     Jobcode = Jobcode,
                     UserName = UserName,
                     Passwords = hashedPwd,
                     Email = Email,
-                    CreatedDate = DateTime.Now
+                    CreatedDate = DateTime.Now,
+                    TeamName = selectedTeam.TeamName
                 };
 
                 _db.Users.Add(newUser);
