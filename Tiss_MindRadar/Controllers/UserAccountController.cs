@@ -79,7 +79,7 @@ namespace Tiss_MindRadar.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "發生錯誤：帳號註冊失敗！" });
+                return Json(new { success = false, message = "發生錯誤：帳號註冊失敗！" + ex.Message });
             }
         }
         #endregion
