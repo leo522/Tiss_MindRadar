@@ -1,0 +1,58 @@
+﻿@model IEnumerable<Tiss_MindRadar.Models.TeamRawDataViewModel>
+@{
+    ViewBag.Title = "隊伍成員分數 RawData";
+    Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
+}
+
+<h2 class="text-2xl font-bold text-center mb-6 text-gray-800">隊伍成員分數 RawData</h2>
+
+@{
+    var teamName = Model.FirstOrDefault()?.TeamName;
+}
+
+@if (!string.IsNullOrEmpty(teamName))
+{
+    <h3 class="text-xl font-bold text-center mb-4 text-gray-700">隊伍: @teamName</h3>
+}
+
+<table class="min-w-full bg-white shadow-md rounded border border-gray-300">
+    <thead>
+        <tr class="bg-gray-200 text-gray-600 uppercase text-lg leading-normal">
+            <th class="py-3 px-6 text-left">選手</th>
+            <th class="py-3 px-6 text-left">心理類別</th>
+            <th class="py-3 px-6 text-left">分數</th>
+            <th class="py-3 px-6 text-left">檢測日期</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var groupedData = Model.GroupBy(x => new { x.UserName, Date = x.SurveyDate?.ToString("yyyy/MM/dd") })
+                                   .ToDictionary(g => g.Key, g => g.Count());
+            string previousUser = null;
+            string previousDate = null;
+        }
+
+        @foreach (var item in Model)
+        {
+            string currentDate = item.SurveyDate?.ToString("yyyy/MM/dd");
+            bool isFirstRow = previousUser != item.UserName || previousDate != currentDate;
+            int rowspan = isFirstRow ? groupedData[new { item.UserName, Date = currentDate }] : 0;
+
+            <tr class="border-b border-gray-200">
+                @if (isFirstRow)
+                {
+                    <td class="py-3 px-6 text-left font-bold" rowspan="@rowspan">@item.UserName</td>
+                }
+                <td class="py-3 px-6 text-left">@item.Category</td>
+                <td class="py-3 px-6 text-left">@item.Score</td>
+                @if (isFirstRow)
+                {
+                    <td class="py-3 px-6 text-left" rowspan="@rowspan">@currentDate</td>
+                }
+            </tr>
+
+            previousUser = item.UserName;
+            previousDate = currentDate;
+        }
+    </tbody>
+</table>

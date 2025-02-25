@@ -26,6 +26,7 @@ namespace Tiss_MindRadar.Models
         }
     
         public virtual DbSet<Category> Category { get; set; }
+        public virtual DbSet<ConsultantTeams> ConsultantTeams { get; set; }
         public virtual DbSet<Fatigue> Fatigue { get; set; }
         public virtual DbSet<LackOfEnergy> LackOfEnergy { get; set; }
         public virtual DbSet<MentalPhysicalState> MentalPhysicalState { get; set; }

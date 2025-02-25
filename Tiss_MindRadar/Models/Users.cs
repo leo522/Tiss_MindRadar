@@ -17,6 +17,7 @@ namespace Tiss_MindRadar.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Users()
         {
+            this.ConsultantTeams = new HashSet<ConsultantTeams>();
             this.PsychologicalResponse = new HashSet<PsychologicalResponse>();
             this.UserProfile = new HashSet<UserProfile>();
             this.UserResponse = new HashSet<UserResponse>();
@@ -30,7 +31,10 @@ namespace Tiss_MindRadar.Models
         public string TeamName { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public Nullable<System.DateTime> LastLoginDate { get; set; }
+        public Nullable<int> TeamID { get; set; }
     
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ConsultantTeams> ConsultantTeams { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PsychologicalResponse> PsychologicalResponse { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

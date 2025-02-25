@@ -12,15 +12,13 @@ namespace Tiss_MindRadar.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class UserProfile
+    public partial class ConsultantTeams
     {
-        public int ID { get; set; }
-        public int UserID { get; set; }
-        public int Age { get; set; }
+        public int ConsultantID { get; set; }
         public int TeamID { get; set; }
-        public string Role { get; set; }
+        public System.DateTime CreatedDate { get; set; }
     
-        public virtual Team Team { get; set; }
         public virtual Users Users { get; set; }
+        public virtual Team Team { get; set; }
     }
 }

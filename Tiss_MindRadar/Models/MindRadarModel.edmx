@@ -12,6 +12,15 @@
           <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="CategoryName" Type="nvarchar" MaxLength="50" Nullable="false" />
         </EntityType>
+        <EntityType Name="ConsultantTeams">
+          <Key>
+            <PropertyRef Name="ConsultantID" />
+            <PropertyRef Name="TeamID" />
+          </Key>
+          <Property Name="ConsultantID" Type="int" Nullable="false" />
+          <Property Name="TeamID" Type="int" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+        </EntityType>
         <EntityType Name="Fatigue">
           <Key>
             <PropertyRef Name="ID" />
@@ -190,6 +199,7 @@
           </Key>
           <Property Name="TeamID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="TeamName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="isenable" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="UserProfile">
           <Key>
@@ -199,6 +209,7 @@
           <Property Name="UserID" Type="int" Nullable="false" />
           <Property Name="Age" Type="int" Nullable="false" />
           <Property Name="TeamID" Type="int" Nullable="false" />
+          <Property Name="Role" Type="nvarchar" MaxLength="20" Nullable="false" />
         </EntityType>
         <EntityType Name="UserResponse">
           <Key>
@@ -225,6 +236,7 @@
           <Property Name="TeamName" Type="nvarchar" MaxLength="30" />
           <Property Name="CreatedDate" Type="datetime" Nullable="false" />
           <Property Name="LastLoginDate" Type="datetime" />
+          <Property Name="TeamID" Type="int" />
         </EntityType>
         <Association Name="FK__Psycholog__Categ__29221CFB">
           <End Role="PsychologicalStateCategory" Type="Self.PsychologicalStateCategory" Multiplicity="1" />
@@ -310,6 +322,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_ConsultantTeams_ConsultantID">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="ConsultantTeams" Type="Self.ConsultantTeams" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="ConsultantTeams">
+              <PropertyRef Name="ConsultantID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ConsultantTeams_TeamID">
+          <End Role="Team" Type="Self.Team" Multiplicity="1" />
+          <End Role="ConsultantTeams" Type="Self.ConsultantTeams" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Team">
+              <PropertyRef Name="TeamID" />
+            </Principal>
+            <Dependent Role="ConsultantTeams">
+              <PropertyRef Name="TeamID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_PsychologicalResponse_QuestionID">
           <End Role="MentalState" Type="Self.MentalState" Multiplicity="1" />
           <End Role="PsychologicalResponse" Type="Self.PsychologicalResponse" Multiplicity="*" />
@@ -336,6 +372,7 @@
         </Association>
         <EntityContainer Name="TISS_MindRadarModelStoreContainer">
           <EntitySet Name="Category" EntityType="Self.Category" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ConsultantTeams" EntityType="Self.ConsultantTeams" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Fatigue" EntityType="Self.Fatigue" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="LackOfEnergy" EntityType="Self.LackOfEnergy" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MentalPhysicalState" EntityType="Self.MentalPhysicalState" Schema="dbo" store:Type="Tables" />
@@ -386,6 +423,14 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="UserResponse" EntitySet="UserResponse" />
           </AssociationSet>
+          <AssociationSet Name="FK_ConsultantTeams_ConsultantID" Association="Self.FK_ConsultantTeams_ConsultantID">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="ConsultantTeams" EntitySet="ConsultantTeams" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ConsultantTeams_TeamID" Association="Self.FK_ConsultantTeams_TeamID">
+            <End Role="Team" EntitySet="Team" />
+            <End Role="ConsultantTeams" EntitySet="ConsultantTeams" />
+          </AssociationSet>
           <AssociationSet Name="FK_PsychologicalResponse_QuestionID" Association="Self.FK_PsychologicalResponse_QuestionID">
             <End Role="MentalState" EntitySet="MentalState" />
             <End Role="PsychologicalResponse" EntitySet="PsychologicalResponse" />
@@ -401,6 +446,7 @@
       <Schema Namespace="TISS_MindRadarModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityContainer Name="TISS_MindRadarEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Category" EntityType="TISS_MindRadarModel.Category" />
+          <EntitySet Name="ConsultantTeams" EntityType="TISS_MindRadarModel.ConsultantTeams" />
           <EntitySet Name="Fatigue" EntityType="TISS_MindRadarModel.Fatigue" />
           <EntitySet Name="LackOfEnergy" EntityType="TISS_MindRadarModel.LackOfEnergy" />
           <EntitySet Name="MentalPhysicalState" EntityType="TISS_MindRadarModel.MentalPhysicalState" />
@@ -422,6 +468,14 @@
           <EntitySet Name="UserProfile" EntityType="TISS_MindRadarModel.UserProfile" />
           <EntitySet Name="UserResponse" EntityType="TISS_MindRadarModel.UserResponse" />
           <EntitySet Name="Users" EntityType="TISS_MindRadarModel.Users" />
+          <AssociationSet Name="FK_ConsultantTeams_ConsultantID" Association="TISS_MindRadarModel.FK_ConsultantTeams_ConsultantID">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="ConsultantTeams" EntitySet="ConsultantTeams" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ConsultantTeams_TeamID" Association="TISS_MindRadarModel.FK_ConsultantTeams_TeamID">
+            <End Role="Team" EntitySet="Team" />
+            <End Role="ConsultantTeams" EntitySet="ConsultantTeams" />
+          </AssociationSet>
           <AssociationSet Name="FK__Psycholog__Quest__282DF8C2" Association="TISS_MindRadarModel.FK__Psycholog__Quest__282DF8C2">
             <End Role="MentalState" EntitySet="MentalState" />
             <End Role="PsychologicalStateQuestionCategory" EntitySet="PsychologicalStateQuestionCategory" />
@@ -462,6 +516,17 @@
           <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="CategoryName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="MentalPhysicalState" Relationship="TISS_MindRadarModel.QuestionCategory" FromRole="Category" ToRole="MentalPhysicalState" />
+        </EntityType>
+        <EntityType Name="ConsultantTeams">
+          <Key>
+            <PropertyRef Name="ConsultantID" />
+            <PropertyRef Name="TeamID" />
+          </Key>
+          <Property Name="ConsultantID" Type="Int32" Nullable="false" />
+          <Property Name="TeamID" Type="Int32" Nullable="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK_ConsultantTeams_ConsultantID" FromRole="ConsultantTeams" ToRole="Users" />
+          <NavigationProperty Name="Team" Relationship="TISS_MindRadarModel.FK_ConsultantTeams_TeamID" FromRole="ConsultantTeams" ToRole="Team" />
         </EntityType>
         <EntityType Name="Fatigue">
           <Key>
@@ -641,6 +706,8 @@
           </Key>
           <Property Name="TeamID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="TeamName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="isenable" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="ConsultantTeams" Relationship="TISS_MindRadarModel.FK_ConsultantTeams_TeamID" FromRole="Team" ToRole="ConsultantTeams" />
           <NavigationProperty Name="UserProfile" Relationship="TISS_MindRadarModel.FK__UserProfi__TeamI__19DFD96B" FromRole="Team" ToRole="UserProfile" />
         </EntityType>
         <EntityType Name="UserProfile">
@@ -651,6 +718,7 @@
           <Property Name="UserID" Type="Int32" Nullable="false" />
           <Property Name="Age" Type="Int32" Nullable="false" />
           <Property Name="TeamID" Type="Int32" Nullable="false" />
+          <Property Name="Role" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Team" Relationship="TISS_MindRadarModel.FK__UserProfi__TeamI__19DFD96B" FromRole="UserProfile" ToRole="Team" />
           <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" FromRole="UserProfile" ToRole="Users" />
         </EntityType>
@@ -680,10 +748,36 @@
           <Property Name="TeamName" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
           <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="LastLoginDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="ConsultantTeams" Relationship="TISS_MindRadarModel.FK_ConsultantTeams_ConsultantID" FromRole="Users" ToRole="ConsultantTeams" />
           <NavigationProperty Name="PsychologicalResponse" Relationship="TISS_MindRadarModel.FK_PsychologicalResponse_UserID" FromRole="Users" ToRole="PsychologicalResponse" />
           <NavigationProperty Name="UserProfile" Relationship="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" FromRole="Users" ToRole="UserProfile" />
           <NavigationProperty Name="UserResponse" Relationship="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" FromRole="Users" ToRole="UserResponse" />
+          <Property Name="TeamID" Type="Int32" />
         </EntityType>
+        <Association Name="FK_ConsultantTeams_ConsultantID">
+          <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="TISS_MindRadarModel.ConsultantTeams" Role="ConsultantTeams" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="ConsultantTeams">
+              <PropertyRef Name="ConsultantID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ConsultantTeams_TeamID">
+          <End Type="TISS_MindRadarModel.Team" Role="Team" Multiplicity="1" />
+          <End Type="TISS_MindRadarModel.ConsultantTeams" Role="ConsultantTeams" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Team">
+              <PropertyRef Name="TeamID" />
+            </Principal>
+            <Dependent Role="ConsultantTeams">
+              <PropertyRef Name="TeamID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__Psycholog__Quest__282DF8C2">
           <End Type="TISS_MindRadarModel.MentalState" Role="MentalState" Multiplicity="1" />
           <End Type="TISS_MindRadarModel.PsychologicalStateQuestionCategory" Role="PsychologicalStateQuestionCategory" Multiplicity="*" />
@@ -783,6 +877,15 @@
               <MappingFragment StoreEntitySet="Category">
                 <ScalarProperty Name="CategoryName" ColumnName="CategoryName" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ConsultantTeams">
+            <EntityTypeMapping TypeName="TISS_MindRadarModel.ConsultantTeams">
+              <MappingFragment StoreEntitySet="ConsultantTeams">
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="TeamID" ColumnName="TeamID" />
+                <ScalarProperty Name="ConsultantID" ColumnName="ConsultantID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -970,6 +1073,7 @@
           <EntitySetMapping Name="Team">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.Team">
               <MappingFragment StoreEntitySet="Team">
+                <ScalarProperty Name="isenable" ColumnName="isenable" />
                 <ScalarProperty Name="TeamName" ColumnName="TeamName" />
                 <ScalarProperty Name="TeamID" ColumnName="TeamID" />
               </MappingFragment>
@@ -978,6 +1082,7 @@
           <EntitySetMapping Name="UserProfile">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.UserProfile">
               <MappingFragment StoreEntitySet="UserProfile">
+                <ScalarProperty Name="Role" ColumnName="Role" />
                 <ScalarProperty Name="TeamID" ColumnName="TeamID" />
                 <ScalarProperty Name="Age" ColumnName="Age" />
                 <ScalarProperty Name="UserID" ColumnName="UserID" />
@@ -1002,6 +1107,7 @@
           <EntitySetMapping Name="Users">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.Users">
               <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="TeamID" ColumnName="TeamID" />
                 <ScalarProperty Name="LastLoginDate" ColumnName="LastLoginDate" />
                 <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
                 <ScalarProperty Name="TeamName" ColumnName="TeamName" />

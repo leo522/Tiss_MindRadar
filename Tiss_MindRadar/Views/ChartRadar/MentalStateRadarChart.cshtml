@@ -29,6 +29,11 @@
             </div>
         </div>
         <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">心理狀態檢測向度雷達圖</h1>
+        <div class="button-container">
+            <button id="viewRawDataBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow-md">
+                查看隊伍分數 RawData
+            </button>
+        </div>
         <div id="mainContent">
             <form id="radarChartForm" method="POST" action="@Url.Action("MentalStateRadarChart", "ChartRadar")">
                 @Html.AntiForgeryToken()
@@ -46,6 +51,7 @@
                 <button type="button" id="updateChartBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
                     更新雷達圖
                 </button>
+
             </form>
 
             <div class="radar-chart-container mt-4">
@@ -264,6 +270,9 @@
                 renderRadarChart("radarChart", radarData);
             }
         }
+        document.getElementById("viewRawDataBtn").addEventListener("click", function () {
+        window.location.href = "@Url.Action("GetMentalStateTeamRawData", "TeamRawData")";
+    });
     </script>
 </body>
 </html>

@@ -17,12 +17,16 @@ namespace Tiss_MindRadar.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Team()
         {
+            this.ConsultantTeams = new HashSet<ConsultantTeams>();
             this.UserProfile = new HashSet<UserProfile>();
         }
     
         public int TeamID { get; set; }
         public string TeamName { get; set; }
+        public bool isenable { get; set; }
     
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ConsultantTeams> ConsultantTeams { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UserProfile> UserProfile { get; set; }
     }
