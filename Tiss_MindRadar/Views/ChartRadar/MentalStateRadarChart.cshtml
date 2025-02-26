@@ -22,17 +22,30 @@
             <div class="user-info">
                 受訪者: @ViewBag.UserName <span class="text-lg text-gray-600">(年齡: @ViewBag.Age 歲 | 隊伍: @ViewBag.TeamName)</span>
             </div>
-            <div class="button-container">
-                <a href="@Url.Action("MentalState", "Survey")" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md">
+            <div class="flex justify-end space-x-4 mb-4">
+                @if (Session["UserID"] != null)
+                {
+                    <a href="@Url.Action("Logout", "UserAccount")"
+                       class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">
+                        登出
+                    </a>
+                }
+                <a href="@Url.Action("MentalState", "Survey")"
+                   class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md">
                     返回心理狀態檢測題目頁
                 </a>
             </div>
         </div>
         <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">心理狀態檢測向度雷達圖</h1>
         <div class="button-container">
-            <button id="viewRawDataBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow-md">
-                查看隊伍分數 RawData
-            </button>
+            @if (Session["UserRole"] != null && Session["UserRole"].ToString() == "Consultant")
+            {
+                <div class="button-container">
+                    <button id="viewRawDataBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow-md">
+                        查看隊伍分數 RawData
+                    </button>
+                </div>
+            }
         </div>
         <div id="mainContent">
             <form id="radarChartForm" method="POST" action="@Url.Action("MentalStateRadarChart", "ChartRadar")">

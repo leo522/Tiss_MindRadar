@@ -210,6 +210,8 @@
           <Property Name="Age" Type="int" Nullable="false" />
           <Property Name="TeamID" Type="int" Nullable="false" />
           <Property Name="Role" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="InviteCode" Type="nvarchar" MaxLength="20" />
+          <Property Name="IsVerified" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="UserResponse">
           <Key>
@@ -721,6 +723,8 @@
           <Property Name="Role" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Team" Relationship="TISS_MindRadarModel.FK__UserProfi__TeamI__19DFD96B" FromRole="UserProfile" ToRole="Team" />
           <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" FromRole="UserProfile" ToRole="Users" />
+          <Property Name="InviteCode" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="IsVerified" Type="Boolean" Nullable="false" />
         </EntityType>
         <EntityType Name="UserResponse">
           <Key>
@@ -1082,6 +1086,8 @@
           <EntitySetMapping Name="UserProfile">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.UserProfile">
               <MappingFragment StoreEntitySet="UserProfile">
+                <ScalarProperty Name="IsVerified" ColumnName="IsVerified" />
+                <ScalarProperty Name="InviteCode" ColumnName="InviteCode" />
                 <ScalarProperty Name="Role" ColumnName="Role" />
                 <ScalarProperty Name="TeamID" ColumnName="TeamID" />
                 <ScalarProperty Name="Age" ColumnName="Age" />

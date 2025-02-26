@@ -22,36 +22,29 @@ namespace Tiss_MindRadar.Controllers
         }
 
         [HttpPost]
-        public JsonResult Register(string Jobcode, string UserName, string pwd, string Email, int Age, int TeamID)
+        public JsonResult Register(string Jobcode, string UserName, string pwd, string Email, int Age, int TeamID,string Role, string InviteCode)
         {
             try
             {
-                if (Jobcode.Length > 20)
+                //驗證資料
+                var validationMessage = ValidateRegistrationInputs(Jobcode, Email, Role, InviteCode);
+
+                if (!string.IsNullOrEmpty(validationMessage))
                 {
-                    return Json(new { success = false, message = "帳號長度不能超過 20 個字！" });
+                    return Json(new { success = false, message = validationMessage });
                 }
 
-                // 只允許中文和英文，不允許數字和符號
-                var jobcodeRegex = new Regex(@"^[\u4e00-\u9fa5a-zA-Z]+$");
-                if (!jobcodeRegex.IsMatch(Jobcode))
-                {
-                    return Json(new { success = false, message = "帳號只能包含中文和英文，不能包含數字或符號！" });
-                }
+                //密碼驗證
+                var hashedPwd = ComputeSha256Hash(pwd);
 
-                if (_db.Users.Any(u => u.Jobcode == Jobcode))
-                {
-                    return Json(new { success = false, message = "該帳號已存在。" });
-                }
-
-                var hashedPwd = ComputeSha256Hash(pwd); // 密碼加密
-
-                // 取得 TeamName
+                //取得隊伍資訊
                 var selectedTeam = _db.Team.FirstOrDefault(t => t.TeamID == TeamID);
                 if (selectedTeam == null)
                 {
-                    return Json(new { success = false, message = "所選隊伍不存在！" });
+                    return Json(new { success = false, message = "所選隊伍不存在" });
                 }
 
+                //建立使用者資料
                 var newUser = new Users
                 {
                     Jobcode = Jobcode,
@@ -59,28 +52,80 @@ namespace Tiss_MindRadar.Controllers
                     Passwords = hashedPwd,
                     Email = Email,
                     CreatedDate = DateTime.Now,
-                    TeamName = selectedTeam.TeamName
+                    TeamName = selectedTeam.TeamName,
+                    TeamID = TeamID
                 };
 
                 _db.Users.Add(newUser);
                 _db.SaveChanges();
 
+                //設定角色與驗證狀態
+                bool isVerified = true;
+                //bool isVerified = (Role == "Player");
                 var newUserProfile = new UserProfile
                 {
                     UserID = newUser.UserID,
                     Age = Age,
-                    TeamID = TeamID
+                    TeamID = TeamID,
+                    Role = Role,
+                    InviteCode = InviteCode,
+                    IsVerified = isVerified
                 };
 
                 _db.UserProfile.Add(newUserProfile);
                 _db.SaveChanges();
 
-                return Json(new { success = true, message = "帳號註冊成功。" });
+                return Json(new { success = true, message = "帳號註冊成功" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "發生錯誤：帳號註冊失敗！" + ex.Message });
+                return Json(new { success = false, message = "帳號註冊失敗" + ex.Message });
             }
+        }
+        #endregion
+
+        #region 獨立驗證方法
+        private string ValidateRegistrationInputs(string Jobcode, string Email, string Role, string InviteCode)
+        {
+            //帳號長度驗證
+            if (Jobcode.Length > 20)
+            {
+                return "帳號長度不能超過20個字";
+            }
+
+            //帳號格式驗證(只能中文和英文)
+            var jobcodeRegex = new Regex(@"^[\u4e00-\u9fa5a-zA-Z]+$");
+            if (!jobcodeRegex.IsMatch(Jobcode))
+            {
+                return "帳號只能包含中文和英文，不能包含數字或符號！";
+            }
+
+            //帳號重複檢查
+            if (_db.Users.Any(u => u.Jobcode == Jobcode))
+            {
+                return "該帳號已存在";
+            }
+
+            //角色檢查
+            if (Role != "Player" && Role != "Consultant" )
+            {
+                return "角色選擇錯誤，請重新選擇";
+            }
+
+            //限制訪談員Email
+            if (Role == "Consultant" && !Email.EndsWith("@tiss.org.tw"))
+            {
+                return "註冊訪談員帳號，需使用運科中心電子郵件帳號";
+            }
+
+            //邀請碼驗證
+            const string consultantInviteCode = "Tiss@dmin!@#";
+            if (Role == "Consultant" && InviteCode != consultantInviteCode)
+            {
+                return"無效的驗證碼！";
+            }
+
+            return ""; //透過所有驗證
         }
         #endregion
 
@@ -123,6 +168,15 @@ namespace Tiss_MindRadar.Controllers
 
                     var userProfile = _db.UserProfile.FirstOrDefault(up => up.UserID == user.UserID);
                     var teamName = userProfile != null ? _db.Team.FirstOrDefault(t => t.TeamID == userProfile.TeamID)?.TeamName : "未指定";
+
+                    if (userProfile != null)
+                    {
+                        Session["UserRole"] = userProfile.Role; // 🔥 設定角色 (Consultant / Player)
+                    }
+                    else
+                    {
+                        Session["UserRole"] = "Player"; // 預設為選手
+                    }
 
                     Session["UserID"] = user.UserID;
                     Session["UserName"] = user.UserName;

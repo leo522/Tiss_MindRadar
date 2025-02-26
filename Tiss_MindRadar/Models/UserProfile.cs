@@ -19,6 +19,8 @@ namespace Tiss_MindRadar.Models
         public int Age { get; set; }
         public int TeamID { get; set; }
         public string Role { get; set; }
+        public string InviteCode { get; set; }
+        public bool IsVerified { get; set; }
     
         public virtual Team Team { get; set; }
         public virtual Users Users { get; set; }

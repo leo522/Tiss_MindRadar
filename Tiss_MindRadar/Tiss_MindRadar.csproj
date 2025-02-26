@@ -129,6 +129,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\ChartRadarController.cs" />
+    <Compile Include="Controllers\RadarErrorController.cs" />
     <Compile Include="Controllers\SurveyController.cs" />
     <Compile Include="Controllers\TeamRawDataController.cs" />
     <Compile Include="Controllers\UserAccountController.cs" />
@@ -314,6 +315,7 @@
     <Content Include="Views\UserAccount\ForgotPassword.cshtml" />
     <Content Include="Views\UserAccount\Register.cshtml" />
     <Content Include="Views\TeamRawData\GetMentalStateTeamRawData.cshtml" />
+    <Content Include="Views\RadarError\AccessDenied.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

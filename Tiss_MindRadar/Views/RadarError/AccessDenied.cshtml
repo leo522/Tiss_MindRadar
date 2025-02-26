@@ -1,0 +1,10 @@
+﻿@{
+    ViewBag.Title = "權限不足";
+    Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
+}
+
+<div class="container text-center mt-5">
+    <h1 class="text-danger">⚠️  權限不足</h1>
+    <p class="lead">抱歉，您沒有權限訪問此頁面。</p>
+    <a href="@Url.Action("Index", "Home")" class="btn btn-primary">返回首頁</a>
+</div>

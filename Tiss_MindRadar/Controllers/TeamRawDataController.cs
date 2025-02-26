@@ -19,6 +19,10 @@ namespace Tiss_MindRadar.Controllers
             {
                 return RedirectToAction("Login", "UserAccount");
             }
+            if (Session["UserRole"] == null || Session["UserRole"].ToString() != "Consultant")
+            {
+                return RedirectToAction("AccessDenied", "RadarError"); // 跳轉到「權限不足」頁面
+            }
 
             var rawData = _db.PsychologicalResponse
     .Join(_db.Users, pr => pr.UserID, u => u.UserID, (pr, u) => new { pr, u })
