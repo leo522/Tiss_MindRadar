@@ -1,90 +1,217 @@
 ﻿@model IEnumerable<Tiss_MindRadar.Models.TeamRawDataViewModel>
+@using Newtonsoft.Json
 @{
-    ViewBag.Title = "隊伍成員分數";
+    ViewBag.Title = "各隊伍成員分數";
     Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
 }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="~/RadarChartJS/chart.js"></script>
+    <script src="~/RadarChartJS/chartjs-plugin-datalabels@2.2.js"></script> @*雷達圖插件*@
+    <link href="~/MindRadarCss/MentalStateRadarChart.css" rel="stylesheet" />
+    <link href="~/MindRadarCss/PsychologicalDescriptionsStyle.css" rel="stylesheet" />
+    <script src="~/RadarChartJS/MentalStateRadarChart.js"></script>
+</head>
+<body>
+    <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">各隊伍成員分數</h2>
 
-<h2 class="text-2xl font-bold text-center mb-6 text-gray-800">隊伍成員分數</h2>
+    <form id="teamForm" method="post" action="@Url.Action("GetMentalStateTeamRawData", "TeamRawData")">
+        <div class="mb-4 flex items-center space-x-4">
+            <div class="flex-1">
+                <label for="teamSelect" class="block text-gray-700 font-bold mb-1">選擇隊伍：</label>
+                @Html.DropDownList("teamId", ViewBag.Teams as SelectList, "請選擇隊伍", new { @class = "form-control", id = "teamSelect" })
+            </div>
 
-<form id="teamForm" method="post" action="@Url.Action("GetMentalStateTeamRawData", "TeamRawData")">
-    <div class="mb-4">
-        <label for="teamSelect" class="block text-gray-700 font-bold mb-2">選擇隊伍：</label>
-        @Html.DropDownList("teamId", ViewBag.Teams as SelectList, "請選擇隊伍", new { @class = "form-control", id = "teamSelect" })
-    </div>
+            <div class="flex-1">
+                <label for="userSelect" class="block text-gray-700 font-bold mb-1">選擇選手：</label>
+                <select id="userSelect" name="userId" class="form-control" disabled>
+                    <option value="" selected disabled>請先選擇隊伍</option>
+                </select>
+            </div>
+        </div>
+    </form>
 
-    <div class="mb-4">
-        <label for="userSelect" class="block text-gray-700 font-bold mb-2">選擇選手：</label>
-        <select id="userSelect" name="userId" class="form-control" disabled>
-            <option value="" selected disabled>請先選擇隊伍</option>
-        </select>
-    </div>
-</form>
-
-@if (Model.Any())
-{
-    <h3 class="text-xl font-bold text-center mt-6 text-gray-700">選手分數資料</h3>
-    <table class="min-w-full bg-white shadow-md rounded border border-gray-300 mt-4">
-        <thead>
-            <tr class="bg-gray-200 text-gray-600 uppercase text-lg leading-normal">
-                <th class="py-3 px-6 text-left">選手</th>
-                <th class="py-3 px-6 text-left">心理類別</th>
-                <th class="py-3 px-6 text-left">分數</th>
-                <th class="py-3 px-6 text-left">檢測日期</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr class="border-b border-gray-200">
-                    <td class="py-3 px-6 text-left font-bold">@item.UserName</td>
-                    <td class="py-3 px-6 text-left">@item.Category</td>
-                    <td class="py-3 px-6 text-left">@item.Score</td>
-                    <td class="py-3 px-6 text-left">@(item.SurveyDate.HasValue ? item.SurveyDate.Value.ToString("yyyy/MM/dd") : "-")</td>
+    @if (Model.Any())
+    {
+        <h3 class="text-xl font-bold text-center mt-6 text-gray-700">選手分數資料</h3>
+        <table class="min-w-full bg-white shadow-md rounded border border-gray-300 mt-4">
+            <thead>
+                <tr class="bg-gray-200 text-gray-600 uppercase text-lg leading-normal">
+                    <th class="py-3 px-6 text-left">選手</th>
+                    <th class="py-3 px-6 text-left">心理類別</th>
+                    <th class="py-3 px-6 text-left">分數</th>
+                    <th class="py-3 px-6 text-left">檢測日期</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @{
+                    var groupedData = Model.GroupBy(m => new { m.UserName, SurveyDate = m.SurveyDate?.ToString("yyyy/MM/dd") }).ToList();
+                }
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const teamSelect = document.getElementById("teamSelect");
-        const userSelect = document.getElementById("userSelect");
-        const form = document.getElementById("teamForm");
+                @foreach (var group in groupedData)
+                {
+                    int userRowSpan = group.Count();
+                    int dateRowSpan = group.Count();
 
-        // 當選擇隊伍時，載入該隊伍的選手
-        teamSelect.addEventListener("change", function () {
-            userSelect.innerHTML = '<option value="" selected disabled>請選擇選手</option>'; // 清空選手選單
-            userSelect.disabled = true; // 先禁用，避免錯誤操作
-
-            let teamId = this.value;
-            if (!teamId) return;
-
-            fetch("/TeamRawData/GetUsersByTeam", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json" // 改為 JSON 傳遞
-                },
-                body: JSON.stringify({ teamId: teamId }) // 以 JSON 格式傳遞
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length > 0) {
-                        userSelect.disabled = false; // 啟用選手選單
-                        data.forEach(user => {
-                            let option = document.createElement("option");
-                            option.value = user.UserID;
-                            option.textContent = user.UserName;
-                            userSelect.appendChild(option);
-                        });
+                    foreach (var (item, index) in group.Select((value, i) => (value, i)))
+                    {
+                        <tr class="border-b border-gray-200">
+                            @if (index == 0)
+                            {
+                                <td class="py-3 px-6 text-left font-bold" rowspan="@userRowSpan">@item.UserName</td>
+                            }
+                            <td class="py-3 px-6 text-left">@item.Category</td>
+                            <td class="py-3 px-6 text-left">@item.Score</td>
+                            @if (index == 0)
+                            {
+                                <td class="py-3 px-6 text-left" rowspan="@dateRowSpan">@item.SurveyDate.Value.ToString("yyyy/MM/dd")</td>
+                            }
+                        </tr>
                     }
+                }
+            </tbody>
+        </table>
+    }
+
+    @if (ViewBag.RadarData != null)
+    {
+        <h3 class="text-xl font-bold text-center mt-6 text-gray-700">心理狀態檢測向度雷達圖</h3>
+
+        <div class="radar-chart-container mt-4">
+            <canvas id="radarChart" width="580" height="580"></canvas>
+        </div>
+
+        <script id="radarData" type="application/json">
+        @Html.Raw(JsonConvert.SerializeObject(ViewBag.RadarData))
+        </script>
+    }
+
+    @if (ViewBag.PsychologicalDescriptions != null)
+    {
+        <div class="mt-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">運動心理技能說明</h2>
+            <table class="min-w-full bg-white shadow-md rounded border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-600 uppercase text-lg leading-normal">
+                        <th class="py-3 px-6 text-left w-1/4">類別</th>
+                        <th class="py-3 px-6 text-left w-1/4">心理技能</th>
+                        <th class="py-3 px-6 text-left">描述</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        string currentCategory = null;
+
+                        // 轉型避免動態類型錯誤
+                        var descriptions = ViewBag.PsychologicalDescriptions as List<Tiss_MindRadar.Models.PsychologicalStateDescription>;
+
+                        // 確保 descriptions 不為 null
+                        var categoryRowSpans = descriptions != null
+                            ? descriptions.GroupBy(d => d.CategoryName)
+                                         .ToDictionary(g => g.Key, g => g.Count())
+                            : new Dictionary<string, int>();
+
+                        var categoryItemIndex = new Dictionary<string, int>();
+
+                        foreach (var item in descriptions ?? new List<Tiss_MindRadar.Models.PsychologicalStateDescription>())
+                        {
+                            string categoryClass = item.CategoryName.Contains("基礎心理技能") ? "bg-yellow-200" :
+                                                   item.CategoryName.Contains("身體心理技能") ? "bg-orange-300" :
+                                                   item.CategoryName.Contains("認知技能") ? "bg-blue-300" : "";
+
+                            if (!categoryItemIndex.ContainsKey(item.CategoryName))
+                            {
+                                categoryItemIndex[item.CategoryName] = 1;
+                            }
+                            else
+                            {
+                                categoryItemIndex[item.CategoryName]++;
+                            }
+
+                            <tr class="border-b border-gray-200">
+                                @if (currentCategory != item.CategoryName)
+                                {
+                                    int categoryRowSpan = categoryRowSpans[item.CategoryName];
+                                    <td class="py-3 px-6 text-left font-bold @categoryClass" rowspan="@categoryRowSpan">
+                                        @item.CategoryName
+                                    </td>
+                                    currentCategory = item.CategoryName;
+                                }
+                                <td class="py-3 px-6 text-left">@categoryItemIndex[item.CategoryName]. @item.SubCategory</td>
+                                <td class="py-3 px-6 text-left">@item.DescriptionContent</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const teamSelect = document.getElementById("teamSelect");
+            const userSelect = document.getElementById("userSelect");
+            const form = document.getElementById("teamForm");
+
+            teamSelect.addEventListener("change", function () {
+                userSelect.innerHTML = '<option value="" selected disabled>請選擇選手</option>';
+                userSelect.disabled = true;
+
+                let teamId = this.value;
+                if (!teamId) return;
+
+                fetch("/TeamRawData/GetUsersByTeam", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ teamId: teamId })
                 })
-                .catch(error => console.error("選手載入失敗:", error));
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            userSelect.disabled = false;
+                            data.forEach(user => {
+                                let option = document.createElement("option");
+                                option.value = user.UserID;
+                                option.textContent = user.UserName;
+                                userSelect.appendChild(option);
+                            });
+                        }
+                    })
+                    .catch(error => console.error("選手載入失敗:", error));
+            });
+
+            userSelect.addEventListener("change", function () {
+                form.submit();
+            });
+
+            const radarDataElement = document.getElementById("radarData");
+            const radarData = radarDataElement ? JSON.parse(radarDataElement.textContent) : [];
+
+            if (radarData.length > 0) {
+                renderRadarChart("radarChart", radarData);
+            }
         });
 
-        // 當選擇選手時，自動提交表單（POST）
-        userSelect.addEventListener("change", function () {
-            form.submit();
-        });
-    });
-</script>
+        function renderRadarChart(canvasId, data) {
+            const ctx = document.getElementById(canvasId).getContext("2d");
+            new Chart(ctx, {
+                type: "radar",
+                data: {
+                    labels: data.map(d => d.CategoryName),
+                    datasets: [{
+                        label: "心理狀態",
+                        data: data.map(d => d.AverageScore),
+                        backgroundColor: "rgba(255, 99, 132, 0.2)",
+                        borderColor: "rgba(255, 99, 132, 1)",
+                        pointBackgroundColor: "rgba(255, 99, 132, 1)"
+                    }]
+                },
+                options: { responsive: true }
+            });
+        }
+    </script>
+</body>
+</html>

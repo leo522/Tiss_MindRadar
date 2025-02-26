@@ -49,47 +49,80 @@ namespace Tiss_MindRadar.Controllers
                 }
                 if (Session["UserRole"] == null || Session["UserRole"].ToString() != "Consultant")
                 {
-                    return RedirectToAction("AccessDenied", "RadarError"); // 沒權限的話導向權限不足頁面
+                    return RedirectToAction("AccessDenied", "RadarError");
                 }
 
-                // 載入隊伍清單
+                // 取得所有隊伍
                 var teams = _db.Team.Where(t => t.isenable == true).ToList();
-                ViewBag.Teams = new SelectList(teams, "TeamID", "TeamName", teamId); // 保持選擇狀態
+                ViewBag.Teams = new SelectList(teams, "TeamID", "TeamName", teamId);
 
-                // 如果隊伍已選擇，則載入該隊伍的選手
+                // 取得隊伍的選手
                 if (teamId.HasValue)
                 {
                     var users = _db.Users
                         .Where(u => u.TeamID == teamId)
                         .Select(u => new { u.UserID, u.UserName })
                         .ToList();
-
                     ViewBag.Users = new SelectList(users, "UserID", "UserName", userId);
                 }
                 else
                 {
-                    ViewBag.Users = new SelectList(new List<object>(), "UserID", "UserName"); // 預設空選單
+                    ViewBag.Users = new SelectList(new List<object>(), "UserID", "UserName");
                 }
 
-                // 如果選擇了選手，則載入雷達圖數據
                 List<TeamRawDataViewModel> rawData = new List<TeamRawDataViewModel>();
+                List<RadarChartVIewModel> radarData = new List<RadarChartVIewModel>();
 
                 if (userId.HasValue)
                 {
                     rawData = _db.PsychologicalResponse
                         .Join(_db.Users, pr => pr.UserID, u => u.UserID, (pr, u) => new { pr, u })
-                        .Where(temp => temp.u.UserID == userId)
-                        .Select(temp => new TeamRawDataViewModel
+                        .Join(_db.MentalState, temp => temp.pr.CategoryID, ms => ms.QuestionNumber, (temp, ms) => new { temp, ms })
+                        .Where(result => result.temp.u.UserID == userId)
+                        .Select(result => new TeamRawDataViewModel
                         {
-                            TeamName = temp.u.TeamName,
-                            UserName = temp.u.UserName,
-                            Category = temp.pr.CategoryID.ToString(),
-                            Score = temp.pr.Score,
-                            SurveyDate = temp.pr.SurveyDate
+                            TeamName = result.temp.u.TeamName,
+                            UserName = result.temp.u.UserName,
+                            Category = result.ms.QuestionText,
+                            Score = result.temp.pr.Score,
+                            SurveyDate = result.temp.pr.SurveyDate
                         })
                         .OrderBy(r => r.SurveyDate)
                         .ToList();
+
+                    // 查詢該選手的雷達圖數據（最近 3 筆測試日期）
+                    var recentDates = _db.PsychologicalResponse
+                        .Where(p => p.UserID == userId)
+                        .Select(p => p.SurveyDate)
+                        .Distinct()
+                        .OrderByDescending(d => d)
+                        .Take(3)
+                        .ToList();
+
+                    foreach (var date in recentDates)
+                    {
+                        string query = @"SELECT c.CategoryName, COALESCE(AVG(pr.Score), 0) AS AverageScore 
+                                FROM PsychologicalResponse pr
+                                INNER JOIN PsychologicalStateCategory c ON pr.CategoryID = c.ID 
+                                WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1 
+                                GROUP BY c.CategoryName";
+
+                        object[] parameters = { userId, date };
+                        var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();
+
+                        foreach (var item in data)
+                        {
+                            item.SurveyDate = date?.ToString("yyyy-MM-dd");
+                        }
+                        radarData.AddRange(data);
+                    }
                 }
+
+                // 取得心理狀態技能說明
+                var psyDescriptions = _db.PsychologicalStateDescription.OrderBy(d => d.ID).ToList();
+                ViewBag.PsychologicalDescriptions = psyDescriptions;
+
+                ViewBag.RadarData = radarData;
 
                 return View(rawData);
             }
@@ -99,7 +132,6 @@ namespace Tiss_MindRadar.Controllers
                 return View(new List<TeamRawDataViewModel>());
             }
         }
-
         #endregion
     }
 }
