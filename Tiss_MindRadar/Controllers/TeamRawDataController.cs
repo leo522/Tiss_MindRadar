@@ -25,7 +25,7 @@ namespace Tiss_MindRadar.Controllers
         #endregion
 
         #region 根據隊伍ID取得選手
-        [HttpGet]
+        [HttpPost]
         public JsonResult GetUsersByTeam(int teamId)
         {
             var users = _db.Users
@@ -33,13 +33,12 @@ namespace Tiss_MindRadar.Controllers
                 .Select(u => new { u.UserID, u.UserName })
                 .ToList();
 
-            return Json(users, JsonRequestBehavior.AllowGet);
+            return Json(users);
         }
-
         #endregion
 
         #region 心理狀態檢測雷達圖_各隊選手分數
-        [HttpGet]
+        [HttpPost]
         public ActionResult GetMentalStateTeamRawData(int? userId, int? teamId)
         {
             try

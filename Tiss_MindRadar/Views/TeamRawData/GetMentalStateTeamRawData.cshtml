@@ -1,5 +1,4 @@
 ﻿@model IEnumerable<Tiss_MindRadar.Models.TeamRawDataViewModel>
-
 @{
     ViewBag.Title = "隊伍成員分數";
     Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
@@ -7,7 +6,7 @@
 
 <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">隊伍成員分數</h2>
 
-<form id="teamForm" method="get" action="@Url.Action("GetMentalStateTeamRawData", "TeamRawData")">
+<form id="teamForm" method="post" action="@Url.Action("GetMentalStateTeamRawData", "TeamRawData")">
     <div class="mb-4">
         <label for="teamSelect" class="block text-gray-700 font-bold mb-2">選擇隊伍：</label>
         @Html.DropDownList("teamId", ViewBag.Teams as SelectList, "請選擇隊伍", new { @class = "form-control", id = "teamSelect" })
@@ -53,19 +52,25 @@
         const userSelect = document.getElementById("userSelect");
         const form = document.getElementById("teamForm");
 
-        // 當選擇隊伍時，透過 AJAX 載入該隊伍的選手
+        // 當選擇隊伍時，載入該隊伍的選手
         teamSelect.addEventListener("change", function () {
             userSelect.innerHTML = '<option value="" selected disabled>請選擇選手</option>'; // 清空選手選單
-            userSelect.disabled = true;
+            userSelect.disabled = true; // 先禁用，避免錯誤操作
 
             let teamId = this.value;
             if (!teamId) return;
 
-            fetch(`/TeamRawData/GetUsersByTeam?teamId=${teamId}`)
+            fetch("/TeamRawData/GetUsersByTeam", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json" // 改為 JSON 傳遞
+                },
+                body: JSON.stringify({ teamId: teamId }) // 以 JSON 格式傳遞
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.length > 0) {
-                        userSelect.disabled = false;
+                        userSelect.disabled = false; // 啟用選手選單
                         data.forEach(user => {
                             let option = document.createElement("option");
                             option.value = user.UserID;
@@ -77,7 +82,7 @@
                 .catch(error => console.error("選手載入失敗:", error));
         });
 
-        // 當選擇選手時，自動提交表單
+        // 當選擇選手時，自動提交表單（POST）
         userSelect.addEventListener("change", function () {
             form.submit();
         });

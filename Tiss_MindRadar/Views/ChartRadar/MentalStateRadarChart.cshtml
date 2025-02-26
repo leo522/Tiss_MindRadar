@@ -42,9 +42,12 @@
             {
                 <div class="button-container">
                     <button id="viewRawDataBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow-md">
-                        查看隊伍分數 RawData
+                        查看隊伍分數
                     </button>
                 </div>
+                <form id="viewRawDataForm" method="post" action="@Url.Action("GetMentalStateTeamRawData", "TeamRawData")">
+                    <input type="hidden" name="teamId" value="@ViewBag.TeamID" />
+                </form>
             }
         </div>
         <div id="mainContent">
@@ -283,8 +286,15 @@
                 renderRadarChart("radarChart", radarData);
             }
         }
-        document.getElementById("viewRawDataBtn").addEventListener("click", function () {
-        window.location.href = "@Url.Action("GetMentalStateTeamRawData", "TeamRawData")";
+       document.addEventListener("DOMContentLoaded", function () {
+        const viewRawDataBtn = document.getElementById("viewRawDataBtn");
+        const viewRawDataForm = document.getElementById("viewRawDataForm");
+
+        if (viewRawDataBtn && viewRawDataForm) {
+            viewRawDataBtn.addEventListener("click", function () {
+                viewRawDataForm.submit();
+            });
+        }
     });
     </script>
 </body>
