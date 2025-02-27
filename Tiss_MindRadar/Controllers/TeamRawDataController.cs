@@ -37,6 +37,26 @@ namespace Tiss_MindRadar.Controllers
         }
         #endregion
 
+        #region 檢查選手是否有數據
+        [HttpPost]
+        public JsonResult CheckUserData(int? userId)
+        {
+            if (!userId.HasValue)
+            {
+                return Json(new { success = false, message = "未提供選手 ID" });
+            }
+
+            var hasData = _db.PsychologicalResponse.Any(p => p.UserID == userId);
+
+            if (!hasData)
+            {
+                return Json(new { success = false, message = "該選手無心理狀態數據" });
+            }
+
+            return Json(new { success = true });
+        }
+        #endregion
+
         #region 心理狀態檢測雷達圖_各隊選手分數
         [HttpPost]
         public ActionResult GetMentalStateTeamRawData(int? userId, int? teamId)
