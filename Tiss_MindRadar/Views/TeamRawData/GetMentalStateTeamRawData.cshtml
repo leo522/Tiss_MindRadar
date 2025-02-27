@@ -9,11 +9,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="~/RadarChartJS/chart.js"></script>
+    <script src="~/RadarChartJS/chart.js"></script>@*雷達圖JS*@
     <script src="~/RadarChartJS/chartjs-plugin-datalabels@2.2.js"></script> @*雷達圖插件*@
-    <link href="~/MindRadarCss/MentalStateRadarChart.css" rel="stylesheet" />
-    <link href="~/MindRadarCss/PsychologicalDescriptionsStyle.css" rel="stylesheet" />
-    <script src="~/RadarChartJS/MentalStateRadarChart.js"></script>
+    <script src="~/RadarChartJS/TeamChartRawData.js"></script>
 </head>
 <body>
     <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">各隊伍成員分數</h2>
@@ -80,7 +78,7 @@
     {
         <h3 class="text-xl font-bold text-center mt-6 text-gray-700">心理狀態檢測向度雷達圖</h3>
 
-        <div class="radar-chart-container mt-4">
+        <div class="radar-chart-container mt-4" style="display: flex; justify-content: center;"> @*產生雷達圖*@
             <canvas id="radarChart" width="580" height="580"></canvas>
         </div>
 
@@ -155,7 +153,9 @@
             const teamSelect = document.getElementById("teamSelect");
             const userSelect = document.getElementById("userSelect");
             const form = document.getElementById("teamForm");
+            let radarChartInstance = null; // **存儲 Chart 實例**
 
+            // 隊伍選擇變更
             teamSelect.addEventListener("change", function () {
                 userSelect.innerHTML = '<option value="" selected disabled>請選擇選手</option>';
                 userSelect.disabled = true;
@@ -183,35 +183,113 @@
                     .catch(error => console.error("選手載入失敗:", error));
             });
 
+            // 選手選擇變更後自動提交
             userSelect.addEventListener("change", function () {
                 form.submit();
             });
 
+            // 解析雷達圖數據
             const radarDataElement = document.getElementById("radarData");
             const radarData = radarDataElement ? JSON.parse(radarDataElement.textContent) : [];
 
             if (radarData.length > 0) {
-                renderRadarChart("radarChart", radarData);
+                const minMaxData = calculateMinMaxScores(radarData);
+                renderRadarChart("radarChart", radarData, minMaxData);
+            }
+
+            function renderRadarChart(canvasId, radarData, minMaxData) {
+                const canvas = document.getElementById(canvasId);
+                const ctx = canvas.getContext("2d");
+
+                // **🔹 銷毀舊的 Chart，避免 `Canvas is already in use` 錯誤**
+                if (radarChartInstance instanceof Chart) {
+                    radarChartInstance.destroy();
+                    radarChartInstance = null;
+                }
+
+                // **🔹 設定最高 & 最低分的標記顏色與大小**
+                const pointColors = radarData.map(d =>
+                    minMaxData.maxCategories.includes(d.CategoryName) ? "red" :
+                        minMaxData.minCategories.includes(d.CategoryName) ? "blue" :
+                            "rgba(255, 99, 132, 1)"
+                );
+
+                const pointSizes = radarData.map(d =>
+                    minMaxData.maxCategories.includes(d.CategoryName) || minMaxData.minCategories.includes(d.CategoryName) ? 10 : 5
+                );
+
+                // **🔹 繪製雷達圖**
+                radarChartInstance = new Chart(ctx, {
+                    type: "radar",
+                    data: {
+                        labels: radarData.map(d => d.CategoryName),
+                        datasets: [{
+                            label: "心理狀態",
+                            data: radarData.map(d => d.AverageScore),
+                            backgroundColor: "rgba(255, 99, 132, 0.2)",
+                            borderColor: "rgba(255, 99, 132, 1)",
+                            pointBackgroundColor: pointColors,
+                            pointRadius: pointSizes,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        scales: {
+                            r: {
+                                angleLines: { display: true },
+                                suggestedMin: 0,
+                                suggestedMax: 5,
+                                pointLabels: { font: { size: 14 } },
+                                ticks: {
+                                    font: { size: 12 },
+                                    stepSize: 1,
+                                    callback: function (value) {
+                                        return Math.round(value);
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: "top"
+                            },
+                            datalabels: {
+                                color: function (context) {
+                                    let value = context.dataset.data[context.dataIndex];
+                                    return value === minMaxData.maxScore ? "red" :
+                                        value === minMaxData.minScore ? "blue" :
+                                            "black";
+                                },
+                                anchor: "center",   // 🔹 讓數值標籤跟隨數據點位置
+                                align: function (context) {
+                                    let value = context.dataset.data[context.dataIndex];
+                                    return value === minMaxData.maxScore ? "right" : // 最高分往右移
+                                        value === minMaxData.minScore ? "left" :  // 最低分往左移
+                                            "top";
+                                },
+                                offset: 15,        // 🔹 增加偏移，讓數字遠離點
+                                font: {
+                                    size: 16,
+                                    weight: "bold"
+                                },
+                                formatter: function (value) {
+                                    if (value === minMaxData.maxScore) {
+                                        return `⬆ ${value.toFixed(1)}`;
+                                    }
+                                    if (value === minMaxData.minScore) {
+                                        return `⬇ ${value.toFixed(1)}`;
+                                    }
+                                    return value.toFixed(1);
+                                }
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
             }
         });
-
-        function renderRadarChart(canvasId, data) {
-            const ctx = document.getElementById(canvasId).getContext("2d");
-            new Chart(ctx, {
-                type: "radar",
-                data: {
-                    labels: data.map(d => d.CategoryName),
-                    datasets: [{
-                        label: "心理狀態",
-                        data: data.map(d => d.AverageScore),
-                        backgroundColor: "rgba(255, 99, 132, 0.2)",
-                        borderColor: "rgba(255, 99, 132, 1)",
-                        pointBackgroundColor: "rgba(255, 99, 132, 1)"
-                    }]
-                },
-                options: { responsive: true }
-            });
-        }
     </script>
 </body>
 </html>

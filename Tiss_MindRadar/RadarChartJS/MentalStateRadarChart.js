@@ -1,4 +1,4 @@
-﻿//心理狀態檢測向度雷達圖.js
+﻿//MentalStateRadarChart.js 計算各日期區間檢測結果&高低分
 function renderRadarChart(canvasId, radarData) {
     if (!Array.isArray(radarData) || radarData.length === 0) {
         Swal.fire({
