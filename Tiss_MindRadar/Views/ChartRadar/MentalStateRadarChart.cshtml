@@ -14,7 +14,7 @@
     <script src="~/RadarChartJS/chartjs-plugin-datalabels@2.2.js"></script> @*雷達圖插件*@
     <link href="~/MindRadarCss/MentalStateRadarChart.css" rel="stylesheet" />
     <link href="~/MindRadarCss/PsychologicalDescriptionsStyle.css" rel="stylesheet" />@*向度說明色塊*@
-    <script src="~/RadarChartJS/MentalStateRadarChart.js"></script> 計算各日期區間檢測結果&高低分
+    <script src="~/RadarChartJS/MentalStateRadarChart.js"></script> @*計算各日期區間檢測結果&高低分*@
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto p-6">
@@ -37,19 +37,6 @@
             </div>
         </div>
         <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">心理狀態檢測向度雷達圖</h1>
-        <div class="button-container">
-            @if (Session["UserRole"] != null && Session["UserRole"].ToString() == "Consultant")
-            {
-                <div class="button-container">
-                    <button id="viewRawDataBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow-md">
-                        查看隊伍分數
-                    </button>
-                </div>
-                <form id="viewRawDataForm" method="post" action="@Url.Action("GetMentalStateTeamRawData", "TeamRawData")">
-                    <input type="hidden" name="teamId" value="@ViewBag.TeamID" />
-                </form>
-            }
-        </div>
         <div id="mainContent">
             <form id="radarChartForm" method="POST" action="@Url.Action("MentalStateRadarChart", "ChartRadar")">
                 @Html.AntiForgeryToken()

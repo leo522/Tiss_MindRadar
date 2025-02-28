@@ -22,29 +22,31 @@ namespace Tiss_MindRadar.Controllers
         }
 
         [HttpPost]
-        public JsonResult Register(string Jobcode, string UserName, string pwd, string Email, int Age, int TeamID,string Role, string InviteCode)
+        public JsonResult Register(string Jobcode, string UserName, string pwd, string Email, int? Age, int? TeamID, string Role, string InviteCode)
         {
             try
             {
-                //驗證資料
                 var validationMessage = ValidateRegistrationInputs(Jobcode, Email, Role, InviteCode);
-
                 if (!string.IsNullOrEmpty(validationMessage))
                 {
                     return Json(new { success = false, message = validationMessage });
                 }
 
-                //密碼驗證
                 var hashedPwd = ComputeSha256Hash(pwd);
 
-                //取得隊伍資訊
-                var selectedTeam = _db.Team.FirstOrDefault(t => t.TeamID == TeamID);
-                if (selectedTeam == null)
+                // 如果是選手，檢查隊伍是否存在
+                string teamName = null;
+                if (Role == "Player")
                 {
-                    return Json(new { success = false, message = "所選隊伍不存在" });
+                    var selectedTeam = _db.Team.FirstOrDefault(t => t.TeamID == TeamID);
+                    if (selectedTeam == null)
+                    {
+                        return Json(new { success = false, message = "所選隊伍不存在" });
+                    }
+                    teamName = selectedTeam.TeamName;
                 }
 
-                //建立使用者資料
+                // 建立使用者
                 var newUser = new Users
                 {
                     Jobcode = Jobcode,
@@ -52,24 +54,21 @@ namespace Tiss_MindRadar.Controllers
                     Passwords = hashedPwd,
                     Email = Email,
                     CreatedDate = DateTime.Now,
-                    TeamName = selectedTeam.TeamName,
-                    TeamID = TeamID
+                    TeamName = teamName,
+                    TeamID = Role == "Player" ? TeamID : null
                 };
 
                 _db.Users.Add(newUser);
                 _db.SaveChanges();
 
-                //設定角色與驗證狀態
-                bool isVerified = true;
-                //bool isVerified = (Role == "Player");
                 var newUserProfile = new UserProfile
                 {
                     UserID = newUser.UserID,
-                    Age = Age,
-                    TeamID = TeamID,
+                    Age = Role == "Player" ? Age : null,
+                    TeamID = Role == "Player" ? TeamID : null,
                     Role = Role,
                     InviteCode = InviteCode,
-                    IsVerified = isVerified
+                    IsVerified = true
                 };
 
                 _db.UserProfile.Add(newUserProfile);
@@ -79,9 +78,10 @@ namespace Tiss_MindRadar.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "帳號註冊失敗" + ex.Message });
+                return Json(new { success = false, message = "帳號註冊失敗：" + ex.Message });
             }
         }
+
         #endregion
 
         #region 獨立驗證方法
@@ -146,6 +146,14 @@ namespace Tiss_MindRadar.Controllers
         }
         #endregion
 
+        #region 密碼規則驗證方法
+        private bool ValidatePasswordStrength(string password)
+        {
+            var passwordRegex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$");
+            return passwordRegex.IsMatch(password);
+        }
+        #endregion
+
         #region 登入
         public ActionResult Login()
         {
@@ -163,27 +171,21 @@ namespace Tiss_MindRadar.Controllers
 
                 if (user != null)
                 {
-                    user.LastLoginDate = DateTime.Now; //記錄最後登入時間
+                    user.LastLoginDate = DateTime.Now; // 記錄最後登入時間
                     _db.SaveChanges();
 
                     var userProfile = _db.UserProfile.FirstOrDefault(up => up.UserID == user.UserID);
                     var teamName = userProfile != null ? _db.Team.FirstOrDefault(t => t.TeamID == userProfile.TeamID)?.TeamName : "未指定";
 
-                    if (userProfile != null)
-                    {
-                        Session["UserRole"] = userProfile.Role; // 🔥 設定角色 (Consultant / Player)
-                    }
-                    else
-                    {
-                        Session["UserRole"] = "Player"; // 預設為選手
-                    }
+                    string userRole = userProfile?.Role ?? "Player"; // 預設為選手
 
                     Session["UserID"] = user.UserID;
                     Session["UserName"] = user.UserName;
+                    Session["UserRole"] = userRole; // 設定角色
                     Session["Age"] = userProfile?.Age ?? 0;
                     Session["TeamName"] = teamName;
 
-                    return Json(new { success = true });
+                    return Json(new { success = true, role = userRole });
                 }
 
                 return Json(new { success = false, message = "帳號或密碼錯誤！" });
@@ -234,14 +236,6 @@ namespace Tiss_MindRadar.Controllers
             {
                 return Json(new { success = false, message = $"發生錯誤：{ex.Message}" });
             }
-        }
-        #endregion
-
-        #region 密碼規則驗證方法
-        private bool ValidatePasswordStrength(string password)
-        {
-            var passwordRegex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$");
-            return passwordRegex.IsMatch(password);
         }
         #endregion
     }

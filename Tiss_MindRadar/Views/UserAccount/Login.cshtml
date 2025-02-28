@@ -55,7 +55,11 @@
                                 showConfirmButton: false,
                                 backdrop: false
                             }).then(() => {
-                                window.location.href = "/Survey/MentalPhysicalState";
+                                if (response.role === "Consultant") {
+                                    window.location.href = "/TeamRawData/ChooseTeamState"; // 訪談員跳轉到ChooseTeamState
+                                } else {
+                                    window.location.href = "/Survey/MentalPhysicalState"; // 選手跳轉到MentalPhysicalState
+                                }
                             });
                         } else {
                             Swal.fire({

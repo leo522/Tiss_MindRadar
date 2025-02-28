@@ -130,6 +130,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\ChartRadarController.cs" />
     <Compile Include="Controllers\RadarErrorController.cs" />
+    <Compile Include="Controllers\ReportRawDataController.cs" />
     <Compile Include="Controllers\SurveyController.cs" />
     <Compile Include="Controllers\TeamRawDataController.cs" />
     <Compile Include="Controllers\UserAccountController.cs" />
@@ -245,7 +246,9 @@
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="img\favicon.svg" />
+    <Content Include="img\heart-attack.png" />
     <Content Include="img\logo.svg" />
+    <Content Include="img\medical-checkup.png" />
     <Content Include="img\TissLogo.jpg" />
     <Content Include="MindRadarCss\PsychologicalDescriptionsStyle.css" />
     <Content Include="RadarChartJS\chartjs-plugin-datalabels%402.2.js" />
@@ -317,6 +320,9 @@
     <Content Include="Views\UserAccount\Register.cshtml" />
     <Content Include="Views\TeamRawData\GetMentalStateTeamRawData.cshtml" />
     <Content Include="Views\RadarError\AccessDenied.cshtml" />
+    <Content Include="Views\TeamRawData\ChooseTeamState.cshtml" />
+    <Content Include="Views\TeamRawData\GetMentalPhysicalStateTeamRawData.cshtml" />
+    <Content Include="Views\ReportRawData\TeamReportData.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

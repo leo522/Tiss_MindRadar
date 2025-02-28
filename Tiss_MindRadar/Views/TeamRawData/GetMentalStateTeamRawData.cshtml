@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<Tiss_MindRadar.Models.TeamRawDataViewModel>
 @using Newtonsoft.Json
 @{
-    ViewBag.Title = "各隊伍成員分數";
+    ViewBag.Title = "心理狀態檢測_各隊伍成員分數";
     Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
 }
 <!DOCTYPE html>
@@ -14,8 +14,12 @@
     <script src="~/RadarChartJS/TeamChartRawData.js"></script> @*計算最高 & 最低分*@
 </head>
 <body>
-    <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">各隊伍成員分數</h2>
-
+    <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">心理狀態檢測_各隊伍成員分數</h2>
+    <div class="text-right mb-4">
+        <a href="@Url.Action("TeamReportData", "ReportRawData")" class="btn btn-primary">
+            查詢各隊伍選手明細
+        </a>
+    </div>
     <form id="teamForm" method="post" action="@Url.Action("GetMentalStateTeamRawData", "TeamRawData")">
         <div class="mb-4 flex items-center space-x-4">
             <div class="flex-1">
@@ -147,7 +151,7 @@
         </div>
     }
 
-<script>
+    <script>
 document.addEventListener("DOMContentLoaded", function () {
     const teamSelect = document.getElementById("teamSelect");
     const userSelect = document.getElementById("userSelect");
@@ -338,6 +342,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
-</script>
+    </script>
 </body>
 </html>

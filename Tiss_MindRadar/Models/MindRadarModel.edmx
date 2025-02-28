@@ -207,8 +207,8 @@
           </Key>
           <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="UserID" Type="int" Nullable="false" />
-          <Property Name="Age" Type="int" Nullable="false" />
-          <Property Name="TeamID" Type="int" Nullable="false" />
+          <Property Name="Age" Type="int" />
+          <Property Name="TeamID" Type="int" />
           <Property Name="Role" Type="nvarchar" MaxLength="20" Nullable="false" />
           <Property Name="InviteCode" Type="nvarchar" MaxLength="20" />
           <Property Name="IsVerified" Type="bit" Nullable="false" />
@@ -289,7 +289,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__UserProfi__TeamI__19DFD96B">
-          <End Role="Team" Type="Self.Team" Multiplicity="1" />
+          <End Role="Team" Type="Self.Team" Multiplicity="0..1" />
           <End Role="UserProfile" Type="Self.UserProfile" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Team">
@@ -718,13 +718,13 @@
           </Key>
           <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="UserID" Type="Int32" Nullable="false" />
-          <Property Name="Age" Type="Int32" Nullable="false" />
-          <Property Name="TeamID" Type="Int32" Nullable="false" />
+          <Property Name="Age" Type="Int32" />
+          <Property Name="TeamID" Type="Int32" />
           <Property Name="Role" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="Team" Relationship="TISS_MindRadarModel.FK__UserProfi__TeamI__19DFD96B" FromRole="UserProfile" ToRole="Team" />
-          <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" FromRole="UserProfile" ToRole="Users" />
           <Property Name="InviteCode" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
           <Property Name="IsVerified" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Team" Relationship="TISS_MindRadarModel.FK__UserProfi__TeamI__19DFD96B" FromRole="UserProfile" ToRole="Team" />
+          <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" FromRole="UserProfile" ToRole="Users" />
         </EntityType>
         <EntityType Name="UserResponse">
           <Key>
@@ -752,11 +752,11 @@
           <Property Name="TeamName" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
           <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="LastLoginDate" Type="DateTime" Precision="3" />
+          <Property Name="TeamID" Type="Int32" />
           <NavigationProperty Name="ConsultantTeams" Relationship="TISS_MindRadarModel.FK_ConsultantTeams_ConsultantID" FromRole="Users" ToRole="ConsultantTeams" />
           <NavigationProperty Name="PsychologicalResponse" Relationship="TISS_MindRadarModel.FK_PsychologicalResponse_UserID" FromRole="Users" ToRole="PsychologicalResponse" />
           <NavigationProperty Name="UserProfile" Relationship="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" FromRole="Users" ToRole="UserProfile" />
           <NavigationProperty Name="UserResponse" Relationship="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" FromRole="Users" ToRole="UserResponse" />
-          <Property Name="TeamID" Type="Int32" />
         </EntityType>
         <Association Name="FK_ConsultantTeams_ConsultantID">
           <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
@@ -831,7 +831,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__UserProfi__TeamI__19DFD96B">
-          <End Type="TISS_MindRadarModel.Team" Role="Team" Multiplicity="1" />
+          <End Type="TISS_MindRadarModel.Team" Role="Team" Multiplicity="0..1" />
           <End Type="TISS_MindRadarModel.UserProfile" Role="UserProfile" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Team">

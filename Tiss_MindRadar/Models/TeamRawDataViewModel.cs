@@ -13,4 +13,12 @@ namespace Tiss_MindRadar.Models
         public int Score { get; set; }
         public DateTime? SurveyDate { get; set; }
     }
+
+    public class TeamReportViewModel
+    {
+        public string UserName { get; set; }
+        public string Category { get; set; }
+        public int Score { get; set; }
+        public DateTime? SurveyDate { get; set; }
+    }
 }

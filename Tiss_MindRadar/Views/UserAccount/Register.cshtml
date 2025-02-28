@@ -19,7 +19,7 @@
             <div class="form-group">
                 <label for="AccountID" title="帳號">帳號</label>
                 <input type="text" class="form-control" id="AccountID" name="Jobcode" placeholder="請輸入帳號" required>
-                <small id="jobcodeError" class="text-danger"></small> <!-- 顯示錯誤訊息 -->
+                <small id="jobcodeError" class="text-danger"></small>
             </div>
             <div class="form-group">
                 <label for="Username" title="姓名">姓名</label>
@@ -28,7 +28,7 @@
             <div class="form-group">
                 <label for="Password" title="密碼">密碼</label>
                 <input type="password" class="form-control" id="Password" name="pwd" placeholder="請輸入密碼" required>
-                <small id="passwordError"></small>
+                <small id="passwordError" class="text-danger"></small>
             </div>
             <div class="form-group">
                 <label for="Email" title="電子郵件">電子郵件</label>
@@ -41,16 +41,16 @@
                     <option value="Consultant">訪談員</option>
                 </select>
             </div>
-            <div class="form-group" id="inviteCodeField" style="display: none">
+            <div class="form-group" id="inviteCodeField" style="display: none;">
                 <label for="InviteCode">驗證碼 (訪談員專用)</label>
-                <input type="text" class="form-control" id="InviteCode" name="InviteCode" placeholder="請輸入驗證碼"/>
-                <small id="inviteCodeError" class="text-bg-danger"></small>
+                <input type="text" class="form-control" id="InviteCode" name="InviteCode" placeholder="請輸入驗證碼" />
+                <small id="inviteCodeError" class="text-danger"></small>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="ageField">
                 <label for="Age" title="年齡">年齡</label>
                 <input type="number" class="form-control" id="Age" name="Age" placeholder="請輸入年齡" required>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="teamField">
                 <label for="TeamID" title="所屬隊伍">所屬隊伍</label>
                 <select class="form-control" id="TeamID" name="TeamID" required>
                     <option value="" disabled selected>請選擇隊伍</option>
@@ -66,204 +66,87 @@
     </div>
 
     <script>
-        @*const officialDomain = "@("tiss.org.tw")";
-
         document.addEventListener("DOMContentLoaded", function () {
             const roleField = document.getElementById("Role");
             const inviteCodeField = document.getElementById("inviteCodeField");
-            const emailField = document.getElementById("Email");
-
-            //選擇訪談員，顯示驗證碼欄位
+            const ageField = document.getElementById("ageField");
+            const teamField = document.getElementById("teamField");
+            const officialDomain = "@("tiss.org.tw")";
+            // 角色變更時，更新欄位顯示
             roleField.addEventListener("change", function () {
-                if (this.value === "Consultant")
-                {
+                if (this.value === "Consultant") {
                     inviteCodeField.style.display = "block";
-                }
-                else
-                {
+                    ageField.style.display = "none";
+                    teamField.style.display = "none";
+                    document.getElementById("Age").removeAttribute("required");
+                    document.getElementById("TeamID").removeAttribute("required");
+                } else {
                     inviteCodeField.style.display = "none";
-                }
-            });
-            // 密碼即時驗證
-            document.getElementById("Password").addEventListener("input", function () {
-                const password = this.value;
-                const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/; // 至少6碼，包含大小寫字母和數字
-                const message = document.getElementById("passwordError");
-
-                if (!passwordRegex.test(password)) {
-                    message.textContent = "密碼必須至少包含 6 碼，並且包含大小寫字母和數字";
-                    message.style.color = "red";
-                } else {
-                    message.textContent = "密碼格式正確";
-                    message.style.color = "green";
+                    ageField.style.display = "block";
+                    teamField.style.display = "block";
+                    document.getElementById("Age").setAttribute("required", "required");
+                    document.getElementById("TeamID").setAttribute("required", "required");
                 }
             });
 
-            document.getElementById("AccountID").addEventListener("input", function () {
-                const jobcode = this.value;
-                const jobcodeError = document.getElementById("jobcodeError");
+            // 預設處理（防止刷新時狀態錯誤）
+            roleField.dispatchEvent(new Event("change"));
 
-                // 只允許輸入中文和英文，禁止數字和符號
-                const jobcodeRegex = /^[\u4e00-\u9fa5a-zA-Z]+$/;
-
-                if (!jobcodeRegex.test(jobcode)) {
-                    jobcodeError.textContent = "帳號只能包含中文和英文，不能包含數字或符號！";
-                    jobcodeError.style.color = "red";
-                } else {
-                    jobcodeError.textContent = "";
-                }
-            });
-
-            // 表單提交處理
+            // 表單提交事件處理
             document.getElementById("registerForm").addEventListener("submit", function (e) {
-                e.preventDefault(); // 阻止默認提交
+                e.preventDefault();
 
-                const role = roleField.value;
-                const email = emailField.value;
-                const inviteCode = document.getElementById("InviteCode").value.trim();
-                const emailError = document.getElementById("emailError");
-                const inviteCodeError = document.getElementById("inviteCodeError");
+                const formData = new FormData(this);
+                const role = formData.get("Role");
+                const email = formData.get("Email");
+                const inviteCode = formData.get("InviteCode");
 
-                let valid = true;
+                let errors = [];
 
-                //角色檢查
-                if (role !== "Player" && role !== "Consultant") {
+                // 訪談員 Email 限制
+                if (role === "Consultant" && !email.endsWith(officialDomain)) {
+                    errors.push("註冊訪談員須使用運科中心電子郵件帳號");
+                }
+
+                // 訪談員驗證碼檢查
+                if (role === "Consultant" && !inviteCode) {
+                    errors.push("請輸入訪談員驗證碼");
+                }
+
+                // 顯示錯誤訊息
+                if (errors.length > 0) {
                     Swal.fire({
                         icon: "error",
-                        title: "錯誤",
-                        text: "請選擇有效角色",
+                        title: "註冊失敗",
+                        html: errors.join("<br>"),
                     });
                     return;
                 }
 
-                //限制訪談員Email
-                if (role === "Consultant" && !email.endsWith(officialDomain)) {
-                    emailError.textContent = "註冊訪談員須使用運科中心電子郵件帳號";
-                    vaild = false;
-                } else {
-                    emailError.textContent = "";
-                }
-
-                //驗證碼驗證
-                if (role === "Consultant" && inviteCode === "") {
-                    inviteCodeError.textContent = "請輸入驗證碼";
-                    vaild = false;
-                } else {
-                    inviteCodeError.textContent = "";
-                }
-
-                if (!vaild) return;
-
-                //AJAX請求
-                const formData = new FormData(this);
+                // 發送 AJAX 註冊請求
                 fetch(this.action, {
                     method: "POST",
                     body: new URLSearchParams(formData),
                 })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.success) {
-                            Swal.fire({
-                                icon: "success",
-                                title: "成功",
-                                text: data.message,
-                            }).then(() => {
-                                window.location.href = "/UserAccount/Login"; // 成功後跳轉到登入頁面
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: "error",
-                                title: "錯誤",
-                                text: data.message,
-                            });
-                        }
-                    })
-                    .catch(() => {
-                        Swal.fire({
-                            icon: "error",
-                            title: "錯誤",
-                            text: "發生未知錯誤，請稍後再試。",
-                        });
+                .then(response => response.json())
+                .then(data => {
+                    Swal.fire({
+                        icon: data.success ? "success" : "error",
+                        title: data.success ? "註冊成功" : "註冊失敗",
+                        text: data.message,
+                    }).then(() => {
+                        if (data.success) window.location.href = "/UserAccount/Login";
                     });
-            });
-
-        });*@
-        document.addEventListener("DOMContentLoaded", function () {
-    const officialDomain = "@("tiss.org.tw")";
-    const roleField = document.getElementById("Role");
-    const inviteCodeField = document.getElementById("inviteCodeField");
-    const emailField = document.getElementById("Email");
-
-    // 當選擇訪談員時，顯示驗證碼欄位
-    roleField.addEventListener("change", function () {
-        if (this.value === "Consultant") {
-            inviteCodeField.style.display = "block";
-        } else {
-            inviteCodeField.style.display = "none";
-        }
-    });
-
-    // 表單提交處理
-    document.getElementById("registerForm").addEventListener("submit", function (e) {
-        e.preventDefault(); // 阻止默認提交
-
-        const role = roleField.value;
-        const email = emailField.value;
-        const inviteCode = document.getElementById("InviteCode").value.trim();
-
-        let errorMessages = []; // 儲存錯誤訊息
-
-        // 角色檢查
-        if (role !== "Player" && role !== "Consultant") {
-            errorMessages.push("請選擇有效角色");
-        }
-
-        // 限制訪談員 Email
-        if (role === "Consultant" && !email.endsWith(officialDomain)) {
-            errorMessages.push("註冊訪談員須使用運科中心電子郵件帳號");
-        }
-
-        // 邀請碼驗證
-        if (role === "Consultant" && inviteCode === "") {
-            errorMessages.push("請輸入驗證碼");
-        }
-
-        // 如果有錯誤，顯示 SweetAlert2 提示視窗
-        if (errorMessages.length > 0) {
-            Swal.fire({
-                icon: "error",
-                title: "註冊失敗",
-                html: errorMessages.join("<br>"), // 顯示多行錯誤訊息
-            });
-            return;
-        }
-
-        // AJAX請求
-        const formData = new FormData(this);
-        fetch(this.action, {
-            method: "POST",
-            body: new URLSearchParams(formData),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                Swal.fire({
-                    icon: data.success ? "success" : "error",
-                    title: data.success ? "成功" : "錯誤",
-                    text: data.message,
-                }).then(() => {
-                    if (data.success) window.location.href = "/UserAccount/Login";
-                });
-            })
-            .catch(() => {
-                Swal.fire({
-                    icon: "error",
-                    title: "錯誤",
-                    text: "發生未知錯誤，請稍後再試。",
+                })
+                .catch(() => {
+                    Swal.fire({
+                        icon: "error",
+                        title: "錯誤",
+                        text: "發生未知錯誤，請稍後再試。",
+                    });
                 });
             });
-    });
-});
-
+        });
     </script>
 </body>
 </html>

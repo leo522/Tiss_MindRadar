@@ -16,8 +16,8 @@ namespace Tiss_MindRadar.Models
     {
         public int ID { get; set; }
         public int UserID { get; set; }
-        public int Age { get; set; }
-        public int TeamID { get; set; }
+        public Nullable<int> Age { get; set; }
+        public Nullable<int> TeamID { get; set; }
         public string Role { get; set; }
         public string InviteCode { get; set; }
         public bool IsVerified { get; set; }

@@ -11,6 +11,13 @@ namespace Tiss_MindRadar.Controllers
     {
         private TISS_MindRadarEntities _db = new TISS_MindRadarEntities(); //資料庫
 
+        #region 選擇檢測分數頁面
+        public ActionResult ChooseTeamState()
+        {
+            return View();
+        }
+        #endregion
+
         #region 取得所有隊伍
         [HttpGet]
         public JsonResult GetTeams()
@@ -151,6 +158,14 @@ namespace Tiss_MindRadar.Controllers
                 ViewBag.ErrorMessage = "發生錯誤：" + ex.Message;
                 return View(new List<TeamRawDataViewModel>());
             }
+        }
+        #endregion
+
+        #region 身心狀態檢測雷達圖_各隊選手分數
+        [HttpPost]
+        public ActionResult GetMentalPhysicalStateTeamRawData()
+        {
+            return View();
         }
         #endregion
     }
