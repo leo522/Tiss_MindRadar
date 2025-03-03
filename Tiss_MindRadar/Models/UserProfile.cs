@@ -21,6 +21,7 @@ namespace Tiss_MindRadar.Models
         public string Role { get; set; }
         public string InviteCode { get; set; }
         public bool IsVerified { get; set; }
+        public string Gender { get; set; }
     
         public virtual Team Team { get; set; }
         public virtual Users Users { get; set; }

@@ -37,6 +37,7 @@
             <div class="form-group">
                 <label for="Role">角色</label>
                 <select class="form-control" id="Role" name="Role" required>
+                    <option value="" disabled selected>請選擇註冊身份</option>
                     <option value="Player">選手</option>
                     <option value="Consultant">訪談員</option>
                 </select>
@@ -50,6 +51,15 @@
                 <label for="Age" title="年齡">年齡</label>
                 <input type="number" class="form-control" id="Age" name="Age" placeholder="請輸入年齡" required>
             </div>
+            <div class="form-group">
+                <label for="Gender" title="性別">性別</label>
+                <select class="form-control" id="Gender" name="Gender" required>
+                    <option value="" disabled selected>請選擇性別</option>
+                    <option value="Female">女性</option>
+                    <option value="Male">男性</option>
+                </select>
+            </div>
+
             <div class="form-group" id="teamField">
                 <label for="TeamID" title="所屬隊伍">所屬隊伍</label>
                 <select class="form-control" id="TeamID" name="TeamID" required>
@@ -71,7 +81,9 @@
             const inviteCodeField = document.getElementById("inviteCodeField");
             const ageField = document.getElementById("ageField");
             const teamField = document.getElementById("teamField");
+            const genderField = document.getElementById("Gender");
             const officialDomain = "@("tiss.org.tw")";
+
             // 角色變更時，更新欄位顯示
             roleField.addEventListener("change", function () {
                 if (this.value === "Consultant") {
@@ -111,6 +123,11 @@
                 // 訪談員驗證碼檢查
                 if (role === "Consultant" && !inviteCode) {
                     errors.push("請輸入訪談員驗證碼");
+                }
+
+                // 性別選項檢查
+                if (!gender) {
+                    errors.push("請選擇性別");
                 }
 
                 // 顯示錯誤訊息

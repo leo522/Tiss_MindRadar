@@ -22,7 +22,7 @@ namespace Tiss_MindRadar.Controllers
         }
 
         [HttpPost]
-        public JsonResult Register(string Jobcode, string UserName, string pwd, string Email, int? Age, int? TeamID, string Role, string InviteCode)
+        public JsonResult Register(string Jobcode, string UserName, string pwd, string Email, int? Age, int? TeamID, string Role, string InviteCode, string Gender)
         {
             try
             {
@@ -44,6 +44,11 @@ namespace Tiss_MindRadar.Controllers
                         return Json(new { success = false, message = "所選隊伍不存在" });
                     }
                     teamName = selectedTeam.TeamName;
+                }
+
+                if (_db.Users.Any(u => u.Jobcode == Jobcode))
+                {
+                    return Json(new { success = false, message = "帳號已存在，請使用其他帳號" });
                 }
 
                 // 建立使用者
@@ -68,6 +73,7 @@ namespace Tiss_MindRadar.Controllers
                     TeamID = Role == "Player" ? TeamID : null,
                     Role = Role,
                     InviteCode = InviteCode,
+                    Gender = Gender,
                     IsVerified = true
                 };
 
