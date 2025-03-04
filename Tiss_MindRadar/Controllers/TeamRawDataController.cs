@@ -168,5 +168,19 @@ namespace Tiss_MindRadar.Controllers
             return View();
         }
         #endregion
+
+        #region 計算該隊伍中有填寫過問卷的選手數量
+        [HttpPost]
+        public JsonResult GetSurveyCountByTeam(int teamId)
+        {
+            int count = _db.PsychologicalResponse
+                .Where(p => _db.Users.Any(u => u.UserID == p.UserID && u.TeamID == teamId))
+                .Select(p => p.UserID)
+                .Distinct()
+                .Count();
+
+            return Json(new { success = true, surveyCount = count });
+        }
+        #endregion
     }
 }

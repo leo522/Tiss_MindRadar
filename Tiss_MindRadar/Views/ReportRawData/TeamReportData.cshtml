@@ -14,6 +14,7 @@
             @Html.DropDownList("teamId", ViewBag.Teams as SelectList, "請選擇隊伍", new { @class = "form-control", id = "teamSelect" })
         </div>
     </div>
+    <p id="surveyCountText" class="text-gray-700 font-bold mt-2"></p>
 </form>
 
 @if (Model != null && Model.Any())
@@ -58,12 +59,55 @@
 }
 
 <script>
+    //document.addEventListener("DOMContentLoaded", function () {
+    //    const teamSelect = document.getElementById("teamSelect");
+    //    const form = document.getElementById("teamForm");
+
+    //    teamSelect.addEventListener("change", function () {
+    //        form.submit();
+    //    });
+    //});
     document.addEventListener("DOMContentLoaded", function () {
         const teamSelect = document.getElementById("teamSelect");
         const form = document.getElementById("teamForm");
+        const surveyCountText = document.getElementById("surveyCountText");
+
+        function fetchSurveyCount(teamId) {
+            fetch('@Url.Action("GetSurveyCountByTeam", "TeamRawData")', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: JSON.stringify({ teamId: teamId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    surveyCountText.textContent = `該隊伍共有 ${data.surveyCount} 人填寫問卷`;
+                } else {
+                    surveyCountText.textContent = "無法獲取數據";
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching survey count:", error);
+                surveyCountText.textContent = "發生錯誤，請稍後重試";
+            });
+        }
 
         teamSelect.addEventListener("change", function () {
-            form.submit();
+            form.submit(); // 提交表單
+            const teamId = teamSelect.value;
+            if (teamId) {
+                fetchSurveyCount(teamId); // 呼叫 API 獲取填寫數量
+            } else {
+                surveyCountText.textContent = "";
+            }
         });
+
+        // 初始化時若有選中的隊伍，則顯示問卷填寫人數
+        if (teamSelect.value) {
+            fetchSurveyCount(teamSelect.value);
+        }
     });
 </script>
