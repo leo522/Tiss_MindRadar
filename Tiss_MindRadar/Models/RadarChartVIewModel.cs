@@ -24,6 +24,7 @@ namespace Tiss_MindRadar.Models
             public int UserID { get; set; }          // 用戶 ID
             public int QuestionID { get; set; }      // 問題 ID
             public int Score { get; set; }           // 分數
+            public string Category { get; set; }
         }
     }
 }
