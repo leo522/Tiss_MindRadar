@@ -60,6 +60,13 @@ namespace Tiss_MindRadar.Controllers
             var team = _db.Team.FirstOrDefault(t => t.TeamID == teamId);
             if (team == null) return HttpNotFound("隊伍不存在");
 
+            // 避免特殊字元影響檔名，移除可能不合法的字元
+            string safeTeamName = string.Concat(team.TeamName.Split(Path.GetInvalidFileNameChars()));
+            string fileName = $"{safeTeamName}_報表.xlsx";
+            // 避免中文亂碼
+            string encodedFileName = Uri.EscapeDataString(fileName);  // 給現代瀏覽器
+            string urlEncodedFileName = HttpUtility.UrlPathEncode(fileName);
+
             var reportData = _db.PsychologicalResponse
                 .Join(_db.Users, pr => pr.UserID, u => u.UserID, (pr, u) => new { pr, u })
                 .Where(x => x.u.TeamID == teamId)
@@ -167,7 +174,7 @@ namespace Tiss_MindRadar.Controllers
                 worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
 
                 var stream = new MemoryStream(package.GetAsByteArray());
-                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{team.TeamName}_報表.xlsx");
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{safeTeamName}_報表.xlsx");
             }
         }
         #endregion

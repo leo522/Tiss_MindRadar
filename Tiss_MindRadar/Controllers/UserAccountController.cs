@@ -191,7 +191,15 @@ namespace Tiss_MindRadar.Controllers
                     Session["Age"] = userProfile?.Age ?? 0;
                     Session["TeamName"] = teamName;
 
-                    return Json(new { success = true, role = userRole });
+                    // 返回跳轉的 URL
+                    if (userRole == "Consultant")
+                    {
+                        return Json(new { success = true, redirectUrl = "/TeamRawData/ChooseTeamState" });
+                    }
+                    else
+                    {
+                        return Json(new { success = true, redirectUrl = "/Survey/MentalPhysicalState" });
+                    }
                 }
 
                 return Json(new { success = false, message = "帳號或密碼錯誤！" });

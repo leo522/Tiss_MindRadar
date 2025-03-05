@@ -103,34 +103,47 @@
         });
 
         downloadBtn.addEventListener("click", function () {
-            const teamId = teamSelect.value;
-            if (!teamId) {
-                alert("請選擇隊伍後再下載報表！");
-                return;
-            }
+    const teamId = teamSelect.value;
+    if (!teamId) {
+        alert("請選擇隊伍後再下載報表！");
+        return;
+    }
 
-            fetch('@Url.Action("ExportTeamReportToExcel", "ReportRawData")', {
-                method: "POST",
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest"
-                },
-                body: new FormData(document.getElementById("teamForm"))
-            })
-            .then(response => {
-                if (!response.ok) throw new Error("下載失敗");
-                return response.blob();
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "隊伍報表.xlsx";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            })
-            .catch(error => alert(error.message));
-        });
+    fetch('@Url.Action("ExportTeamReportToExcel", "ReportRawData")', {
+        method: "POST",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: new FormData(document.getElementById("teamForm"))
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("下載失敗");
+
+        // **取得 Content-Disposition 標頭**
+        const contentDisposition = response.headers.get("Content-Disposition");
+        let fileName = "報表.xlsx"; // 預設檔名
+
+        if (contentDisposition) {
+            const match = contentDisposition.match(/filename="?(.+?)"?$/);
+            if (match) {
+                fileName = decodeURIComponent(match[1]);
+            }
+        }
+
+        return response.blob().then(blob => ({ blob, fileName }));
+    })
+    .then(({ blob, fileName }) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName; // **這裡設定後端提供的檔名**
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    })
+    .catch(error => alert(error.message));
+});
 
         if (teamSelect.value) {
             fetchSurveyCount(teamSelect.value);

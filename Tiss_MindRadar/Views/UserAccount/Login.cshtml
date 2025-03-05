@@ -37,9 +37,9 @@
     <script>
         $(document).ready(function () {
             $("#loginForm").submit(function (e) {
-                e.preventDefault(); // 阻止表單默認提交
+                e.preventDefault(); //阻止表單默認提交
 
-                const formData = $(this).serialize();
+                const formData = $(this).serialize(); //將表單數據序列化
 
                 $.ajax({
                     url: "/UserAccount/Login",
@@ -51,23 +51,27 @@
                                 icon: "success",
                                 title: "成功",
                                 text: "登入成功！",
-                                timer: 2000,
+                                timer: 2000,  // 提示顯示時間
                                 showConfirmButton: false,
                                 backdrop: false
                             }).then(() => {
-                                if (response.role === "Consultant") {
-                                    window.location.href = "/TeamRawData/ChooseTeamState"; // 訪談員跳轉到ChooseTeamState
+                                // 從後端獲取跳轉的預定義 URL
+                                if (response.redirectUrl) {
+                                    location.replace(response.redirectUrl);
                                 } else {
-                                    window.location.href = "/Survey/MentalPhysicalState"; // 選手跳轉到MentalPhysicalState
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "錯誤",
+                                        text: "無法找到跳轉目的地！"
+                                    });
                                 }
                             });
                         } else {
+                            // 如果 success 是 false，顯示錯誤訊息
                             Swal.fire({
                                 icon: "error",
                                 title: "錯誤",
-                                text: "帳號或密碼錯誤，請重新輸入！"
-                            }).then(() => {
-                                $("body").css("overflow", "auto"); // 確保彈窗關閉後恢復滾動
+                                text: response.message || "帳號或密碼錯誤，請重新輸入！"
                             });
                         }
                     },
@@ -76,8 +80,6 @@
                             icon: "error",
                             title: "錯誤",
                             text: "發生錯誤，請稍後再試！"
-                        }).then(() => {
-                            $("body").css("overflow", "auto");
                         });
                     }
                 });
