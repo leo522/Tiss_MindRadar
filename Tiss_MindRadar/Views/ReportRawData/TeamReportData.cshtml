@@ -1,18 +1,17 @@
 ﻿@model IEnumerable<Tiss_MindRadar.Models.TeamReportViewModel>
-
 @{
     ViewBag.Title = "各隊伍選手明細";
     Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
 }
 
-<h2 class="text-2xl font-bold text-center mb-6 text-gray-800">各隊伍選手明細</h2>
-
+<h1 class="text-2xl font-bold text-center mb-6 text-gray-800">各隊伍選手明細</h1>
 <form id="teamForm" method="post" action="@Url.Action("TeamReportData", "ReportRawData")">
     <div class="mb-4 flex items-center space-x-4">
         <div class="flex-1">
             <label for="teamSelect" class="block text-gray-700 font-bold mb-1">選擇隊伍：</label>
             @Html.DropDownList("teamId", ViewBag.Teams as SelectList, "請選擇隊伍", new { @class = "form-control", id = "teamSelect" })
         </div>
+        <button type="button" id="downloadReport" class="bg-blue-500 text-white px-4 py-2 rounded">下載報表</button>
     </div>
     <p id="surveyCountText" class="text-gray-700 font-bold mt-2"></p>
 </form>
@@ -24,6 +23,7 @@
         <thead>
             <tr class="bg-gray-200 text-gray-600 uppercase text-lg leading-normal">
                 <th class="py-3 px-6 text-left">選手</th>
+                <th class="py-3 px-6 text-left">性別</th>
                 <th class="py-3 px-6 text-left">心理類別</th>
                 <th class="py-3 px-6 text-left">分數</th>
                 <th class="py-3 px-6 text-left">填答日期</th>
@@ -45,6 +45,10 @@
                         {
                             <td class="py-3 px-6 text-left font-bold" rowspan="@rowSpanCount">@item.UserName</td>
                         }
+                        @if (index == 0)
+                        {
+                            <td class="py-3 px-6 text-left" rowspan="@rowSpanCount">@item.Gender</td>
+                        }
                         <td class="py-3 px-6 text-left">@item.Category</td>
                         <td class="py-3 px-6 text-left">@item.Score</td>
                         @if (index == 0)
@@ -59,18 +63,11 @@
 }
 
 <script>
-    //document.addEventListener("DOMContentLoaded", function () {
-    //    const teamSelect = document.getElementById("teamSelect");
-    //    const form = document.getElementById("teamForm");
-
-    //    teamSelect.addEventListener("change", function () {
-    //        form.submit();
-    //    });
-    //});
     document.addEventListener("DOMContentLoaded", function () {
         const teamSelect = document.getElementById("teamSelect");
         const form = document.getElementById("teamForm");
         const surveyCountText = document.getElementById("surveyCountText");
+        const downloadBtn = document.getElementById("downloadReport");
 
         function fetchSurveyCount(teamId) {
             fetch('@Url.Action("GetSurveyCountByTeam", "TeamRawData")', {
@@ -96,16 +93,45 @@
         }
 
         teamSelect.addEventListener("change", function () {
-            form.submit(); // 提交表單
+            form.submit();
             const teamId = teamSelect.value;
             if (teamId) {
-                fetchSurveyCount(teamId); // 呼叫 API 獲取填寫數量
+                fetchSurveyCount(teamId);
             } else {
                 surveyCountText.textContent = "";
             }
         });
 
-        // 初始化時若有選中的隊伍，則顯示問卷填寫人數
+        downloadBtn.addEventListener("click", function () {
+            const teamId = teamSelect.value;
+            if (!teamId) {
+                alert("請選擇隊伍後再下載報表！");
+                return;
+            }
+
+            fetch('@Url.Action("ExportTeamReportToExcel", "ReportRawData")', {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: new FormData(document.getElementById("teamForm"))
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("下載失敗");
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "隊伍報表.xlsx";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(error => alert(error.message));
+        });
+
         if (teamSelect.value) {
             fetchSurveyCount(teamSelect.value);
         }
