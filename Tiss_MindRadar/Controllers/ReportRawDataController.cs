@@ -1,5 +1,6 @@
 ﻿using OfficeOpenXml.Style;
 using OfficeOpenXml;
+using OfficeOpenXml.Drawing.Chart;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -82,17 +83,6 @@ namespace Tiss_MindRadar.Controllers
 
                 if (!reportData.Any()) return Content("沒有數據可下載");
 
-                // 依選手與日期分組，確保每位選手每一題的分數都顯示
-                //var groupedData = reportData
-                //    .GroupBy(r => new { r.UserName, r.Gender, r.SurveyDate })
-                //    .Select(g => new
-                //    {
-                //        g.Key.UserName,
-                //        g.Key.Gender,
-                //        SurveyDate = g.Key.SurveyDate?.ToString("yyyy/MM/dd"),
-                //        Scores = g.OrderBy(r => r.QuestionID).ToDictionary(r => r.QuestionID, r => r.Score)
-                //    }).ToList();
-
                 var groupedData = reportData
                     .GroupBy(r => new { r.UserName, r.Gender, r.SurveyDate })
                     .Select(g => new
@@ -103,8 +93,23 @@ namespace Tiss_MindRadar.Controllers
                         Scores = g.GroupBy(r => r.QuestionID).ToDictionary(q => q.Key, q => q.First().Score)
                     }).ToList();
 
+                // **計算男女大類別平均數**
+                var maleData = groupedData.Where(p => p.Gender == "男");
+                var femaleData = groupedData.Where(p => p.Gender == "女");
 
                 var questionTexts = _db.MentalState.OrderBy(q => q.QuestionNumber).Select(q => q.QuestionText).ToList();
+
+                var maleScores = reportData.Where(r => r.Gender == "男").GroupBy(r => r.QuestionID).ToDictionary(g => g.Key, g => g.Average(r => r.Score));
+
+                var femaleScores = reportData.Where(r => r.Gender == "女").GroupBy(r => r.QuestionID).ToDictionary(g => g.Key, g => g.Average(r => r.Score));
+
+                // 計算大類別的平均分數
+                var categoryScores = new Dictionary<string, (double maleAvg, double femaleAvg)>
+                {
+                    { "一、基礎心理技能", GetCategoryAverage(new[] { 1, 2, 3 }, maleScores, femaleScores) },
+                    { "二、身體心理技能", GetCategoryAverage(new[] { 4, 5, 6, 7 }, maleScores, femaleScores) },
+                    { "三、認知技能", GetCategoryAverage(new[] { 8, 9, 10, 11, 12 }, maleScores, femaleScores) }
+                };
 
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial; //**設定 LicenseContext 避免錯誤**
 
@@ -119,9 +124,9 @@ namespace Tiss_MindRadar.Controllers
 
                     headers.AddRange(new string[]
                     {
-                    "一、基礎心理技能", "1.目標設定", "2.自信心", "3.承諾",
-                    "二、身體心理技能", "1.壓力反應", "2.害怕控制", "3.活化/激發", "4.放鬆",
-                    "三、認知技能", "1.意象", "2.心智練習", "3.專注", "4.再專注", "5.競賽計畫"
+                        "一、基礎心理技能", "1.目標設定", "2.自信心", "3.承諾",
+                        "二、身體心理技能", "1.壓力反應", "2.害怕控制", "3.活化/激發", "4.放鬆",
+                        "三、認知技能", "1.意象", "2.心智練習", "3.專注", "4.再專注", "5.競賽計畫"
                     });
 
                     for (int i = 0; i < headers.Count; i++)
@@ -163,7 +168,6 @@ namespace Tiss_MindRadar.Controllers
                         double? avgRefocus = SafeAverage(player.Scores.Where(kv => kv.Key == 21 || kv.Key == 22).Select(kv => (double?)kv.Value));
                         double? avgCompetitionPlan = SafeAverage(player.Scores.Where(kv => kv.Key == 23 || kv.Key == 24).Select(kv => (double?)kv.Value));
 
-
                         // 計算大類別平均數
                         double? avgBasicSkills = SafeAverage(new[] { avgGoalSetting, avgConfidence, avgCommitment });
                         double? avgPhysicalSkills = SafeAverage(new[] { avgStressResponse, avgFearControl, avgActivation, avgRelaxation });
@@ -191,6 +195,24 @@ namespace Tiss_MindRadar.Controllers
 
                     worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
 
+                    // 在此處插入雷達圖
+                    var radarChart = worksheet.Drawings.AddChart("RadarChart", eChartType.Radar);
+
+                    // 設定雷達圖數據範圍 (大類別的男、女性別平均分數)
+                    var maleAverageRange = worksheet.Cells[2, 28, row - 1, 28]; // 假設這是男性大類別平均數的範圍
+                    var femaleAverageRange = worksheet.Cells[2, 29, row - 1, 29]; // 假設這是女性大類別平均數的範圍
+
+                    radarChart.Series.Add(maleAverageRange, worksheet.Cells[2, 1, row - 1, 1]);
+                    radarChart.Series.Add(femaleAverageRange, worksheet.Cells[2, 1, row - 1, 1]);
+
+                    radarChart.Title.Text = "隊伍雷達圖";
+
+                    // 設置雷達圖大小
+                    radarChart.SetSize(500, 500);
+
+                    // 使用 SetPosition 設置圖表位置 (設置圖表的起始列和行)
+                    radarChart.SetPosition(row + 1, 0, 1, 0); // 在 row + 1 行，1 列的位置顯示
+
                     var stream = new MemoryStream(package.GetAsByteArray());
                     stream.Position = 0; // 修正檔案串流的位置
 
@@ -204,7 +226,22 @@ namespace Tiss_MindRadar.Controllers
             catch (Exception ex)
             {
                 throw ex;
-            }          
+            }
+        }
+        #endregion
+
+        #region 計算每個大類別的平均分數
+        private (double maleAvg, double femaleAvg) GetCategoryAverage(int[] questionIds, Dictionary<int, double> maleScores, Dictionary<int, double> femaleScores)
+        {
+            var maleCategoryAvg = questionIds
+                .Where(id => maleScores.ContainsKey(id))
+                .Average(id => maleScores[id]);
+
+            var femaleCategoryAvg = questionIds
+                .Where(id => femaleScores.ContainsKey(id))
+                .Average(id => femaleScores[id]);
+
+            return (Math.Round(maleCategoryAvg, 1), Math.Round(femaleCategoryAvg, 1));
         }
         #endregion
     }
