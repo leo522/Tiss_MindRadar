@@ -103,7 +103,9 @@ namespace Tiss_MindRadar.Controllers
                         Scores = g.GroupBy(r => r.QuestionID).ToDictionary(q => q.Key, q => q.First().Score)
                     }).ToList();
 
-                
+
+                var questionTexts = _db.MentalState.OrderBy(q => q.QuestionNumber).Select(q => q.QuestionText).ToList();
+
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial; //**設定 LicenseContext 避免錯誤**
 
                 using (var package = new ExcelPackage())
@@ -112,7 +114,9 @@ namespace Tiss_MindRadar.Controllers
 
                     // 建立標題列
                     List<string> headers = new List<string> { "姓名", "性別", "填答日期" };
-                    for (int i = 1; i <= 24; i++) headers.Add($"Q{i}");
+
+                    headers.AddRange(questionTexts);
+
                     headers.AddRange(new string[]
                     {
                     "一、基礎心理技能", "1.目標設定", "2.自信心", "3.承諾",
