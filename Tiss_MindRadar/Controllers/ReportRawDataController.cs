@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using Tiss_MindRadar.Models;
 using System.Runtime.Remoting.Messaging;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace Tiss_MindRadar.Controllers
 {
@@ -63,9 +64,7 @@ namespace Tiss_MindRadar.Controllers
             // 避免特殊字元影響檔名，移除可能不合法的字元
             string safeTeamName = string.Concat(team.TeamName.Split(Path.GetInvalidFileNameChars()));
             string fileName = $"{safeTeamName}_報表.xlsx";
-            // 避免中文亂碼
-            string encodedFileName = Uri.EscapeDataString(fileName);  // 給現代瀏覽器
-            string urlEncodedFileName = HttpUtility.UrlPathEncode(fileName);
+            string encodedFileName = Uri.EscapeDataString(fileName);
 
             var reportData = _db.PsychologicalResponse
                 .Join(_db.Users, pr => pr.UserID, u => u.UserID, (pr, u) => new { pr, u })
@@ -174,7 +173,13 @@ namespace Tiss_MindRadar.Controllers
                 worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
 
                 var stream = new MemoryStream(package.GetAsByteArray());
-                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{safeTeamName}_報表.xlsx");
+                stream.Position = 0; // 修正檔案串流的位置
+
+                Response.Headers.Remove("Content-Disposition"); // 先移除可能的舊值
+                Response.Headers["Content-Disposition"] = $"attachment; filename=\"{HttpUtility.UrlEncode(fileName)}\"";
+                Response.Headers["Content-Type"] = "application/octet-stream";
+
+                return File(stream, "application/octet-stream", fileName);
             }
         }
         #endregion
