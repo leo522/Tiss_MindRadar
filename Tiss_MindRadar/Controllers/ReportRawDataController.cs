@@ -13,8 +13,8 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace Tiss_MindRadar.Controllers
 {
-    public class ReportRawDataController : Controller
-    {
+   public class ReportRawDataController : Controller
+   {
         private TISS_MindRadarEntities _db = new TISS_MindRadarEntities(); //資料庫
 
         #region 產生各隊伍選手明細
@@ -198,20 +198,70 @@ namespace Tiss_MindRadar.Controllers
                     // 在此處插入雷達圖
                     var radarChart = worksheet.Drawings.AddChart("RadarChart", eChartType.Radar);
 
-                    // 設定雷達圖數據範圍 (大類別的男、女性別平均分數)
-                    var maleAverageRange = worksheet.Cells[2, 28, row - 1, 28]; // 假設這是男性大類別平均數的範圍
-                    var femaleAverageRange = worksheet.Cells[2, 29, row - 1, 29]; // 假設這是女性大類別平均數的範圍
+                    //// 設定雷達圖數據範圍 (大類別的男、女性別平均分數)
+                    //var maleAverageRange = worksheet.Cells[2, 28, row - 1, 28]; // 假設這是男性大類別平均數的範圍
+                    //var femaleAverageRange = worksheet.Cells[2, 29, row - 1, 29]; // 假設這是女性大類別平均數的範圍
 
-                    radarChart.Series.Add(maleAverageRange, worksheet.Cells[2, 1, row - 1, 1]);
-                    radarChart.Series.Add(femaleAverageRange, worksheet.Cells[2, 1, row - 1, 1]);
+                    //radarChart.Series.Add(maleAverageRange, worksheet.Cells[2, 1, row - 1, 1]);
+                    //radarChart.Series.Add(femaleAverageRange, worksheet.Cells[2, 1, row - 1, 1]);
 
-                    radarChart.Title.Text = "隊伍雷達圖";
+                    //radarChart.Title.Text = "隊伍雷達圖";
 
-                    // 設置雷達圖大小
-                    radarChart.SetSize(500, 500);
+                    //// 設置雷達圖大小
+                    //radarChart.SetSize(500, 500);
 
-                    // 使用 SetPosition 設置圖表位置 (設置圖表的起始列和行)
-                    radarChart.SetPosition(row + 1, 0, 1, 0); // 在 row + 1 行，1 列的位置顯示
+                    //// 使用 SetPosition 設置圖表位置 (設置圖表的起始列和行)
+                    //radarChart.SetPosition(row + 1, 0, 1, 0); // 在 row + 1 行，1 列的位置顯示
+                    // 設定雷達圖標題
+                    radarChart.Title.Text = $"{team.TeamName} 向度大類別平均分數（男女區分）";
+
+                    // **大類別名稱**
+                    string[] categories = { "基礎心理技能", "身體心理技能", "認知技能" };
+
+                    // **對應的男女性別平均數**
+                    double[] maleAverages = {
+                                categoryScores["一、基礎心理技能"].maleAvg,
+                                categoryScores["二、身體心理技能"].maleAvg,
+                                categoryScores["三、認知技能"].maleAvg
+                        };
+
+                    double[] femaleAverages = {
+                                categoryScores["一、基礎心理技能"].femaleAvg,
+                                categoryScores["二、身體心理技能"].femaleAvg,
+                                categoryScores["三、認知技能"].femaleAvg
+                        };
+
+                    // **填入數據到 Excel**
+                    int chartStartRow = row + 2;
+                    int chartStartCol = 1;
+
+                    worksheet.Cells[chartStartRow, chartStartCol].Value = "向度大類別";
+                    worksheet.Cells[chartStartRow, chartStartCol + 1].Value = "男";
+                    worksheet.Cells[chartStartRow, chartStartCol + 2].Value = "女";
+
+                    for (int i = 0; i < categories.Length; i++)
+                    {
+                        worksheet.Cells[chartStartRow + i + 1, chartStartCol].Value = categories[i];
+                        worksheet.Cells[chartStartRow + i + 1, chartStartCol + 1].Value = maleAverages[i];
+                        worksheet.Cells[chartStartRow + i + 1, chartStartCol + 2].Value = femaleAverages[i];
+                    }
+
+                    // 設定圖表範圍
+                    var seriesMale = radarChart.Series.Add(
+                        worksheet.Cells[chartStartRow + 1, chartStartCol + 1, chartStartRow + categories.Length, chartStartCol + 1],
+                        worksheet.Cells[chartStartRow + 1, chartStartCol, chartStartRow + categories.Length, chartStartCol]
+                    );
+                    seriesMale.Header = "男性平均分數";
+
+                    var seriesFemale = radarChart.Series.Add(
+                        worksheet.Cells[chartStartRow + 1, chartStartCol + 2, chartStartRow + categories.Length, chartStartCol + 2],
+                        worksheet.Cells[chartStartRow + 1, chartStartCol, chartStartRow + categories.Length, chartStartCol]
+                    );
+                    seriesFemale.Header = "女性平均分數";
+
+                    // **調整雷達圖大小與位置**
+                    radarChart.SetPosition(chartStartRow - 2, 0, chartStartCol + 4, 0);
+                    radarChart.SetSize(600, 400);
 
                     var stream = new MemoryStream(package.GetAsByteArray());
                     stream.Position = 0; // 修正檔案串流的位置
@@ -233,16 +283,22 @@ namespace Tiss_MindRadar.Controllers
         #region 計算每個大類別的平均分數
         private (double maleAvg, double femaleAvg) GetCategoryAverage(int[] questionIds, Dictionary<int, double> maleScores, Dictionary<int, double> femaleScores)
         {
-            var maleCategoryAvg = questionIds
-                .Where(id => maleScores.ContainsKey(id))
-                .Average(id => maleScores[id]);
+            double SafeAverage(IEnumerable<double> scores) => scores.Any() ? Math.Round(scores.Average(), 1) : 0.0;
 
-            var femaleCategoryAvg = questionIds
-                .Where(id => femaleScores.ContainsKey(id))
-                .Average(id => femaleScores[id]);
+            var maleCategoryAvg = SafeAverage(questionIds.Where(id => maleScores.ContainsKey(id)).Select(id => maleScores[id]));
+            var femaleCategoryAvg = SafeAverage(questionIds.Where(id => femaleScores.ContainsKey(id)).Select(id => femaleScores[id]));
 
-            return (Math.Round(maleCategoryAvg, 1), Math.Round(femaleCategoryAvg, 1));
+            return (maleCategoryAvg, femaleCategoryAvg);
+            //var maleCategoryAvg = questionIds
+            //    .Where(id => maleScores.ContainsKey(id))
+            //    .Average(id => maleScores[id]);
+
+            //var femaleCategoryAvg = questionIds
+            //    .Where(id => femaleScores.ContainsKey(id))
+            //    .Average(id => femaleScores[id]);
+
+            //return (Math.Round(maleCategoryAvg, 1), Math.Round(femaleCategoryAvg, 1));
         }
         #endregion
-    }
+   }
 }
