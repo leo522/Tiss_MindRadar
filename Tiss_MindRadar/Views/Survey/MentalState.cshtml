@@ -50,8 +50,7 @@
                 <table class="responsive-table sticky-header">
                     <thead>
                         <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                            <th class="py-3 px-6 text-left sticky-left">題號</th>
-                            <th class="py-3 px-6 text-left sticky-left">題目</th>
+                            <th class="py-3 px-6 text-center sticky-left">題目</th>
                             <th class="py-3 px-4 text-center">非常不符合</th>
                             <th class="py-3 px-4 text-center">不符合</th>
                             <th class="py-3 px-4 text-center">尚可</th>
@@ -62,9 +61,11 @@
                     <tbody class="text-gray-700 text-sm">
                         @foreach (var item in Model)
                         {
-                            <tr class="border-b border-gray-200 hover:bg-gray-100 sticky-left">
-                                <td class="py-3 px-4 text-left">@item.QuestionNumber</td>
-                                <td class="py-3 px-4 text-left">@item.QuestionText</td>
+                            <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                <td class="py-3 px-1 text-left break-words whitespace-normal overflow-visible w-80 sticky-left">
+                                    <span class="font-bold mr-2">@item.QuestionNumber.</span>@item.QuestionText
+                                </td>
+
                                 @for (int i = 1; i <= 5; i++)
                                 {
                                     <td class="py-3 px-4 text-center">
