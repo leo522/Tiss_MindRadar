@@ -79,8 +79,7 @@ namespace Tiss_MindRadar.Controllers
                 foreach (var date in selectedDates)
                 {
                     string query = @"SELECT c.CategoryName, COALESCE(AVG(pr.Score), 0) AS AverageScore FROM PsychologicalResponse pr
-                           INNER JOIN PsychologicalStateCategory c ON pr.CategoryID = c.ID WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1 
-                           GROUP BY c.CategoryName";
+                           INNER JOIN PsychologicalStateCategory c ON pr.CategoryID = c.ID WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1 GROUP BY c.CategoryName";
 
                     object[] parameters = { userId, date };
                     var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();

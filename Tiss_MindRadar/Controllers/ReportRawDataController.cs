@@ -13,8 +13,8 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace Tiss_MindRadar.Controllers
 {
-   public class ReportRawDataController : Controller
-   {
+    public class ReportRawDataController : Controller
+    {
         private TISS_MindRadarEntities _db = new TISS_MindRadarEntities(); //資料庫
 
         #region 產生各隊伍選手明細
@@ -69,17 +69,50 @@ namespace Tiss_MindRadar.Controllers
                 string fileName = $"{safeTeamName}_報表.xlsx";
                 string encodedFileName = Uri.EscapeDataString(fileName);
 
-                var reportData = _db.PsychologicalResponse
-                    .Join(_db.Users, pr => pr.UserID, u => u.UserID, (pr, u) => new { pr, u })
-                    .Where(x => x.u.TeamID == teamId)
-                    .Select(x => new
-                    {
-                        x.u.UserName,
-                        Gender = x.u.UserProfile.FirstOrDefault().Gender,
-                        x.pr.SurveyDate,
-                        x.pr.Score,
-                        x.pr.QuestionID
-                    }).ToList();
+                //var reportData = _db.PsychologicalResponse
+                //    .Join(_db.Users, pr => pr.UserID, u => u.UserID, (pr, u) => new { pr, u })
+                //    .Where(x => x.u.TeamID == teamId)
+                //    .Select(x => new
+                //    {
+                //        x.u.UserName,
+                //        Gender = x.u.UserProfile.FirstOrDefault().Gender,
+                //        x.pr.SurveyDate,
+                //        x.pr.Score,
+                //        x.pr.QuestionID
+                //    }).ToList();
+                var reportData = _db.PsychologicalResponse.Join(_db.Users, pr => pr.UserID, u => u.UserID, (pr, u) => new { pr, u })
+                                    .Where(x => x.u.TeamID == teamId).Select(x => new
+                                {
+                                    x.u.UserName,
+                                    Gender = x.u.UserProfile.FirstOrDefault().Gender,
+                                    x.pr.SurveyDate,
+                                    x.pr.Score,
+                                    x.pr.QuestionID
+                                }).ToList()
+                                  .Select(x => (x.UserName, x.Gender, x.SurveyDate, x.Score, x.QuestionID)).ToList();
+                // 檢查 reportData 是否正確
+                Console.WriteLine($"[Debug] reportData 總筆數: {reportData.Count}");
+                foreach (var item in reportData.Take(10)) // 只列印前10筆，避免輸出過多
+                {
+                    Console.WriteLine($"[Debug] 使用者: {item.UserName}, 性別: {item.Gender}, 題目ID: {item.QuestionID}, 分數: {item.Score}");
+                }
+                
+                // **加入 Console 檢查點**
+                Console.WriteLine($"reportData 總筆數: {reportData.Count}");
+
+                var teamUsers = reportData.Select(r => r.UserName).Distinct().ToList();
+                Console.WriteLine($"該隊伍包含的成員: {string.Join(", ", teamUsers)}");
+
+                var dateRange = reportData.Select(r => r.SurveyDate).Distinct().OrderBy(d => d).ToList();
+                Console.WriteLine($"填答時間範圍: {string.Join(" ~ ", dateRange)}");
+
+                var genderCount = reportData.GroupBy(r => r.Gender).Select(g => new { Gender = g.Key, Count = g.Count() });
+
+                foreach (var g in genderCount)
+                {
+                    Console.WriteLine($"Gender: {g.Gender}, Count: {g.Count}");
+                }
+                Console.WriteLine($"報表數據筆數: {reportData.Count}");
 
                 if (!reportData.Any()) return Content("沒有數據可下載");
 
@@ -99,17 +132,29 @@ namespace Tiss_MindRadar.Controllers
 
                 var questionTexts = _db.MentalState.OrderBy(q => q.QuestionNumber).Select(q => q.QuestionText).ToList();
 
-                var maleScores = reportData.Where(r => r.Gender == "男").GroupBy(r => r.QuestionID).ToDictionary(g => g.Key, g => g.Average(r => r.Score));
+                var maleScores = reportData.Where(r => r.Gender == "男").GroupBy(r => r.QuestionID)
+                                .ToDictionary(g => g.Key, g => g.Average(r => r.Score));
 
-                var femaleScores = reportData.Where(r => r.Gender == "女").GroupBy(r => r.QuestionID).ToDictionary(g => g.Key, g => g.Average(r => r.Score));
+                var femaleScores = reportData.Where(r => r.Gender == "女").GroupBy(r => r.QuestionID)
+                                .ToDictionary(g => g.Key, g => g.Average(r => r.Score));
 
                 // 計算大類別的平均分數
+                //var categoryScores = new Dictionary<string, (double maleAvg, double femaleAvg)>
+                //{
+                //    { "一、基礎心理技能", GetCategoryAverage(new[] { 1, 2, 3 }, maleScores, femaleScores) },
+                //    { "二、身體心理技能", GetCategoryAverage(new[] { 4, 5, 6, 7 }, maleScores, femaleScores) },
+                //    { "三、認知技能", GetCategoryAverage(new[] { 8, 9, 10, 11, 12 }, maleScores, femaleScores) }
+                //};
                 var categoryScores = new Dictionary<string, (double maleAvg, double femaleAvg)>
                 {
-                    { "一、基礎心理技能", GetCategoryAverage(new[] { 1, 2, 3 }, maleScores, femaleScores) },
-                    { "二、身體心理技能", GetCategoryAverage(new[] { 4, 5, 6, 7 }, maleScores, femaleScores) },
-                    { "三、認知技能", GetCategoryAverage(new[] { 8, 9, 10, 11, 12 }, maleScores, femaleScores) }
+                    { "一、基礎心理技能", GetCategoryAverage(new[] { 1, 2, 3 }, reportData, "男", "女") },
+                    { "二、身體心理技能", GetCategoryAverage(new[] { 4, 5, 6, 7 }, reportData, "男", "女") },
+                    { "三、認知技能", GetCategoryAverage(new[] { 8, 9, 10, 11, 12 }, reportData, "男", "女") }
                 };
+                foreach (var kvp in categoryScores)
+                {
+                    Console.WriteLine($"[Debug] 類別: {kvp.Key}, 男性平均: {kvp.Value.maleAvg}, 女性平均: {kvp.Value.femaleAvg}");
+                }
 
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial; //**設定 LicenseContext 避免錯誤**
 
@@ -144,51 +189,93 @@ namespace Tiss_MindRadar.Controllers
                         worksheet.Cells[row, 3].Value = player.SurveyDate;
 
                         // 填入每題的分數
+                        //for (int q = 1; q <= 24; q++)
+                        //{
+                        //    worksheet.Cells[row, q + 3].Value = player.Scores.ContainsKey(q)
+                        //        ? Math.Round((double)player.Scores[q], 1) : (double?)null;
+                        //}
                         for (int q = 1; q <= 24; q++)
                         {
-                            worksheet.Cells[row, q + 3].Value = player.Scores.ContainsKey(q)
-                                ? Math.Round((double)player.Scores[q], 1) : (double?)null;
+                            worksheet.Cells[row, q + 3].Value = player.Scores.TryGetValue(q, out var score)
+                                ? Math.Round((double)score, 1)
+                                : (double?)null;
                         }
-
                         // 安全計算平均數的方法，確保保留小數第一位
-                        double? SafeAverage(IEnumerable<double?> scores) =>
-                            scores.Any(s => s.HasValue) ? Math.Round(scores.Where(s => s.HasValue).Average(s => s.Value), 1) : (double?)null;
+                        //double? SafeAverage(IEnumerable<double?> scores) =>
+                        //    scores.Any(s => s.HasValue) ? Math.Round(scores.Where(s => s.HasValue).Average(s => s.Value), 1) : (double?)null;
+
+                        double SafeAverage(IEnumerable<double> scores) => scores.Any() ? Math.Round(scores.Average(), 1) : 0.0;
+
+
 
                         // 計算小類別平均數
-                        double? avgGoalSetting = SafeAverage(player.Scores.Where(kv => kv.Key == 1 || kv.Key == 2).Select(kv => (double?)kv.Value));
-                        double? avgConfidence = SafeAverage(player.Scores.Where(kv => kv.Key == 3 || kv.Key == 4).Select(kv => (double?)kv.Value));
-                        double? avgCommitment = SafeAverage(player.Scores.Where(kv => kv.Key == 5 || kv.Key == 6).Select(kv => (double?)kv.Value));
-                        double? avgStressResponse = SafeAverage(player.Scores.Where(kv => kv.Key == 7 || kv.Key == 8).Select(kv => (double?)kv.Value));
-                        double? avgFearControl = SafeAverage(player.Scores.Where(kv => kv.Key == 9 || kv.Key == 10).Select(kv => (double?)kv.Value));
-                        double? avgActivation = SafeAverage(player.Scores.Where(kv => kv.Key == 11 || kv.Key == 12).Select(kv => (double?)kv.Value));
-                        double? avgRelaxation = SafeAverage(player.Scores.Where(kv => kv.Key == 13 || kv.Key == 14).Select(kv => (double?)kv.Value));
-                        double? avgImagery = SafeAverage(player.Scores.Where(kv => kv.Key == 15 || kv.Key == 16).Select(kv => (double?)kv.Value));
-                        double? avgMentalPractice = SafeAverage(player.Scores.Where(kv => kv.Key == 17 || kv.Key == 18).Select(kv => (double?)kv.Value));
-                        double? avgFocus = SafeAverage(player.Scores.Where(kv => kv.Key == 19 || kv.Key == 20).Select(kv => (double?)kv.Value));
-                        double? avgRefocus = SafeAverage(player.Scores.Where(kv => kv.Key == 21 || kv.Key == 22).Select(kv => (double?)kv.Value));
-                        double? avgCompetitionPlan = SafeAverage(player.Scores.Where(kv => kv.Key == 23 || kv.Key == 24).Select(kv => (double?)kv.Value));
+                        double avgGoalSetting = SafeAverage(player.Scores.Where(kv => kv.Key == 1 || kv.Key == 2).Select(kv => (double)kv.Value));
+                        double avgConfidence = SafeAverage(player.Scores.Where(kv => kv.Key == 3 || kv.Key == 4).Select(kv => (double)kv.Value));
+                        double avgCommitment = SafeAverage(player.Scores.Where(kv => kv.Key == 5 || kv.Key == 6).Select(kv => (double)kv.Value));
+                        double avgStressResponse = SafeAverage(player.Scores.Where(kv => kv.Key == 7 || kv.Key == 8).Select(kv => (double)kv.Value));
+                        double avgFearControl = SafeAverage(player.Scores.Where(kv => kv.Key == 9 || kv.Key == 10).Select(kv => (double)kv.Value));
+                        double avgActivation = SafeAverage(player.Scores.Where(kv => kv.Key == 11 || kv.Key == 12).Select(kv => (double)kv.Value));
+                        double avgRelaxation = SafeAverage(player.Scores.Where(kv => kv.Key == 13 || kv.Key == 14).Select(kv => (double)kv.Value));
+                        double avgImagery = SafeAverage(player.Scores.Where(kv => kv.Key == 15 || kv.Key == 16).Select(kv => (double)kv.Value));
+                        double avgMentalPractice = SafeAverage(player.Scores.Where(kv => kv.Key == 17 || kv.Key == 18).Select(kv => (double)kv.Value));
+                        double avgFocus = SafeAverage(player.Scores.Where(kv => kv.Key == 19 || kv.Key == 20).Select(kv => (double)kv.Value));
+                        double avgRefocus = SafeAverage(player.Scores.Where(kv => kv.Key == 21 || kv.Key == 22).Select(kv => (double)kv.Value));
+                        double avgCompetitionPlan = SafeAverage(player.Scores.Where(kv => kv.Key == 23 || kv.Key == 24).Select(kv => (double)kv.Value));
+
+
+                        //double? avgGoalSetting = SafeAverage(player.Scores.Where(kv => kv.Key == 1 || kv.Key == 2).Select(kv => (double?)kv.Value));
+                        //double? avgConfidence = SafeAverage(player.Scores.Where(kv => kv.Key == 3 || kv.Key == 4).Select(kv => (double?)kv.Value));
+                        //double? avgCommitment = SafeAverage(player.Scores.Where(kv => kv.Key == 5 || kv.Key == 6).Select(kv => (double?)kv.Value));
+                        //double? avgStressResponse = SafeAverage(player.Scores.Where(kv => kv.Key == 7 || kv.Key == 8).Select(kv => (double?)kv.Value));
+                        //double? avgFearControl = SafeAverage(player.Scores.Where(kv => kv.Key == 9 || kv.Key == 10).Select(kv => (double?)kv.Value));
+                        //double? avgActivation = SafeAverage(player.Scores.Where(kv => kv.Key == 11 || kv.Key == 12).Select(kv => (double?)kv.Value));
+                        //double? avgRelaxation = SafeAverage(player.Scores.Where(kv => kv.Key == 13 || kv.Key == 14).Select(kv => (double?)kv.Value));
+                        //double? avgImagery = SafeAverage(player.Scores.Where(kv => kv.Key == 15 || kv.Key == 16).Select(kv => (double?)kv.Value));
+                        //double? avgMentalPractice = SafeAverage(player.Scores.Where(kv => kv.Key == 17 || kv.Key == 18).Select(kv => (double?)kv.Value));
+                        //double? avgFocus = SafeAverage(player.Scores.Where(kv => kv.Key == 19 || kv.Key == 20).Select(kv => (double?)kv.Value));
+                        //double? avgRefocus = SafeAverage(player.Scores.Where(kv => kv.Key == 21 || kv.Key == 22).Select(kv => (double?)kv.Value));
+                        //double? avgCompetitionPlan = SafeAverage(player.Scores.Where(kv => kv.Key == 23 || kv.Key == 24).Select(kv => (double?)kv.Value));
 
                         // 計算大類別平均數
-                        double? avgBasicSkills = SafeAverage(new[] { avgGoalSetting, avgConfidence, avgCommitment });
-                        double? avgPhysicalSkills = SafeAverage(new[] { avgStressResponse, avgFearControl, avgActivation, avgRelaxation });
-                        double? avgCognitiveSkills = SafeAverage(new[] { avgImagery, avgMentalPractice, avgFocus, avgRefocus, avgCompetitionPlan });
+                        double avgBasicSkills = SafeAverage(new[] { avgGoalSetting, avgConfidence, avgCommitment });
+                        double avgPhysicalSkills = SafeAverage(new[] { avgStressResponse, avgFearControl, avgActivation, avgRelaxation });
+                        double avgCognitiveSkills = SafeAverage(new[] { avgImagery, avgMentalPractice, avgFocus, avgRefocus, avgCompetitionPlan });
+
+                        //double? avgBasicSkills = SafeAverage(new[] { avgGoalSetting, avgConfidence, avgCommitment });
+                        //double? avgPhysicalSkills = SafeAverage(new[] { avgStressResponse, avgFearControl, avgActivation, avgRelaxation });
+                        //double? avgCognitiveSkills = SafeAverage(new[] { avgImagery, avgMentalPractice, avgFocus, avgRefocus, avgCompetitionPlan });
 
                         // 填入大類別與小類別平均數，並四捨五入到小數點第一位
-                        worksheet.Cells[row, 28].Value = avgBasicSkills.HasValue ? Math.Round(avgBasicSkills.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 29].Value = avgGoalSetting.HasValue ? Math.Round(avgGoalSetting.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 30].Value = avgConfidence.HasValue ? Math.Round(avgConfidence.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 31].Value = avgCommitment.HasValue ? Math.Round(avgCommitment.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 32].Value = avgPhysicalSkills.HasValue ? Math.Round(avgPhysicalSkills.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 33].Value = avgStressResponse.HasValue ? Math.Round(avgStressResponse.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 34].Value = avgFearControl.HasValue ? Math.Round(avgFearControl.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 35].Value = avgActivation.HasValue ? Math.Round(avgActivation.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 36].Value = avgRelaxation.HasValue ? Math.Round(avgRelaxation.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 37].Value = avgCognitiveSkills.HasValue ? Math.Round(avgCognitiveSkills.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 38].Value = avgImagery.HasValue ? Math.Round(avgImagery.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 39].Value = avgMentalPractice.HasValue ? Math.Round(avgMentalPractice.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 40].Value = avgFocus.HasValue ? Math.Round(avgFocus.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 41].Value = avgRefocus.HasValue ? Math.Round(avgRefocus.Value, 1) : (double?)null;
-                        worksheet.Cells[row, 42].Value = avgCompetitionPlan.HasValue ? Math.Round(avgCompetitionPlan.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 28].Value = avgBasicSkills.HasValue ? Math.Round(avgBasicSkills.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 29].Value = avgGoalSetting.HasValue ? Math.Round(avgGoalSetting.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 30].Value = avgConfidence.HasValue ? Math.Round(avgConfidence.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 31].Value = avgCommitment.HasValue ? Math.Round(avgCommitment.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 32].Value = avgPhysicalSkills.HasValue ? Math.Round(avgPhysicalSkills.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 33].Value = avgStressResponse.HasValue ? Math.Round(avgStressResponse.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 34].Value = avgFearControl.HasValue ? Math.Round(avgFearControl.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 35].Value = avgActivation.HasValue ? Math.Round(avgActivation.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 36].Value = avgRelaxation.HasValue ? Math.Round(avgRelaxation.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 37].Value = avgCognitiveSkills.HasValue ? Math.Round(avgCognitiveSkills.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 38].Value = avgImagery.HasValue ? Math.Round(avgImagery.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 39].Value = avgMentalPractice.HasValue ? Math.Round(avgMentalPractice.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 40].Value = avgFocus.HasValue ? Math.Round(avgFocus.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 41].Value = avgRefocus.HasValue ? Math.Round(avgRefocus.Value, 1) : (double?)null;
+                        //worksheet.Cells[row, 42].Value = avgCompetitionPlan.HasValue ? Math.Round(avgCompetitionPlan.Value, 1) : (double?)null;
+                        worksheet.Cells[row, 28].Value = avgBasicSkills != 0.0 ? Math.Round(avgBasicSkills, 1) : (double?)null;
+                        worksheet.Cells[row, 29].Value = avgGoalSetting != 0.0 ? Math.Round(avgGoalSetting, 1) : (double?)null;
+                        worksheet.Cells[row, 30].Value = avgConfidence != 0.0 ? Math.Round(avgConfidence, 1) : (double?)null;
+                        worksheet.Cells[row, 31].Value = avgCommitment != 0.0 ? Math.Round(avgCommitment, 1) : (double?)null;
+                        worksheet.Cells[row, 32].Value = avgPhysicalSkills != 0.0 ? Math.Round(avgPhysicalSkills, 1) : (double?)null;
+                        worksheet.Cells[row, 33].Value = avgStressResponse != 0.0 ? Math.Round(avgStressResponse, 1) : (double?)null;
+                        worksheet.Cells[row, 34].Value = avgFearControl != 0.0 ? Math.Round(avgFearControl, 1) : (double?)null;
+                        worksheet.Cells[row, 35].Value = avgActivation != 0.0 ? Math.Round(avgActivation, 1) : (double?)null;
+                        worksheet.Cells[row, 36].Value = avgRelaxation != 0.0 ? Math.Round(avgRelaxation, 1) : (double?)null;
+                        worksheet.Cells[row, 37].Value = avgCognitiveSkills != 0.0 ? Math.Round(avgCognitiveSkills, 1) : (double?)null;
+                        worksheet.Cells[row, 38].Value = avgImagery != 0.0 ? Math.Round(avgImagery, 1) : (double?)null;
+                        worksheet.Cells[row, 39].Value = avgMentalPractice != 0.0 ? Math.Round(avgMentalPractice, 1) : (double?)null;
+                        worksheet.Cells[row, 40].Value = avgFocus != 0.0 ? Math.Round(avgFocus, 1) : (double?)null;
+                        worksheet.Cells[row, 41].Value = avgRefocus != 0.0 ? Math.Round(avgRefocus, 1) : (double?)null;
+                        worksheet.Cells[row, 42].Value = avgCompetitionPlan != 0.0 ? Math.Round(avgCompetitionPlan, 1) : (double?)null;
 
                         row++;
                     }
@@ -275,30 +362,55 @@ namespace Tiss_MindRadar.Controllers
             }
             catch (Exception ex)
             {
-                throw ex;
+                System.Diagnostics.Debug.WriteLine("[Error] 下載 Excel 失敗：" + ex.Message);
+                return new HttpStatusCodeResult(500, "伺服器內部錯誤，請稍後再試");
             }
         }
         #endregion
 
         #region 計算每個大類別的平均分數
-        private (double maleAvg, double femaleAvg) GetCategoryAverage(int[] questionIds, Dictionary<int, double> maleScores, Dictionary<int, double> femaleScores)
+        //private (double maleAvg, double femaleAvg) GetCategoryAverage(int[] questionIds, Dictionary<int, double> maleScores, Dictionary<int, double> femaleScores)
+        //{
+        //    double? SafeAverage(IEnumerable<double> scores) =>
+        //scores.Any() ? Math.Round(scores.Average(), 1) : (double?)null;  // 如果沒有數據，則返回null
+
+        //    // 計算男性和女性對應問題編號的平均分數
+        //    var maleCategoryValues = questionIds
+        //        .Where(id => maleScores.ContainsKey(id))  // 確保在男性分數字典中有此問題
+        //        .Select(id => maleScores[id])  // 取出每一題的分數
+        //        .ToList();
+
+        //    var femaleCategoryValues = questionIds
+        //        .Where(id => femaleScores.ContainsKey(id))  // 確保在女性分數字典中有此問題
+        //        .Select(id => femaleScores[id])  // 取出每一題的分數
+        //        .ToList();
+
+        //    Console.WriteLine($"男性平均分數: {SafeAverage(maleCategoryValues)}");
+        //    Console.WriteLine($"女性平均分數: {SafeAverage(femaleCategoryValues)}");
+
+        //    // 返回男性和女性的大類別平均分數
+        //    return (SafeAverage(maleCategoryValues) ?? 0.0, SafeAverage(femaleCategoryValues) ?? 0.0);
+        //}
+        private (double maleAvg, double femaleAvg) GetCategoryAverage(int[] questionIds, List<(string UserName, string Gender, DateTime? SurveyDate, int Score, int QuestionID)> reportData, string maleGender, string femaleGender)
         {
-            double SafeAverage(IEnumerable<double> scores) => scores.Any() ? Math.Round(scores.Average(), 1) : 0.0;
+            // 紀錄 Debug 訊息
+            Console.WriteLine($"正在計算大類別平均分數，題目 ID: {string.Join(", ", questionIds)}");
 
-            var maleCategoryAvg = SafeAverage(questionIds.Where(id => maleScores.ContainsKey(id)).Select(id => maleScores[id]));
-            var femaleCategoryAvg = SafeAverage(questionIds.Where(id => femaleScores.ContainsKey(id)).Select(id => femaleScores[id]));
+            double SafeAverage(IEnumerable<double> scores)
+                => scores.Any() ? Math.Round(scores.Average(), 1) : 0.0;
 
-            return (maleCategoryAvg, femaleCategoryAvg);
-            //var maleCategoryAvg = questionIds
-            //    .Where(id => maleScores.ContainsKey(id))
-            //    .Average(id => maleScores[id]);
+            var maleScores = reportData.Where(r => r.Gender == maleGender && questionIds.Contains(r.QuestionID))
+                .Select(r => (double)r.Score).ToList();
 
-            //var femaleCategoryAvg = questionIds
-            //    .Where(id => femaleScores.ContainsKey(id))
-            //    .Average(id => femaleScores[id]);
+            var femaleScores = reportData.Where(r => r.Gender == femaleGender && questionIds.Contains(r.QuestionID))
+                .Select(r => (double)r.Score).ToList();
 
-            //return (Math.Round(maleCategoryAvg, 1), Math.Round(femaleCategoryAvg, 1));
+            // **檢查數據是否符合預期**
+            Console.WriteLine($"[Debug] 男性 - 題目ID: {string.Join(",", questionIds)}，數量: {maleScores.Count}，分數: {string.Join(", ", maleScores)}");
+            Console.WriteLine($"[Debug] 女性 - 題目ID: {string.Join(",", questionIds)}，數量: {femaleScores.Count}，分數: {string.Join(", ", femaleScores)}");
+
+            return (SafeAverage(maleScores), SafeAverage(femaleScores));
         }
         #endregion
-   }
+    }
 }
