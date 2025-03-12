@@ -162,6 +162,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\ChartRadarController.cs" />
     <Compile Include="Controllers\RadarErrorController.cs" />
+    <Compile Include="Controllers\RefereeSurveyController.cs" />
     <Compile Include="Controllers\ReportRawDataController.cs" />
     <Compile Include="Controllers\SurveyController.cs" />
     <Compile Include="Controllers\TeamRawDataController.cs" />
@@ -237,6 +238,12 @@
     </Compile>
     <Compile Include="Models\RadarChartVIewModel.cs" />
     <Compile Include="Models\SelfEfficacy.cs">
+      <DependentUpon>MindRadarModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\SmoothExperience.cs">
+      <DependentUpon>MindRadarModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\SmoothExperienceCategory.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Successful.cs">
@@ -355,6 +362,7 @@
     <Content Include="Views\TeamRawData\ChooseTeamState.cshtml" />
     <Content Include="Views\TeamRawData\GetMentalPhysicalStateTeamRawData.cshtml" />
     <Content Include="Views\ReportRawData\TeamReportData.cshtml" />
+    <Content Include="Views\RefereeSurvey\SmoothExperienceSurvey.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

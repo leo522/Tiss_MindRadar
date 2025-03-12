@@ -87,7 +87,6 @@ namespace Tiss_MindRadar.Controllers
                 return Json(new { success = false, message = "帳號註冊失敗：" + ex.Message });
             }
         }
-
         #endregion
 
         #region 獨立驗證方法
@@ -112,8 +111,13 @@ namespace Tiss_MindRadar.Controllers
                 return "該帳號已存在";
             }
 
+            if (Role != "Player" && Role != "Consultant" && Role != "Referee")
+            {
+                return "角色選擇錯誤，請重新選擇";
+            }
+
             //角色檢查
-            if (Role != "Player" && Role != "Consultant" )
+            if (Role != "Player" && Role != "Consultant" && Role != "Referee")
             {
                 return "角色選擇錯誤，請重新選擇";
             }
@@ -126,9 +130,12 @@ namespace Tiss_MindRadar.Controllers
 
             //邀請碼驗證
             const string consultantInviteCode = "Tiss@dmin!@#";
-            if (Role == "Consultant" && InviteCode != consultantInviteCode)
+            const string coachInviteCode = "Referee@123";
+
+            if ((Role == "Consultant" && InviteCode != consultantInviteCode) ||
+                (Role == "Referee" && InviteCode != coachInviteCode))
             {
-                return"無效的驗證碼！";
+                return "無效的驗證碼！";
             }
 
             return ""; //透過所有驗證

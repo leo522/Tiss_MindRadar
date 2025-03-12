@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流暢經驗問卷</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-4 text-center">流暢經驗問卷</h1>
+        <form id="surveyForm" class="space-y-6">
+            <div id="questionsContainer"></div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">提交</button>
+        </form>
+    </div>
+
+    <script>const questions = [
+            "在軟網場上執法，對我而言是件枯燥乏味的工作。",
+            "執法過程中，我清楚知道下一步要做什麼。",
+            "有一種強烈的感覺，擔心自己會無法擔任稱職的裁判。",
+            "上場執法時，我會暫時忘記煩惱或其他大小事。",
+            "執法過程中，我常無法專心。",
+            "和先進們討論執法狀況時，總是無法進入狀況或切入話題中。",
+            "我覺得完成執法工作之後，在精神上感覺很充實。",
+            "在執法過程中，我可以達到自己想要的感覺。",
+            "每次執法結束後，我知道自己的表現更進步、純熟了。",
+            "上場執法結束後，讓我內心充滿愉快與滿足。",
+            "我十分享受執法時體驗到的感覺，並希望常有機會上場執法。",
+            "上場執法時，我有一種『能夠完全控制』的感覺。",
+            "上場執法時，我會感覺到時間過得特別快。",
+            "我不會擔心自己無法掌握比賽的過程。",
+            "我相信自己的能力可以勝任比賽中的挑戰。"
+        ];
+
+        const questionsContainer = document.getElementById("questionsContainer");
+        questions.forEach((question, index) => {
+            const questionBlock = document.createElement("div");
+            questionBlock.classList.add("p-4", "bg-gray-50", "rounded-md", "shadow-sm");
+
+            questionBlock.innerHTML = `
+                <p class="font-medium mb-2">${index + 1}. ${question}</p>
+                <div class="flex space-x-4">
+                    ${[1, 2, 3, 4, 5].map(score => `
+                        <label class="flex items-center space-x-1">
+                            <input type="radio" name="q${index + 1}" value="${score}" class="form-radio h-5 w-5 text-blue-600">
+                            <span>${score}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+            questionsContainer.appendChild(questionBlock);
+        });
+
+        document.getElementById("surveyForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            alert("問卷提交成功！");
+        });</script>
+</body>
+</html>

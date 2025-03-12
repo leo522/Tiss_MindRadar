@@ -40,10 +40,11 @@
                     <option value="" disabled selected>請選擇註冊身份</option>
                     <option value="Player">選手</option>
                     <option value="Consultant">訪談員</option>
+                    <option value="Referee">裁判</option>
                 </select>
             </div>
             <div class="form-group" id="inviteCodeField" style="display: none;">
-                <label for="InviteCode">驗證碼 (訪談員專用)</label>
+                <label for="InviteCode">驗證碼 (訪談員/裁判專用)</label>
                 <input type="text" class="form-control" id="InviteCode" name="InviteCode" placeholder="請輸入驗證碼" />
                 <small id="inviteCodeError" class="text-danger"></small>
             </div>
@@ -86,7 +87,7 @@
 
             // 角色變更時，更新欄位顯示
             roleField.addEventListener("change", function () {
-                if (this.value === "Consultant") {
+                if (this.value === "Consultant" || this.value === "Referee") {
                     inviteCodeField.style.display = "block";
                     ageField.style.display = "none";
                     teamField.style.display = "none";

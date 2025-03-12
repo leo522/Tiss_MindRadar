@@ -43,6 +43,8 @@ namespace Tiss_MindRadar.Models
         public virtual DbSet<PsychologicalStateDescription> PsychologicalStateDescription { get; set; }
         public virtual DbSet<PsychologicalStateQuestionCategory> PsychologicalStateQuestionCategory { get; set; }
         public virtual DbSet<SelfEfficacy> SelfEfficacy { get; set; }
+        public virtual DbSet<SmoothExperience> SmoothExperience { get; set; }
+        public virtual DbSet<SmoothExperienceCategory> SmoothExperienceCategory { get; set; }
         public virtual DbSet<Successful> Successful { get; set; }
         public virtual DbSet<Team> Team { get; set; }
         public virtual DbSet<UserProfile> UserProfile { get; set; }
