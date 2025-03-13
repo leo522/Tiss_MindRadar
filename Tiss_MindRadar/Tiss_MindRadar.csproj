@@ -237,6 +237,9 @@
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\RadarChartVIewModel.cs" />
+    <Compile Include="Models\RefereeTeam.cs">
+      <DependentUpon>MindRadarModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\RefereeViewModel.cs" />
     <Compile Include="Models\SelfEfficacy.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>

@@ -13,10 +13,18 @@ namespace Tiss_MindRadar.Models
             public string QuestionText { get; set; }
         }
 
+        public class SmoothExperienceCategoryViewModel
+        {
+            public int CategoryID { get; set; }
+            public string CategoryItem { get; set; }  // 分類名稱
+            public List<SmoothExperienceViewModel> Questions { get; set; } // 問題列表
+        }
+
         public class SmoothExperienceResponseViewModel
         {
             public int QuestionID { get; set; }
             public int Score { get; set; }
         }
+
     }
 }

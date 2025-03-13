@@ -17,12 +17,13 @@ namespace Tiss_MindRadar.Controllers
         #region 註冊帳號
         public ActionResult Register()
         {
-            ViewBag.Teams = _db.Team.ToList(); // 提供隊伍選單
+            ViewBag.Teams = _db.Team.ToList(); //提供隊伍選單
+            ViewBag.RefereeTeams = _db.RefereeTeam.ToList(); //提供裁判隊伍
             return View();
         }
 
         [HttpPost]
-        public JsonResult Register(string Jobcode, string UserName, string pwd, string Email, int? Age, int? TeamID, string Role, string InviteCode, string Gender)
+        public JsonResult Register(string Jobcode, string UserName, string pwd, string Email, int? Age, int? TeamID, int? RefereeTeamID, string Role, string InviteCode, string Gender)
         {
             try
             {
@@ -34,8 +35,8 @@ namespace Tiss_MindRadar.Controllers
 
                 var hashedPwd = ComputeSha256Hash(pwd);
 
-                // 如果是選手，檢查隊伍是否存在
-                string teamName = null;
+                string teamName = null; // 如果是選手，檢查隊伍是否存在
+
                 if (Role == "Player")
                 {
                     var selectedTeam = _db.Team.FirstOrDefault(t => t.TeamID == TeamID);
@@ -46,21 +47,32 @@ namespace Tiss_MindRadar.Controllers
                     teamName = selectedTeam.TeamName;
                 }
 
+                string refereeTeamName = null;
+                if (Role == "Referee")
+                {
+                    var selectedRefereeTeam = _db.RefereeTeam.FirstOrDefault(t => t.RefereeTeamID == RefereeTeamID);
+                    if (selectedRefereeTeam == null)
+                    {
+                        return Json(new { success = false, message = "所選裁判隊伍不存在" });
+                    }
+                    refereeTeamName = selectedRefereeTeam.RefereeTeamName;
+                }
+
                 if (_db.Users.Any(u => u.Jobcode == Jobcode))
                 {
                     return Json(new { success = false, message = "帳號已存在，請使用其他帳號" });
                 }
 
-                // 建立使用者
-                var newUser = new Users
+                var newUser = new Users //建立使用者
                 {
                     Jobcode = Jobcode,
                     UserName = UserName,
                     Passwords = hashedPwd,
                     Email = Email,
                     CreatedDate = DateTime.Now,
-                    TeamName = teamName,
-                    TeamID = Role == "Player" ? TeamID : null
+                    TeamName = teamName ?? refereeTeamName,
+                    TeamID = Role == "Player" ? TeamID : null,
+                    RefereeTeamID = Role == "Referee" ? RefereeTeamID : null
                 };
 
                 _db.Users.Add(newUser);
@@ -74,7 +86,8 @@ namespace Tiss_MindRadar.Controllers
                     Role = Role,
                     InviteCode = InviteCode,
                     Gender = Gender,
-                    IsVerified = true
+                    IsVerified = true,
+                    RefereeTeamID = Role == "Referee" ? RefereeTeamID : null
                 };
 
                 _db.UserProfile.Add(newUserProfile);
@@ -184,22 +197,35 @@ namespace Tiss_MindRadar.Controllers
 
                 if (user != null)
                 {
-                    user.LastLoginDate = DateTime.Now; // 記錄最後登入時間
+                    user.LastLoginDate = DateTime.Now; //記錄最後登入時間
                     _db.SaveChanges();
 
                     var userProfile = _db.UserProfile.FirstOrDefault(up => up.UserID == user.UserID);
-                    var teamName = userProfile != null ? _db.Team.FirstOrDefault(t => t.TeamID == userProfile.TeamID)?.TeamName : "未指定";
+
+                    string teamName = "未指定";
+
+                    if (userProfile != null)
+                    {
+                        if (userProfile.Role == "Player" && userProfile.TeamID.HasValue)
+                        {
+                            teamName = _db.Team.FirstOrDefault(t => t.TeamID == userProfile.TeamID)?.TeamName;
+                        }
+                        else if (userProfile.Role == "Referee" && userProfile.RefereeTeamID.HasValue)
+                        {
+                            teamName = _db.RefereeTeam.FirstOrDefault(t => t.RefereeTeamID == userProfile.RefereeTeamID)?.RefereeTeamName;
+                        }
+                    }
 
                     string userRole = userProfile?.Role ?? "Player"; //預設為選手
 
                     Session["UserID"] = user.UserID;
                     Session["UserName"] = user.UserName;
-                    Session["UserRole"] = userRole; // 設定角色
+                    Session["UserRole"] = userRole; //設定角色
                     Session["Age"] = userProfile?.Age ?? 0;
-                    Session["TeamName"] = teamName;
+                    Session["TeamName"] = teamName; //選手隊伍
+                    Session["RefereeTeamName"] = teamName; //裁判隊伍
 
-                    // 根據角色設定跳轉的 URL
-                    string redirectUrl;
+                    string redirectUrl; //根據角色設定跳轉的 URL
 
                     switch (userRole)
                     {
@@ -207,10 +233,10 @@ namespace Tiss_MindRadar.Controllers
                             redirectUrl = "/TeamRawData/ChooseTeamState";
                             break;
                         case "Referee":
-                            redirectUrl = "/RefereeSurvey/SmoothExperienceSurvey"; // 新增裁判專用跳轉
+                            redirectUrl = "/RefereeSurvey/SmoothExperienceSurvey"; //裁判專用跳轉
                             break;
                         default:
-                            redirectUrl = "/Survey/MentalPhysicalState"; // 預設跳轉
+                            redirectUrl = "/Survey/MentalPhysicalState"; //預設跳轉
                             break;
                     }
                     return Json(new { success = true, redirectUrl });

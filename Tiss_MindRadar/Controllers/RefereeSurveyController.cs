@@ -15,13 +15,25 @@ namespace Tiss_MindRadar.Controllers
         #region 流暢經驗_裁判版
         public ActionResult SmoothExperienceSurvey()
         {
-            var dtos = _db.SmoothExperience.Select(q => new SmoothExperienceViewModel
-            { 
-                QuestionID = q.QuestionID,
-                QuestionText = q.QuestionText
-            }).ToList();
+            ViewBag.RefereeName = Session["UserName"];
+            ViewBag.RefereeTeamName = Session["RefereeTeamName"];
 
-            return View(dtos);
+            // 取得分類資料
+            var categories = _db.SmoothExperienceCategory
+                .Select(c => new SmoothExperienceCategoryViewModel
+                {
+                    CategoryID = c.CategoryID,
+                    CategoryItem = c.CategoryItem,
+                    Questions = _db.SmoothExperience
+                        .Where(q => q.CategoryID == c.CategoryID) // 按分類篩選問題
+                        .Select(q => new SmoothExperienceViewModel
+                        {
+                            QuestionID = q.QuestionID,
+                            QuestionText = q.QuestionText
+                        }).ToList()
+                }).ToList();
+
+            return View(categories);
         }
 
         [HttpPost]

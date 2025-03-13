@@ -72,6 +72,18 @@
                 </select>
                 <small id="teamError" class="text-danger"></small>
             </div>
+            <div class="form-group" id="refereeTeamField" style="display: none;">
+                <label for="RefereeTeamID" title="裁判所屬隊伍">裁判所屬隊伍</label>
+                <select class="form-control" id="RefereeTeamID" name="RefereeTeamID">
+                    <option value="" disabled selected>請選擇裁判隊伍</option>
+                    @foreach (var refereeTeam in ViewBag.RefereeTeams)
+                    {
+                        <option value="@refereeTeam.RefereeTeamID">@refereeTeam.RefereeTeamName</option>
+                    }
+                </select>
+                <small id="refereeTeamError" class="text-danger"></small>
+            </div>
+
             <button type="submit" class="btn btn-primary btn-block" title="註冊">註冊</button>
         </form>
     </div>
@@ -83,22 +95,35 @@
             const ageField = document.getElementById("ageField");
             const teamField = document.getElementById("teamField");
             const genderField = document.getElementById("Gender");
+            const refereeTeamField = document.getElementById("refereeTeamField");
             const officialDomain = "@("tiss.org.tw")";
 
             // 角色變更時，更新欄位顯示
             roleField.addEventListener("change", function () {
-                if (this.value === "Consultant" || this.value === "Referee") {
+                if (this.value === "Consultant") {
                     inviteCodeField.style.display = "block";
                     ageField.style.display = "none";
                     teamField.style.display = "none";
+                    refereeTeamField.style.display = "none";
                     document.getElementById("Age").removeAttribute("required");
                     document.getElementById("TeamID").removeAttribute("required");
-                } else {
+                    document.getElementById("RefereeTeamID").removeAttribute("required");
+                } else if (this.value === "Referee") {
+                    inviteCodeField.style.display = "block";
+                    ageField.style.display = "none";
+                    teamField.style.display = "none"; // 隱藏一般隊伍
+                    refereeTeamField.style.display = "block"; // 顯示裁判隊伍
+                    document.getElementById("Age").removeAttribute("required");
+                    document.getElementById("TeamID").removeAttribute("required");
+                    document.getElementById("RefereeTeamID").setAttribute("required", "required");
+                } else { // Player
                     inviteCodeField.style.display = "none";
                     ageField.style.display = "block";
                     teamField.style.display = "block";
+                    refereeTeamField.style.display = "none"; // 隱藏裁判隊伍
                     document.getElementById("Age").setAttribute("required", "required");
                     document.getElementById("TeamID").setAttribute("required", "required");
+                    document.getElementById("RefereeTeamID").removeAttribute("required");
                 }
             });
 
@@ -113,6 +138,7 @@
                 const role = formData.get("Role");
                 const email = formData.get("Email");
                 const inviteCode = formData.get("InviteCode");
+                const gender = formData.get("Gender");
 
                 let errors = [];
 
@@ -122,8 +148,8 @@
                 }
 
                 // 訪談員驗證碼檢查
-                if (role === "Consultant" && !inviteCode) {
-                    errors.push("請輸入訪談員驗證碼");
+                if ((role === "Consultant" || role === "Referee") && !inviteCode) {
+                    errors.push("請輸入驗證碼");
                 }
 
                 // 性別選項檢查

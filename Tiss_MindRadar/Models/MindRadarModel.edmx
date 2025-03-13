@@ -175,6 +175,14 @@
           <Property Name="QuestionID" Type="int" Nullable="false" />
           <Property Name="CategoryID" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="RefereeTeam">
+          <Key>
+            <PropertyRef Name="RefereeTeamID" />
+          </Key>
+          <Property Name="RefereeTeamID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RefereeTeamName" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="isenable" Type="bit" Nullable="false" />
+        </EntityType>
         <EntityType Name="SelfEfficacy">
           <Key>
             <PropertyRef Name="ID" />
@@ -242,6 +250,7 @@
           <Property Name="InviteCode" Type="nvarchar" MaxLength="20" />
           <Property Name="IsVerified" Type="bit" Nullable="false" />
           <Property Name="Gender" Type="nvarchar" MaxLength="5" />
+          <Property Name="RefereeTeamID" Type="int" />
         </EntityType>
         <EntityType Name="UserResponse">
           <Key>
@@ -269,6 +278,7 @@
           <Property Name="CreatedDate" Type="datetime" Nullable="false" />
           <Property Name="LastLoginDate" Type="datetime" />
           <Property Name="TeamID" Type="int" />
+          <Property Name="RefereeTeamID" Type="int" />
         </EntityType>
         <Association Name="FK__Psycholog__Categ__29221CFB">
           <End Role="PsychologicalStateCategory" Type="Self.PsychologicalStateCategory" Multiplicity="1" />
@@ -426,6 +436,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_UserProfile_RefereeTeam">
+          <End Role="RefereeTeam" Type="Self.RefereeTeam" Multiplicity="0..1" />
+          <End Role="UserProfile" Type="Self.UserProfile" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RefereeTeam">
+              <PropertyRef Name="RefereeTeamID" />
+            </Principal>
+            <Dependent Role="UserProfile">
+              <PropertyRef Name="RefereeTeamID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_RefereeTeam">
+          <End Role="RefereeTeam" Type="Self.RefereeTeam" Multiplicity="0..1" />
+          <End Role="Users" Type="Self.Users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RefereeTeam">
+              <PropertyRef Name="RefereeTeamID" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="RefereeTeamID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="TISS_MindRadarModelStoreContainer">
           <EntitySet Name="Category" EntityType="Self.Category" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ConsultantTeams" EntityType="Self.ConsultantTeams" Schema="dbo" store:Type="Tables" />
@@ -445,6 +479,7 @@
           <EntitySet Name="PsychologicalStateDescription" EntityType="Self.PsychologicalStateDescription" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="PsychologicalStateQuestionCategory" EntityType="Self.PsychologicalStateQuestionCategory" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="QuestionCategory" EntityType="Self.QuestionCategory" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RefereeTeam" EntityType="Self.RefereeTeam" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="SelfEfficacy" EntityType="Self.SelfEfficacy" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="SmoothExperience" EntityType="Self.SmoothExperience" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="SmoothExperienceCategory" EntityType="Self.SmoothExperienceCategory" Schema="dbo" store:Type="Tables" />
@@ -506,6 +541,14 @@
             <End Role="SmoothExperience" EntitySet="SmoothExperience" />
             <End Role="SmoothExperienceResponse" EntitySet="SmoothExperienceResponse" />
           </AssociationSet>
+          <AssociationSet Name="FK_UserProfile_RefereeTeam" Association="Self.FK_UserProfile_RefereeTeam">
+            <End Role="RefereeTeam" EntitySet="RefereeTeam" />
+            <End Role="UserProfile" EntitySet="UserProfile" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_RefereeTeam" Association="Self.FK_Users_RefereeTeam">
+            <End Role="RefereeTeam" EntitySet="RefereeTeam" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
@@ -529,9 +572,11 @@
           <EntitySet Name="PsychologicalStateCategory" EntityType="TISS_MindRadarModel.PsychologicalStateCategory" />
           <EntitySet Name="PsychologicalStateDescription" EntityType="TISS_MindRadarModel.PsychologicalStateDescription" />
           <EntitySet Name="PsychologicalStateQuestionCategory" EntityType="TISS_MindRadarModel.PsychologicalStateQuestionCategory" />
+          <EntitySet Name="RefereeTeam" EntityType="TISS_MindRadarModel.RefereeTeam" />
           <EntitySet Name="SelfEfficacy" EntityType="TISS_MindRadarModel.SelfEfficacy" />
           <EntitySet Name="SmoothExperience" EntityType="TISS_MindRadarModel.SmoothExperience" />
           <EntitySet Name="SmoothExperienceCategory" EntityType="TISS_MindRadarModel.SmoothExperienceCategory" />
+          <EntitySet Name="SmoothExperienceResponse" EntityType="TISS_MindRadarModel.SmoothExperienceResponse" />
           <EntitySet Name="Successful" EntityType="TISS_MindRadarModel.Successful" />
           <EntitySet Name="Team" EntityType="TISS_MindRadarModel.Team" />
           <EntitySet Name="UserProfile" EntityType="TISS_MindRadarModel.UserProfile" />
@@ -561,9 +606,21 @@
             <End Role="PsychologicalStateCategory" EntitySet="PsychologicalStateCategory" />
             <End Role="PsychologicalStateQuestionCategory" EntitySet="PsychologicalStateQuestionCategory" />
           </AssociationSet>
+          <AssociationSet Name="FK_UserProfile_RefereeTeam" Association="TISS_MindRadarModel.FK_UserProfile_RefereeTeam">
+            <End Role="RefereeTeam" EntitySet="RefereeTeam" />
+            <End Role="UserProfile" EntitySet="UserProfile" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_RefereeTeam" Association="TISS_MindRadarModel.FK_Users_RefereeTeam">
+            <End Role="RefereeTeam" EntitySet="RefereeTeam" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
           <AssociationSet Name="FK_SmoothExperience_Category" Association="TISS_MindRadarModel.FK_SmoothExperience_Category">
             <End Role="SmoothExperienceCategory" EntitySet="SmoothExperienceCategory" />
             <End Role="SmoothExperience" EntitySet="SmoothExperience" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SmoothExperienceResponse_SmoothExperience" Association="TISS_MindRadarModel.FK_SmoothExperienceResponse_SmoothExperience">
+            <End Role="SmoothExperience" EntitySet="SmoothExperience" />
+            <End Role="SmoothExperienceResponse" EntitySet="SmoothExperienceResponse" />
           </AssociationSet>
           <AssociationSet Name="FK__UserProfi__TeamI__19DFD96B" Association="TISS_MindRadarModel.FK__UserProfi__TeamI__19DFD96B">
             <End Role="Team" EntitySet="Team" />
@@ -580,11 +637,6 @@
           <AssociationSet Name="QuestionCategory" Association="TISS_MindRadarModel.QuestionCategory">
             <End Role="Category" EntitySet="Category" />
             <End Role="MentalPhysicalState" EntitySet="MentalPhysicalState" />
-          </AssociationSet>
-          <EntitySet Name="SmoothExperienceResponse" EntityType="TISS_MindRadarModel.SmoothExperienceResponse" />
-          <AssociationSet Name="FK_SmoothExperienceResponse_SmoothExperience" Association="TISS_MindRadarModel.FK_SmoothExperienceResponse_SmoothExperience">
-            <End Role="SmoothExperience" EntitySet="SmoothExperience" />
-            <End Role="SmoothExperienceResponse" EntitySet="SmoothExperienceResponse" />
           </AssociationSet>
         </EntityContainer>
         <EntityType Name="Category">
@@ -760,6 +812,16 @@
           <NavigationProperty Name="MentalState" Relationship="TISS_MindRadarModel.FK__Psycholog__Quest__282DF8C2" FromRole="PsychologicalStateQuestionCategory" ToRole="MentalState" />
           <NavigationProperty Name="PsychologicalStateCategory" Relationship="TISS_MindRadarModel.FK__Psycholog__Categ__29221CFB" FromRole="PsychologicalStateQuestionCategory" ToRole="PsychologicalStateCategory" />
         </EntityType>
+        <EntityType Name="RefereeTeam">
+          <Key>
+            <PropertyRef Name="RefereeTeamID" />
+          </Key>
+          <Property Name="RefereeTeamID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="RefereeTeamName" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="isenable" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="UserProfile" Relationship="TISS_MindRadarModel.FK_UserProfile_RefereeTeam" FromRole="RefereeTeam" ToRole="UserProfile" />
+          <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK_Users_RefereeTeam" FromRole="RefereeTeam" ToRole="Users" />
+        </EntityType>
         <EntityType Name="SelfEfficacy">
           <Key>
             <PropertyRef Name="ID" />
@@ -792,6 +854,16 @@
           <Property Name="CategoryItem" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="SmoothExperience" Relationship="TISS_MindRadarModel.FK_SmoothExperience_Category" FromRole="SmoothExperienceCategory" ToRole="SmoothExperience" />
         </EntityType>
+        <EntityType Name="SmoothExperienceResponse">
+          <Key>
+            <PropertyRef Name="ResponseID" />
+          </Key>
+          <Property Name="ResponseID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="QuestionID" Type="Int32" Nullable="false" />
+          <Property Name="Score" Type="Int32" Nullable="false" />
+          <Property Name="SubmittedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="SmoothExperience" Relationship="TISS_MindRadarModel.FK_SmoothExperienceResponse_SmoothExperience" FromRole="SmoothExperienceResponse" ToRole="SmoothExperience" />
+        </EntityType>
         <EntityType Name="Successful">
           <Key>
             <PropertyRef Name="ID" />
@@ -823,6 +895,8 @@
           <Property Name="InviteCode" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
           <Property Name="IsVerified" Type="Boolean" Nullable="false" />
           <Property Name="Gender" Type="String" MaxLength="5" FixedLength="false" Unicode="true" />
+          <Property Name="RefereeTeamID" Type="Int32" />
+          <NavigationProperty Name="RefereeTeam" Relationship="TISS_MindRadarModel.FK_UserProfile_RefereeTeam" FromRole="UserProfile" ToRole="RefereeTeam" />
           <NavigationProperty Name="Team" Relationship="TISS_MindRadarModel.FK__UserProfi__TeamI__19DFD96B" FromRole="UserProfile" ToRole="Team" />
           <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" FromRole="UserProfile" ToRole="Users" />
         </EntityType>
@@ -853,8 +927,10 @@
           <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="LastLoginDate" Type="DateTime" Precision="3" />
           <Property Name="TeamID" Type="Int32" />
+          <Property Name="RefereeTeamID" Type="Int32" />
           <NavigationProperty Name="ConsultantTeams" Relationship="TISS_MindRadarModel.FK_ConsultantTeams_ConsultantID" FromRole="Users" ToRole="ConsultantTeams" />
           <NavigationProperty Name="PsychologicalResponse" Relationship="TISS_MindRadarModel.FK_PsychologicalResponse_UserID" FromRole="Users" ToRole="PsychologicalResponse" />
+          <NavigationProperty Name="RefereeTeam" Relationship="TISS_MindRadarModel.FK_Users_RefereeTeam" FromRole="Users" ToRole="RefereeTeam" />
           <NavigationProperty Name="UserProfile" Relationship="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" FromRole="Users" ToRole="UserProfile" />
           <NavigationProperty Name="UserResponse" Relationship="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" FromRole="Users" ToRole="UserResponse" />
         </EntityType>
@@ -930,6 +1006,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_UserProfile_RefereeTeam">
+          <End Type="TISS_MindRadarModel.RefereeTeam" Role="RefereeTeam" Multiplicity="0..1" />
+          <End Type="TISS_MindRadarModel.UserProfile" Role="UserProfile" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RefereeTeam">
+              <PropertyRef Name="RefereeTeamID" />
+            </Principal>
+            <Dependent Role="UserProfile">
+              <PropertyRef Name="RefereeTeamID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_RefereeTeam">
+          <End Type="TISS_MindRadarModel.RefereeTeam" Role="RefereeTeam" Multiplicity="0..1" />
+          <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RefereeTeam">
+              <PropertyRef Name="RefereeTeamID" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="RefereeTeamID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_SmoothExperience_Category">
           <End Type="TISS_MindRadarModel.SmoothExperienceCategory" Role="SmoothExperienceCategory" Multiplicity="1" />
           <End Type="TISS_MindRadarModel.SmoothExperience" Role="SmoothExperience" Multiplicity="*" />
@@ -939,6 +1039,18 @@
             </Principal>
             <Dependent Role="SmoothExperience">
               <PropertyRef Name="CategoryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SmoothExperienceResponse_SmoothExperience">
+          <End Type="TISS_MindRadarModel.SmoothExperience" Role="SmoothExperience" Multiplicity="1" />
+          <End Type="TISS_MindRadarModel.SmoothExperienceResponse" Role="SmoothExperienceResponse" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SmoothExperience">
+              <PropertyRef Name="QuestionID" />
+            </Principal>
+            <Dependent Role="SmoothExperienceResponse">
+              <PropertyRef Name="QuestionID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -981,28 +1093,6 @@
         <Association Name="QuestionCategory">
           <End Type="TISS_MindRadarModel.Category" Role="Category" Multiplicity="*" />
           <End Type="TISS_MindRadarModel.MentalPhysicalState" Role="MentalPhysicalState" Multiplicity="*" />
-        </Association>
-        <EntityType Name="SmoothExperienceResponse">
-          <Key>
-            <PropertyRef Name="ResponseID" />
-          </Key>
-          <Property Name="ResponseID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="QuestionID" Type="Int32" Nullable="false" />
-          <Property Name="Score" Type="Int32" Nullable="false" />
-          <Property Name="SubmittedAt" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="SmoothExperience" Relationship="TISS_MindRadarModel.FK_SmoothExperienceResponse_SmoothExperience" FromRole="SmoothExperienceResponse" ToRole="SmoothExperience" />
-        </EntityType>
-        <Association Name="FK_SmoothExperienceResponse_SmoothExperience">
-          <End Type="TISS_MindRadarModel.SmoothExperience" Role="SmoothExperience" Multiplicity="1" />
-          <End Type="TISS_MindRadarModel.SmoothExperienceResponse" Role="SmoothExperienceResponse" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="SmoothExperience">
-              <PropertyRef Name="QuestionID" />
-            </Principal>
-            <Dependent Role="SmoothExperienceResponse">
-              <PropertyRef Name="QuestionID" />
-            </Dependent>
-          </ReferentialConstraint>
         </Association>
         </Schema>
     </edmx:ConceptualModels>
@@ -1188,6 +1278,15 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="RefereeTeam">
+            <EntityTypeMapping TypeName="TISS_MindRadarModel.RefereeTeam">
+              <MappingFragment StoreEntitySet="RefereeTeam">
+                <ScalarProperty Name="isenable" ColumnName="isenable" />
+                <ScalarProperty Name="RefereeTeamName" ColumnName="RefereeTeamName" />
+                <ScalarProperty Name="RefereeTeamID" ColumnName="RefereeTeamID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="SelfEfficacy">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.SelfEfficacy">
               <MappingFragment StoreEntitySet="SelfEfficacy">
@@ -1220,6 +1319,16 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="SmoothExperienceResponse">
+            <EntityTypeMapping TypeName="TISS_MindRadarModel.SmoothExperienceResponse">
+              <MappingFragment StoreEntitySet="SmoothExperienceResponse">
+                <ScalarProperty Name="SubmittedAt" ColumnName="SubmittedAt" />
+                <ScalarProperty Name="Score" ColumnName="Score" />
+                <ScalarProperty Name="QuestionID" ColumnName="QuestionID" />
+                <ScalarProperty Name="ResponseID" ColumnName="ResponseID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="Successful">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.Successful">
               <MappingFragment StoreEntitySet="Successful">
@@ -1242,6 +1351,7 @@
           <EntitySetMapping Name="UserProfile">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.UserProfile">
               <MappingFragment StoreEntitySet="UserProfile">
+                <ScalarProperty Name="RefereeTeamID" ColumnName="RefereeTeamID" />
                 <ScalarProperty Name="Gender" ColumnName="Gender" />
                 <ScalarProperty Name="IsVerified" ColumnName="IsVerified" />
                 <ScalarProperty Name="InviteCode" ColumnName="InviteCode" />
@@ -1270,6 +1380,7 @@
           <EntitySetMapping Name="Users">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.Users">
               <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="RefereeTeamID" ColumnName="RefereeTeamID" />
                 <ScalarProperty Name="TeamID" ColumnName="TeamID" />
                 <ScalarProperty Name="LastLoginDate" ColumnName="LastLoginDate" />
                 <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
@@ -1290,16 +1401,6 @@
               <ScalarProperty Name="ID" ColumnName="CategoryID" />
             </EndProperty>
           </AssociationSetMapping>
-          <EntitySetMapping Name="SmoothExperienceResponse">
-            <EntityTypeMapping TypeName="TISS_MindRadarModel.SmoothExperienceResponse">
-              <MappingFragment StoreEntitySet="SmoothExperienceResponse">
-                <ScalarProperty Name="SubmittedAt" ColumnName="SubmittedAt" />
-                <ScalarProperty Name="Score" ColumnName="Score" />
-                <ScalarProperty Name="QuestionID" ColumnName="QuestionID" />
-                <ScalarProperty Name="ResponseID" ColumnName="ResponseID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

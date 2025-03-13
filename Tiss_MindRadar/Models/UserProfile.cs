@@ -22,7 +22,9 @@ namespace Tiss_MindRadar.Models
         public string InviteCode { get; set; }
         public bool IsVerified { get; set; }
         public string Gender { get; set; }
+        public Nullable<int> RefereeTeamID { get; set; }
     
+        public virtual RefereeTeam RefereeTeam { get; set; }
         public virtual Team Team { get; set; }
         public virtual Users Users { get; set; }
     }

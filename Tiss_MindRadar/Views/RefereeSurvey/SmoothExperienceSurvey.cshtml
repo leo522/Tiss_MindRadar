@@ -1,25 +1,26 @@
-﻿<!DOCTYPE html>
+﻿@{
+    ViewBag.Title = "流暢經驗_裁判版";
+    Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
+}
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>流暢經驗問卷</title>
-    <link href="~/MindRadarCss/FlowExperience.css" rel="stylesheet" />
+    <title>流暢經驗_裁判版</title>
 </head>
 <body class="bg-gray-100">
     <div class="flex justify-between items-center py-4 px-6 bg-white shadow-md">
         <div class="text-2xl font-bold text-gray-800">
-            歡迎, @ViewBag.UserName <span class="text-lg text-gray-600">(隊伍: @ViewBag.TeamName)</span>
+            歡迎, @ViewBag.RefereeName <span class="text-lg text-gray-600">(隊伍: @ViewBag.RefereeTeamName)</span>
         </div>
         <div>
             <img src="~/img/TissLogo.jpg" alt="Logo" class="h-16 mx-auto">
         </div>
     </div>
     <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold text-center mb-6">流暢經驗問卷</h1>
-        <p class="text-gray-700 text-center mb-4">
-            填答方式：請根據您的執法經驗，選擇最符合的選項。
-        </p>
+        <h1 class="text-2xl font-bold text-center mb-6">流暢經驗量表</h1>
+
         @using (Html.BeginForm("SubmitFlowExperience", "Survey", FormMethod.Post, new { id = "flowExperienceForm" }))
         {
             @Html.AntiForgeryToken()
@@ -27,32 +28,44 @@
                 <table class="responsive-table sticky-header">
                     <thead>
                         <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                            <th class="py-3 px-6 text-center sticky-left">題目</th>
-                            <th class="py-3 px-4 text-center">非常不同意</th>
-                            <th class="py-3 px-4 text-center">不同意</th>
+                            <th class="py-3 px-6 text-center">流暢經驗</th>
+                            <th class="py-3 px-6 text-center sticky-left">請根據自己的實際狀況，填答以下15題</th>
+                            <th class="py-3 px-4 text-center">非常不符合</th>
+                            <th class="py-3 px-4 text-center">不符合</th>
                             <th class="py-3 px-4 text-center">普通</th>
-                            <th class="py-3 px-4 text-center">同意</th>
-                            <th class="py-3 px-4 text-center">非常同意</th>
+                            <th class="py-3 px-4 text-center">符合</th>
+                            <th class="py-3 px-4 text-center">非常符合</th>
                         </tr>
                     </thead>
                     <tbody class="text-gray-700 text-sm">
-                        @foreach (var item in Model)
+                        @foreach (var category in Model)
                         {
-                            <tr class="border-b border-gray-200 hover:bg-gray-100">
-                                <td class="py-3 px-1 text-left break-words whitespace-normal overflow-visible w-80 sticky-left">
-                                    <span class="font-bold mr-2">@item.QuestionNumber.</span>@item.QuestionText
-                                </td>
-                                @for (int i = 1; i <= 5; i++)
-                                {
-                                    <td class="py-3 px-4 text-center">
-                                        <input type="radio" name="responses[@item.ID]" value="@i" class="form-radio text-blue-600">
-                                    </td>
-                                }
+                            <!-- 渲染分類標題 -->
+                            <tr class="bg-gray-300 text-gray-800">
+                                <td colspan="7" class="py-2 px-4 font-bold">@category.CategoryItem</td>
                             </tr>
+
+                            <!-- 渲染分類內的問題 -->
+                            foreach (var item in category.Questions)
+                            {
+                                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                    <td class="py-3 px-1 text-left break-words whitespace-normal overflow-visible w-80"></td>
+                                    <td class="py-3 px-1 text-left break-words whitespace-normal overflow-visible w-80">
+                                        <span class="font-bold mr-2">@item.QuestionID.</span>@item.QuestionText
+                                    </td>
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <td class="py-3 px-4 text-center">
+                                            <input type="radio" name="responses[@item.QuestionID]" value="@i" class="form-radio text-blue-600 w-5 h-5">
+                                        </td>
+                                    }
+                                </tr>
+                            }
                         }
                     </tbody>
                 </table>
             </div>
+
             <div class="mt-6 text-center">
                 <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
                     提交答案
@@ -60,16 +73,17 @@
             </div>
         }
     </div>
+
     <script>
         document.getElementById('flowExperienceForm').addEventListener('submit', function (e) {
             let missingQuestions = [];
 
             document.querySelectorAll('tbody tr').forEach(row => {
-                const questionNumber = row.querySelector('td:first-child').textContent.trim();
+                const questionNumber = row.querySelector('td:nth-child(2) span')?.textContent.trim();
                 const radioButtons = row.querySelectorAll('input[type="radio"]');
                 const isChecked = [...radioButtons].some(radio => radio.checked);
 
-                if (!isChecked) {
+                if (!isChecked && questionNumber) {
                     missingQuestions.push(questionNumber);
                 }
             });
