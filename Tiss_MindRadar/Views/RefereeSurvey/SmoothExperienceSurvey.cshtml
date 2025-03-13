@@ -25,37 +25,40 @@
         {
             @Html.AntiForgeryToken()
             <div class="table-container">
-                <table class="responsive-table sticky-header">
+                <table class="responsive-table sticky-header border-collapse border border-gray-400 w-full">
                     <thead>
                         <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                            <th class="py-3 px-6 text-center">流暢經驗</th>
-                            <th class="py-3 px-6 text-center sticky-left">請根據自己的實際狀況，填答以下15題</th>
-                            <th class="py-3 px-4 text-center">非常不符合</th>
-                            <th class="py-3 px-4 text-center">不符合</th>
-                            <th class="py-3 px-4 text-center">普通</th>
-                            <th class="py-3 px-4 text-center">符合</th>
-                            <th class="py-3 px-4 text-center">非常符合</th>
+                            <th class="py-3 px-6 text-center w-1/10 border border-gray-400">流暢經驗</th>
+                            <th class="py-3 px-6 text-center w-1/10 border border-gray-400">請根據自己的實際狀況，填答以下15題</th>
+                            <th class="py-3 px-6 text-center w-1/10 min-w-[80px] border border-gray-400">非常不符合</th>
+                            <th class="py-3 px-6 text-center w-1/10 min-w-[80px] border border-gray-400">不符合</th>
+                            <th class="py-3 px-6 text-center w-1/10 min-w-[80px] border border-gray-400">普通</th>
+                            <th class="py-3 px-6 text-center w-1/10 min-w-[80px] border border-gray-400">符合</th>
+                            <th class="py-3 px-6 text-center w-1/8 min-w-[80px] border border-gray-400">非常符合</th>
                         </tr>
                     </thead>
                     <tbody class="text-gray-700 text-sm">
                         @foreach (var category in Model)
                         {
-                            <!-- 渲染分類標題 -->
-                            <tr class="bg-gray-300 text-gray-800">
-                                <td colspan="7" class="py-2 px-4 font-bold">@category.CategoryItem</td>
-                            </tr>
+                            var questionCount = category.Questions.Count;
+                            bool isFirstRow = true;
 
-                            <!-- 渲染分類內的問題 -->
                             foreach (var item in category.Questions)
                             {
                                 <tr class="border-b border-gray-200 hover:bg-gray-100">
-                                    <td class="py-3 px-1 text-left break-words whitespace-normal overflow-visible w-80"></td>
-                                    <td class="py-3 px-1 text-left break-words whitespace-normal overflow-visible w-80">
+                                    @if (isFirstRow)
+                                    {
+                                        <td rowspan="@questionCount" class="py-2 px-4 font-bold text-center align-middle border border-gray-400 bg-gray-300">
+                                            @category.CategoryItem
+                                        </td>
+                                        isFirstRow = false;
+                                    }
+                                    <td class="py-3 px-1 text-left break-words whitespace-normal overflow-visible w-1/2 border border-gray-400">
                                         <span class="font-bold mr-2">@item.QuestionID.</span>@item.QuestionText
                                     </td>
                                     @for (int i = 1; i <= 5; i++)
                                     {
-                                        <td class="py-3 px-4 text-center">
+                                        <td class="py-3 px-4 text-center border border-gray-400">
                                             <input type="radio" name="responses[@item.QuestionID]" value="@i" class="form-radio text-blue-600 w-5 h-5">
                                         </td>
                                     }
