@@ -190,7 +190,7 @@ namespace Tiss_MindRadar.Controllers
                     var userProfile = _db.UserProfile.FirstOrDefault(up => up.UserID == user.UserID);
                     var teamName = userProfile != null ? _db.Team.FirstOrDefault(t => t.TeamID == userProfile.TeamID)?.TeamName : "未指定";
 
-                    string userRole = userProfile?.Role ?? "Player"; // 預設為選手
+                    string userRole = userProfile?.Role ?? "Player"; //預設為選手
 
                     Session["UserID"] = user.UserID;
                     Session["UserName"] = user.UserName;
@@ -198,15 +198,22 @@ namespace Tiss_MindRadar.Controllers
                     Session["Age"] = userProfile?.Age ?? 0;
                     Session["TeamName"] = teamName;
 
-                    // 返回跳轉的 URL
-                    if (userRole == "Consultant")
+                    // 根據角色設定跳轉的 URL
+                    string redirectUrl;
+
+                    switch (userRole)
                     {
-                        return Json(new { success = true, redirectUrl = "/TeamRawData/ChooseTeamState" });
+                        case "Consultant":
+                            redirectUrl = "/TeamRawData/ChooseTeamState";
+                            break;
+                        case "Referee":
+                            redirectUrl = "/RefereeSurvey/SmoothExperienceSurvey"; // 新增裁判專用跳轉
+                            break;
+                        default:
+                            redirectUrl = "/Survey/MentalPhysicalState"; // 預設跳轉
+                            break;
                     }
-                    else
-                    {
-                        return Json(new { success = true, redirectUrl = "/Survey/MentalPhysicalState" });
-                    }
+                    return Json(new { success = true, redirectUrl });
                 }
 
                 return Json(new { success = false, message = "帳號或密碼錯誤！" });

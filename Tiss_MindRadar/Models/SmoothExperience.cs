@@ -14,6 +14,12 @@ namespace Tiss_MindRadar.Models
     
     public partial class SmoothExperience
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public SmoothExperience()
+        {
+            this.SmoothExperienceResponse = new HashSet<SmoothExperienceResponse>();
+        }
+    
         public int QuestionID { get; set; }
         public string QuestionText { get; set; }
         public int ScoreOption1 { get; set; }
@@ -24,5 +30,7 @@ namespace Tiss_MindRadar.Models
         public int CategoryID { get; set; }
     
         public virtual SmoothExperienceCategory SmoothExperienceCategory { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<SmoothExperienceResponse> SmoothExperienceResponse { get; set; }
     }
 }

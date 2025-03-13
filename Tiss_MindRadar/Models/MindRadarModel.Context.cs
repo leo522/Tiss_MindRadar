@@ -50,5 +50,6 @@ namespace Tiss_MindRadar.Models
         public virtual DbSet<UserProfile> UserProfile { get; set; }
         public virtual DbSet<UserResponse> UserResponse { get; set; }
         public virtual DbSet<Users> Users { get; set; }
+        public virtual DbSet<SmoothExperienceResponse> SmoothExperienceResponse { get; set; }
     }
 }

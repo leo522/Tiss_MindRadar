@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="e082adac15d14bd39cd8c7755c705474" Name="Diagram1" ZoomLevel="94">
+      <Diagram DiagramId="e082adac15d14bd39cd8c7755c705474" Name="Diagram1" ZoomLevel="45">
         <EntityTypeShape EntityType="TISS_MindRadarModel.Category" Width="1.5" PointX="8.75" PointY="6.5" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.ConsultantTeams" Width="1.5" PointX="3" PointY="7.625" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.Fatigue" Width="1.5" PointX="2.75" PointY="10.625" />
@@ -41,6 +41,8 @@
         <AssociationConnector Association="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" />
         <AssociationConnector Association="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" />
         <AssociationConnector Association="TISS_MindRadarModel.QuestionCategory" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.SmoothExperienceResponse" Width="1.5" PointX="16.125" PointY="3.75" />
+        <AssociationConnector Association="TISS_MindRadarModel.FK_SmoothExperienceResponse_SmoothExperience" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

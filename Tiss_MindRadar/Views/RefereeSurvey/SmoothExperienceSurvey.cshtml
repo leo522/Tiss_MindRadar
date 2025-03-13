@@ -4,57 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>流暢經驗問卷</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="~/MindRadarCss/FlowExperience.css" rel="stylesheet" />
 </head>
-<body class="bg-gray-100 p-4">
-    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 class="text-2xl font-bold mb-4 text-center">流暢經驗問卷</h1>
-        <form id="surveyForm" class="space-y-6">
-            <div id="questionsContainer"></div>
-            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">提交</button>
-        </form>
+<body class="bg-gray-100">
+    <div class="flex justify-between items-center py-4 px-6 bg-white shadow-md">
+        <div class="text-2xl font-bold text-gray-800">
+            歡迎, @ViewBag.UserName <span class="text-lg text-gray-600">(隊伍: @ViewBag.TeamName)</span>
+        </div>
+        <div>
+            <img src="~/img/TissLogo.jpg" alt="Logo" class="h-16 mx-auto">
+        </div>
     </div>
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold text-center mb-6">流暢經驗問卷</h1>
+        <p class="text-gray-700 text-center mb-4">
+            填答方式：請根據您的執法經驗，選擇最符合的選項。
+        </p>
+        @using (Html.BeginForm("SubmitFlowExperience", "Survey", FormMethod.Post, new { id = "flowExperienceForm" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="table-container">
+                <table class="responsive-table sticky-header">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                            <th class="py-3 px-6 text-center sticky-left">題目</th>
+                            <th class="py-3 px-4 text-center">非常不同意</th>
+                            <th class="py-3 px-4 text-center">不同意</th>
+                            <th class="py-3 px-4 text-center">普通</th>
+                            <th class="py-3 px-4 text-center">同意</th>
+                            <th class="py-3 px-4 text-center">非常同意</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700 text-sm">
+                        @foreach (var item in Model)
+                        {
+                            <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                <td class="py-3 px-1 text-left break-words whitespace-normal overflow-visible w-80 sticky-left">
+                                    <span class="font-bold mr-2">@item.QuestionNumber.</span>@item.QuestionText
+                                </td>
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <td class="py-3 px-4 text-center">
+                                        <input type="radio" name="responses[@item.ID]" value="@i" class="form-radio text-blue-600">
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-6 text-center">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                    提交答案
+                </button>
+            </div>
+        }
+    </div>
+    <script>
+        document.getElementById('flowExperienceForm').addEventListener('submit', function (e) {
+            let missingQuestions = [];
 
-    <script>const questions = [
-            "在軟網場上執法，對我而言是件枯燥乏味的工作。",
-            "執法過程中，我清楚知道下一步要做什麼。",
-            "有一種強烈的感覺，擔心自己會無法擔任稱職的裁判。",
-            "上場執法時，我會暫時忘記煩惱或其他大小事。",
-            "執法過程中，我常無法專心。",
-            "和先進們討論執法狀況時，總是無法進入狀況或切入話題中。",
-            "我覺得完成執法工作之後，在精神上感覺很充實。",
-            "在執法過程中，我可以達到自己想要的感覺。",
-            "每次執法結束後，我知道自己的表現更進步、純熟了。",
-            "上場執法結束後，讓我內心充滿愉快與滿足。",
-            "我十分享受執法時體驗到的感覺，並希望常有機會上場執法。",
-            "上場執法時，我有一種『能夠完全控制』的感覺。",
-            "上場執法時，我會感覺到時間過得特別快。",
-            "我不會擔心自己無法掌握比賽的過程。",
-            "我相信自己的能力可以勝任比賽中的挑戰。"
-        ];
+            document.querySelectorAll('tbody tr').forEach(row => {
+                const questionNumber = row.querySelector('td:first-child').textContent.trim();
+                const radioButtons = row.querySelectorAll('input[type="radio"]');
+                const isChecked = [...radioButtons].some(radio => radio.checked);
 
-        const questionsContainer = document.getElementById("questionsContainer");
-        questions.forEach((question, index) => {
-            const questionBlock = document.createElement("div");
-            questionBlock.classList.add("p-4", "bg-gray-50", "rounded-md", "shadow-sm");
+                if (!isChecked) {
+                    missingQuestions.push(questionNumber);
+                }
+            });
 
-            questionBlock.innerHTML = `
-                <p class="font-medium mb-2">${index + 1}. ${question}</p>
-                <div class="flex space-x-4">
-                    ${[1, 2, 3, 4, 5].map(score => `
-                        <label class="flex items-center space-x-1">
-                            <input type="radio" name="q${index + 1}" value="${score}" class="form-radio h-5 w-5 text-blue-600">
-                            <span>${score}</span>
-                        </label>
-                    `).join('')}
-                </div>
-            `;
-            questionsContainer.appendChild(questionBlock);
+            if (missingQuestions.length > 0) {
+                e.preventDefault(); // 阻止表單提交
+                Swal.fire({
+                    icon: 'error',
+                    title: '未填寫答案',
+                    html: `請填寫以下題號的答案：<br><strong>${missingQuestions.join(", ")}</strong>`,
+                    confirmButtonText: '確定'
+                });
+            }
         });
-
-        document.getElementById("surveyForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            alert("問卷提交成功！");
-        });</script>
+    </script>
 </body>
 </html>
