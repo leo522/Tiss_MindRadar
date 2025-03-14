@@ -43,13 +43,16 @@ namespace Tiss_MindRadar.Controllers
                 ViewBag.TeamName = Session["TeamName"];
 
                 // 取得該用戶所有有填寫問卷的日期，並按時間排序
-                List<DateTime> surveyDatesList = _db.PsychologicalResponse.Where(ur => ur.UserID == userId && ur.SurveyDate.HasValue)
-                .Select(ur => ur.SurveyDate.Value).Distinct().OrderByDescending(d => d).ToList();
+                List<DateTime> surveyDatesList = _db.PsychologicalResponse
+                    .Where(ur => ur.UserID == userId && ur.SurveyDate.HasValue)
+                    .Select(ur => ur.SurveyDate.Value)
+                    .Distinct()
+                    .OrderByDescending(d => d)
+                    .ToList();
 
                 ViewBag.SurveyDates = surveyDatesList;
 
                 string[] surveyDatesRaw = form.GetValues("surveyDates");
-
                 List<DateTime> selectedDates = new List<DateTime>();
 
                 if (surveyDatesRaw != null)
@@ -75,11 +78,10 @@ namespace Tiss_MindRadar.Controllers
 
                 // 查詢所有選擇的日期的數據
                 List<RadarChartVIewModel> radarData = new List<RadarChartVIewModel>();
-
                 foreach (var date in selectedDates)
                 {
                     string query = @"SELECT c.CategoryName, COALESCE(AVG(pr.Score), 0) AS AverageScore FROM PsychologicalResponse pr
-                           INNER JOIN PsychologicalStateCategory c ON pr.CategoryID = c.ID WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1 GROUP BY c.CategoryName";
+                       INNER JOIN PsychologicalStateCategory c ON pr.CategoryID = c.ID WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1 GROUP BY c.CategoryName";
 
                     object[] parameters = { userId, date };
                     var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();
@@ -88,17 +90,17 @@ namespace Tiss_MindRadar.Controllers
                     {
                         item.SurveyDate = date.ToString("yyyy-MM-dd"); // 存入日期以便前端區分數據
                     }
-
                     radarData.AddRange(data);
                 }
 
-                //取得心理狀態技能描述
+                // 取得心理狀態技能描述
                 var psy = _db.PsychologicalStateDescription.OrderBy(d => d.ID).ToList();
-
                 var headers = _db.PsychologicalStateHeader.ToList();
+                var mentalStates = _db.MentalState.OrderBy(m => m.QuestionNumber).ToList();
 
                 ViewBag.PsychologicalDescriptions = psy;
                 ViewBag.PsychologicalHeaders = headers;
+                ViewBag.MentalStateQuestions = mentalStates;
 
                 return View(radarData);
             }

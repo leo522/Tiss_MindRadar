@@ -27,3 +27,46 @@ th, td {
 th {
     background-color: #f3f4f6;
 }
+
+/* 讓最外層容器變寬 */
+.container {
+    max-width: 100%;
+    width: 90vw; /* 讓內容佔據更大範圍 */
+}
+
+/* 讓表格變寬，填滿可用空間 */
+table {
+    width: 100%;
+    min-width: 1200px; /* 讓表格不會太窄 */
+    border-collapse: collapse;
+    margin: auto; /* 讓表格居中 */
+}
+
+/* 讓 td 內的文字適當換行，不會太擠 */
+th, td {
+    padding: 12px; /* 增加內距，讓內容不會太擠 */
+    border: 1px solid #ddd;
+    text-align: left;
+    white-space: normal; /* 允許內容換行 */
+    word-break: break-word; /* 避免長單字撐破表格 */
+}
+
+/* 讓 HeaderText 也適當撐開 */
+.bg-yellow-200, .bg-orange-300, .bg-blue-300 {
+    padding: 15px;
+    font-size: 18px;
+}
+
+.category-title {
+    white-space: nowrap; /* 不允許換行 */
+    min-width: 150px; /* 設定最小寬度，避免過窄 */
+    text-align: center; /* 讓文字置中 */
+    vertical-align: middle; /* 垂直置中 */
+}
+
+.skill-title {
+    white-space: nowrap; /* 確保不換行 */
+    min-width: 200px; /* 確保有足夠的寬度 */
+    text-align: left; /* 保持靠左對齊 */
+    vertical-align: middle; /* 讓內容置中 */
+}

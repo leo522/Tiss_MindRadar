@@ -17,7 +17,7 @@
     <script src="~/RadarChartJS/MentalStateRadarChart.js"></script> @*計算各日期區間檢測結果&高低分*@
 </head>
 <body class="bg-gray-100">
-    <div class="container mx-auto p-6">
+    <div class="container mx-auto p-6 max-w-full">
         <div class="header-container">
             <div class="user-info">
                 受訪者: @ViewBag.UserName <span class="text-lg text-gray-600">(年齡: @ViewBag.Age 歲 | 隊伍: @ViewBag.TeamName)</span>
@@ -55,46 +55,46 @@
                     更新雷達圖
                 </button>
             </form>
-            <div class="radar-chart-container mt-4"> @*產生雷達圖*@
+            <div class="radar-chart-container mt-4">
+                @*產生雷達圖*@
                 <canvas id="radarChart" width="580" height="580"></canvas>
             </div>
             <script id="radarData" type="application/json">
                 @Html.Raw(JsonConvert.SerializeObject(Model))
             </script>
         </div>
-
         <div class="mt-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">運動心理技能說明</h2>
-            <table class="min-w-full bg-white shadow-md rounded border border-gray-300">
-                @*<thead>
-                    <tr class="bg-gray-200 text-gray-600 uppercase text-lg leading-normal">
-                        <th class="py-3 px-6 text-left w-1/4">類別</th>
-                        <th class="py-3 px-6 text-left w-1/4">心理技能</th>
-                        <th class="py-3 px-6 text-left">描述</th>
-                    </tr>
-                </thead>*@
+            <table class="min-w-full w-full bg-white shadow-md rounded border border-gray-300">
 
                 <tbody>
-                    @if (ViewBag.PsychologicalHeaders != null && ViewBag.PsychologicalDescriptions != null)
+                    @if (ViewBag.PsychologicalHeaders != null && ViewBag.PsychologicalDescriptions != null && ViewBag.MentalStateQuestions != null)
                     {
-                        var headers = ViewBag.PsychologicalHeaders as List<Tiss_MindRadar.Models.PsychologicalStateHeader>;
                         var descriptions = ViewBag.PsychologicalDescriptions as List<Tiss_MindRadar.Models.PsychologicalStateDescription>;
+                        var questions = ViewBag.MentalStateQuestions as List<Tiss_MindRadar.Models.MentalState>;
 
-                        string currentHeader = null;
                         string currentCategory = null;
 
-                        foreach (var header in headers)
+                        var categoryRowSpans = descriptions.GroupBy(d => d.CategoryName)
+                            .ToDictionary(g => g.Key, g => g.Count());
+
+                        var categoryItemIndex = new Dictionary<string, int>();
+
+                        foreach (var header in ViewBag.PsychologicalHeaders)
                         {
-                            <tr class="bg-gray-300">
-                                <td colspan="3" class="py-3 px-6 font-bold text-lg">@header.HeaderText</td>
+                            // 取得對應 `HeaderText` 的第一個 `CategoryName`
+                            var firstCategory = descriptions.FirstOrDefault(d => d.HeaderID == header.ID)?.CategoryName ?? "";
+
+                            // 根據分類名稱來決定標題背景顏色
+                            string headerClass = firstCategory.Contains("基礎心理技能") ? "bg-yellow-200" :
+                                                 firstCategory.Contains("身體心理技能") ? "bg-orange-300" :
+                                                 firstCategory.Contains("認知技能") ? "bg-blue-300" : "bg-gray-200";
+
+                            <tr class="@headerClass">
+                                <td colspan="4" class="py-3 px-6 font-bold text-lg">@header.HeaderText</td>
                             </tr>
 
                             var filteredDescriptions = descriptions.Where(d => d.HeaderID == header.ID).ToList();
-                            Dictionary<string, int> categoryRowSpans = filteredDescriptions
-                                .GroupBy(d => d.CategoryName)
-                                .ToDictionary(g => g.Key, g => g.Count());
-
-                            Dictionary<string, int> categoryItemIndex = new Dictionary<string, int>();
 
                             foreach (var item in filteredDescriptions)
                             {
@@ -111,28 +111,36 @@
                                     categoryItemIndex[item.CategoryName]++;
                                 }
 
-                                <tr class="border-b border-gray-200">
-                                    @if (currentCategory != item.CategoryName)
-                                    {
-                                        int categoryRowSpan = categoryRowSpans[item.CategoryName];
-                                        <td class="py-3 px-6 text-left font-bold @categoryClass" rowspan="@categoryRowSpan">
-                                            @item.CategoryName
-                                        </td>
-                                        currentCategory = item.CategoryName;
-                                    }
-                                    <td class="py-3 px-6 text-left">@categoryItemIndex[item.CategoryName]. @item.SubCategory</td>
-                                    <td class="py-3 px-6 text-left">@item.DescriptionContent</td>
-                                </tr>
+                <tr class="border-b border-gray-200">
+                    @if (currentCategory != item.CategoryName)
+                    {
+                        int categoryRowSpan = categoryRowSpans[item.CategoryName];
+                        <td class="py-3 px-6 text-left font-bold @categoryClass category-title" rowspan="@categoryRowSpan">
+                            @item.CategoryName
+                    </td>
+                    currentCategory = item.CategoryName;
+                }
+                    <td class="py-3 px-6 text-left skill-title">@categoryItemIndex[item.CategoryName]. @item.SubCategory</td>
+                    <td class="py-3 px-6 text-left">@item.DescriptionContent</td>
+                    <td class="py-3 px-6 text-left">
+                        <ul class="list-disc ml-5">
+                            @foreach (var question in questions.Where(q => q.CategoryID == item.ID).OrderBy(q => q.QuestionNumber))
+                            {
+                                <li>@question.QuestionNumber. @question.QuestionText</li>
+                            }
+                        </ul>
+                    </td>
+                </tr>
                             }
                         }
                     }
                 </tbody>
-
             </table>
         </div>
 
-    </div>
 
+
+    </div>
     <script>
         const radarData = @Html.Raw(JsonConvert.SerializeObject(Model));
 
