@@ -75,6 +75,7 @@
           <Property Name="Option3" Type="nvarchar" MaxLength="10" Nullable="false" />
           <Property Name="Option4" Type="nvarchar" MaxLength="10" Nullable="false" />
           <Property Name="Option5" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="CategoryID" Type="int" />
         </EntityType>
         <EntityType Name="OverallSelfRegulation">
           <Key>
@@ -158,6 +159,14 @@
           <Property Name="CategoryName" Type="nvarchar" MaxLength="30" Nullable="false" />
           <Property Name="SubCategory" Type="nvarchar" MaxLength="30" Nullable="false" />
           <Property Name="DescriptionContent" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="HeaderID" Type="int" />
+        </EntityType>
+        <EntityType Name="PsychologicalStateHeader">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="HeaderText" Type="nvarchar" MaxLength="100" Nullable="false" />
         </EntityType>
         <EntityType Name="PsychologicalStateQuestionCategory">
           <Key>
@@ -174,6 +183,7 @@
           </Key>
           <Property Name="QuestionID" Type="int" Nullable="false" />
           <Property Name="CategoryID" Type="int" Nullable="false" />
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
         </EntityType>
         <EntityType Name="RefereeTeam">
           <Key>
@@ -388,6 +398,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_MentalState_Category">
+          <End Role="PsychologicalStateCategory" Type="Self.PsychologicalStateCategory" Multiplicity="0..1" />
+          <End Role="MentalState" Type="Self.MentalState" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PsychologicalStateCategory">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="MentalState">
+              <PropertyRef Name="CategoryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_PsychologicalResponse_QuestionID">
           <End Role="MentalState" Type="Self.MentalState" Multiplicity="1" />
           <End Role="PsychologicalResponse" Type="Self.PsychologicalResponse" Multiplicity="*" />
@@ -409,6 +431,18 @@
             </Principal>
             <Dependent Role="PsychologicalResponse">
               <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_PsychologicalStateDescription_HeaderID">
+          <End Role="PsychologicalStateHeader" Type="Self.PsychologicalStateHeader" Multiplicity="0..1" />
+          <End Role="PsychologicalStateDescription" Type="Self.PsychologicalStateDescription" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PsychologicalStateHeader">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="PsychologicalStateDescription">
+              <PropertyRef Name="HeaderID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -477,6 +511,7 @@
           <EntitySet Name="PsychologicalResponse" EntityType="Self.PsychologicalResponse" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="PsychologicalStateCategory" EntityType="Self.PsychologicalStateCategory" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="PsychologicalStateDescription" EntityType="Self.PsychologicalStateDescription" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PsychologicalStateHeader" EntityType="Self.PsychologicalStateHeader" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="PsychologicalStateQuestionCategory" EntityType="Self.PsychologicalStateQuestionCategory" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="QuestionCategory" EntityType="Self.QuestionCategory" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="RefereeTeam" EntityType="Self.RefereeTeam" Schema="dbo" store:Type="Tables" />
@@ -525,6 +560,10 @@
             <End Role="Team" EntitySet="Team" />
             <End Role="ConsultantTeams" EntitySet="ConsultantTeams" />
           </AssociationSet>
+          <AssociationSet Name="FK_MentalState_Category" Association="Self.FK_MentalState_Category">
+            <End Role="PsychologicalStateCategory" EntitySet="PsychologicalStateCategory" />
+            <End Role="MentalState" EntitySet="MentalState" />
+          </AssociationSet>
           <AssociationSet Name="FK_PsychologicalResponse_QuestionID" Association="Self.FK_PsychologicalResponse_QuestionID">
             <End Role="MentalState" EntitySet="MentalState" />
             <End Role="PsychologicalResponse" EntitySet="PsychologicalResponse" />
@@ -532,6 +571,10 @@
           <AssociationSet Name="FK_PsychologicalResponse_UserID" Association="Self.FK_PsychologicalResponse_UserID">
             <End Role="Users" EntitySet="Users" />
             <End Role="PsychologicalResponse" EntitySet="PsychologicalResponse" />
+          </AssociationSet>
+          <AssociationSet Name="FK_PsychologicalStateDescription_HeaderID" Association="Self.FK_PsychologicalStateDescription_HeaderID">
+            <End Role="PsychologicalStateHeader" EntitySet="PsychologicalStateHeader" />
+            <End Role="PsychologicalStateDescription" EntitySet="PsychologicalStateDescription" />
           </AssociationSet>
           <AssociationSet Name="FK_SmoothExperience_Category" Association="Self.FK_SmoothExperience_Category">
             <End Role="SmoothExperienceCategory" EntitySet="SmoothExperienceCategory" />
@@ -571,7 +614,9 @@
           <EntitySet Name="PsychologicalResponse" EntityType="TISS_MindRadarModel.PsychologicalResponse" />
           <EntitySet Name="PsychologicalStateCategory" EntityType="TISS_MindRadarModel.PsychologicalStateCategory" />
           <EntitySet Name="PsychologicalStateDescription" EntityType="TISS_MindRadarModel.PsychologicalStateDescription" />
+          <EntitySet Name="PsychologicalStateHeader" EntityType="TISS_MindRadarModel.PsychologicalStateHeader" />
           <EntitySet Name="PsychologicalStateQuestionCategory" EntityType="TISS_MindRadarModel.PsychologicalStateQuestionCategory" />
+          <EntitySet Name="QuestionCategory" EntityType="TISS_MindRadarModel.QuestionCategory" />
           <EntitySet Name="RefereeTeam" EntityType="TISS_MindRadarModel.RefereeTeam" />
           <EntitySet Name="SelfEfficacy" EntityType="TISS_MindRadarModel.SelfEfficacy" />
           <EntitySet Name="SmoothExperience" EntityType="TISS_MindRadarModel.SmoothExperience" />
@@ -582,6 +627,10 @@
           <EntitySet Name="UserProfile" EntityType="TISS_MindRadarModel.UserProfile" />
           <EntitySet Name="UserResponse" EntityType="TISS_MindRadarModel.UserResponse" />
           <EntitySet Name="Users" EntityType="TISS_MindRadarModel.Users" />
+          <AssociationSet Name="FK__QuestionC__Categ__68487DD7" Association="TISS_MindRadarModel.FK__QuestionC__Categ__68487DD7">
+            <End Role="Category" EntitySet="Category" />
+            <End Role="QuestionCategory" EntitySet="QuestionCategory" />
+          </AssociationSet>
           <AssociationSet Name="FK_ConsultantTeams_ConsultantID" Association="TISS_MindRadarModel.FK_ConsultantTeams_ConsultantID">
             <End Role="Users" EntitySet="Users" />
             <End Role="ConsultantTeams" EntitySet="ConsultantTeams" />
@@ -590,9 +639,17 @@
             <End Role="Team" EntitySet="Team" />
             <End Role="ConsultantTeams" EntitySet="ConsultantTeams" />
           </AssociationSet>
+          <AssociationSet Name="FK__QuestionC__Quest__6754599E" Association="TISS_MindRadarModel.FK__QuestionC__Quest__6754599E">
+            <End Role="MentalPhysicalState" EntitySet="MentalPhysicalState" />
+            <End Role="QuestionCategory" EntitySet="QuestionCategory" />
+          </AssociationSet>
           <AssociationSet Name="FK__Psycholog__Quest__282DF8C2" Association="TISS_MindRadarModel.FK__Psycholog__Quest__282DF8C2">
             <End Role="MentalState" EntitySet="MentalState" />
             <End Role="PsychologicalStateQuestionCategory" EntitySet="PsychologicalStateQuestionCategory" />
+          </AssociationSet>
+          <AssociationSet Name="FK_MentalState_Category" Association="TISS_MindRadarModel.FK_MentalState_Category">
+            <End Role="PsychologicalStateCategory" EntitySet="PsychologicalStateCategory" />
+            <End Role="MentalState" EntitySet="MentalState" />
           </AssociationSet>
           <AssociationSet Name="FK_PsychologicalResponse_QuestionID" Association="TISS_MindRadarModel.FK_PsychologicalResponse_QuestionID">
             <End Role="MentalState" EntitySet="MentalState" />
@@ -605,6 +662,10 @@
           <AssociationSet Name="FK__Psycholog__Categ__29221CFB" Association="TISS_MindRadarModel.FK__Psycholog__Categ__29221CFB">
             <End Role="PsychologicalStateCategory" EntitySet="PsychologicalStateCategory" />
             <End Role="PsychologicalStateQuestionCategory" EntitySet="PsychologicalStateQuestionCategory" />
+          </AssociationSet>
+          <AssociationSet Name="FK_PsychologicalStateDescription_HeaderID" Association="TISS_MindRadarModel.FK_PsychologicalStateDescription_HeaderID">
+            <End Role="PsychologicalStateHeader" EntitySet="PsychologicalStateHeader" />
+            <End Role="PsychologicalStateDescription" EntitySet="PsychologicalStateDescription" />
           </AssociationSet>
           <AssociationSet Name="FK_UserProfile_RefereeTeam" Association="TISS_MindRadarModel.FK_UserProfile_RefereeTeam">
             <End Role="RefereeTeam" EntitySet="RefereeTeam" />
@@ -634,10 +695,6 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="UserResponse" EntitySet="UserResponse" />
           </AssociationSet>
-          <AssociationSet Name="QuestionCategory" Association="TISS_MindRadarModel.QuestionCategory">
-            <End Role="Category" EntitySet="Category" />
-            <End Role="MentalPhysicalState" EntitySet="MentalPhysicalState" />
-          </AssociationSet>
         </EntityContainer>
         <EntityType Name="Category">
           <Key>
@@ -645,7 +702,7 @@
           </Key>
           <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="CategoryName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="MentalPhysicalState" Relationship="TISS_MindRadarModel.QuestionCategory" FromRole="Category" ToRole="MentalPhysicalState" />
+          <NavigationProperty Name="QuestionCategory" Relationship="TISS_MindRadarModel.FK__QuestionC__Categ__68487DD7" FromRole="Category" ToRole="QuestionCategory" />
         </EntityType>
         <EntityType Name="ConsultantTeams">
           <Key>
@@ -690,7 +747,7 @@
           <Property Name="ScoreOption4" Type="Int32" Nullable="false" />
           <Property Name="ScoreOption5" Type="Int32" Nullable="false" />
           <Property Name="ScoreOption6" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Category" Relationship="TISS_MindRadarModel.QuestionCategory" FromRole="MentalPhysicalState" ToRole="Category" />
+          <NavigationProperty Name="QuestionCategory" Relationship="TISS_MindRadarModel.FK__QuestionC__Quest__6754599E" FromRole="MentalPhysicalState" ToRole="QuestionCategory" />
         </EntityType>
         <EntityType Name="MentalRelaxation">
           <Key>
@@ -713,7 +770,9 @@
           <Property Name="Option3" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
           <Property Name="Option4" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
           <Property Name="Option5" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="CategoryID" Type="Int32" />
           <NavigationProperty Name="PsychologicalStateQuestionCategory" Relationship="TISS_MindRadarModel.FK__Psycholog__Quest__282DF8C2" FromRole="MentalState" ToRole="PsychologicalStateQuestionCategory" />
+          <NavigationProperty Name="PsychologicalStateCategory" Relationship="TISS_MindRadarModel.FK_MentalState_Category" FromRole="MentalState" ToRole="PsychologicalStateCategory" />
           <NavigationProperty Name="PsychologicalResponse" Relationship="TISS_MindRadarModel.FK_PsychologicalResponse_QuestionID" FromRole="MentalState" ToRole="PsychologicalResponse" />
         </EntityType>
         <EntityType Name="OverallSelfRegulation">
@@ -791,6 +850,7 @@
           </Key>
           <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="CategoryName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="MentalState" Relationship="TISS_MindRadarModel.FK_MentalState_Category" FromRole="PsychologicalStateCategory" ToRole="MentalState" />
           <NavigationProperty Name="PsychologicalStateQuestionCategory" Relationship="TISS_MindRadarModel.FK__Psycholog__Categ__29221CFB" FromRole="PsychologicalStateCategory" ToRole="PsychologicalStateQuestionCategory" />
         </EntityType>
         <EntityType Name="PsychologicalStateDescription">
@@ -801,6 +861,16 @@
           <Property Name="CategoryName" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
           <Property Name="SubCategory" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
           <Property Name="DescriptionContent" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="HeaderID" Type="Int32" />
+          <NavigationProperty Name="PsychologicalStateHeader" Relationship="TISS_MindRadarModel.FK_PsychologicalStateDescription_HeaderID" FromRole="PsychologicalStateDescription" ToRole="PsychologicalStateHeader" />
+        </EntityType>
+        <EntityType Name="PsychologicalStateHeader">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="HeaderText" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="PsychologicalStateDescription" Relationship="TISS_MindRadarModel.FK_PsychologicalStateDescription_HeaderID" FromRole="PsychologicalStateHeader" ToRole="PsychologicalStateDescription" />
         </EntityType>
         <EntityType Name="PsychologicalStateQuestionCategory">
           <Key>
@@ -811,6 +881,17 @@
           <Property Name="CategoryID" Type="Int32" Nullable="false" />
           <NavigationProperty Name="MentalState" Relationship="TISS_MindRadarModel.FK__Psycholog__Quest__282DF8C2" FromRole="PsychologicalStateQuestionCategory" ToRole="MentalState" />
           <NavigationProperty Name="PsychologicalStateCategory" Relationship="TISS_MindRadarModel.FK__Psycholog__Categ__29221CFB" FromRole="PsychologicalStateQuestionCategory" ToRole="PsychologicalStateCategory" />
+        </EntityType>
+        <EntityType Name="QuestionCategory">
+          <Key>
+            <PropertyRef Name="QuestionID" />
+            <PropertyRef Name="CategoryID" />
+          </Key>
+          <Property Name="QuestionID" Type="Int32" Nullable="false" />
+          <Property Name="CategoryID" Type="Int32" Nullable="false" />
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="Category" Relationship="TISS_MindRadarModel.FK__QuestionC__Categ__68487DD7" FromRole="QuestionCategory" ToRole="Category" />
+          <NavigationProperty Name="MentalPhysicalState" Relationship="TISS_MindRadarModel.FK__QuestionC__Quest__6754599E" FromRole="QuestionCategory" ToRole="MentalPhysicalState" />
         </EntityType>
         <EntityType Name="RefereeTeam">
           <Key>
@@ -934,6 +1015,18 @@
           <NavigationProperty Name="UserProfile" Relationship="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" FromRole="Users" ToRole="UserProfile" />
           <NavigationProperty Name="UserResponse" Relationship="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" FromRole="Users" ToRole="UserResponse" />
         </EntityType>
+        <Association Name="FK__QuestionC__Categ__68487DD7">
+          <End Type="TISS_MindRadarModel.Category" Role="Category" Multiplicity="1" />
+          <End Type="TISS_MindRadarModel.QuestionCategory" Role="QuestionCategory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Category">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="QuestionCategory">
+              <PropertyRef Name="CategoryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_ConsultantTeams_ConsultantID">
           <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
           <End Type="TISS_MindRadarModel.ConsultantTeams" Role="ConsultantTeams" Multiplicity="*" />
@@ -958,6 +1051,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__QuestionC__Quest__6754599E">
+          <End Type="TISS_MindRadarModel.MentalPhysicalState" Role="MentalPhysicalState" Multiplicity="1" />
+          <End Type="TISS_MindRadarModel.QuestionCategory" Role="QuestionCategory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="MentalPhysicalState">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="QuestionCategory">
+              <PropertyRef Name="QuestionID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__Psycholog__Quest__282DF8C2">
           <End Type="TISS_MindRadarModel.MentalState" Role="MentalState" Multiplicity="1" />
           <End Type="TISS_MindRadarModel.PsychologicalStateQuestionCategory" Role="PsychologicalStateQuestionCategory" Multiplicity="*" />
@@ -967,6 +1072,18 @@
             </Principal>
             <Dependent Role="PsychologicalStateQuestionCategory">
               <PropertyRef Name="QuestionID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_MentalState_Category">
+          <End Type="TISS_MindRadarModel.PsychologicalStateCategory" Role="PsychologicalStateCategory" Multiplicity="0..1" />
+          <End Type="TISS_MindRadarModel.MentalState" Role="MentalState" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PsychologicalStateCategory">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="MentalState">
+              <PropertyRef Name="CategoryID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1003,6 +1120,18 @@
             </Principal>
             <Dependent Role="PsychologicalStateQuestionCategory">
               <PropertyRef Name="CategoryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_PsychologicalStateDescription_HeaderID">
+          <End Type="TISS_MindRadarModel.PsychologicalStateHeader" Role="PsychologicalStateHeader" Multiplicity="0..1" />
+          <End Type="TISS_MindRadarModel.PsychologicalStateDescription" Role="PsychologicalStateDescription" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PsychologicalStateHeader">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="PsychologicalStateDescription">
+              <PropertyRef Name="HeaderID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1090,10 +1219,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="QuestionCategory">
-          <End Type="TISS_MindRadarModel.Category" Role="Category" Multiplicity="*" />
-          <End Type="TISS_MindRadarModel.MentalPhysicalState" Role="MentalPhysicalState" Multiplicity="*" />
-        </Association>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1166,6 +1291,7 @@
           <EntitySetMapping Name="MentalState">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.MentalState">
               <MappingFragment StoreEntitySet="MentalState">
+                <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
                 <ScalarProperty Name="Option5" ColumnName="Option5" />
                 <ScalarProperty Name="Option4" ColumnName="Option4" />
                 <ScalarProperty Name="Option3" ColumnName="Option3" />
@@ -1262,9 +1388,18 @@
           <EntitySetMapping Name="PsychologicalStateDescription">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.PsychologicalStateDescription">
               <MappingFragment StoreEntitySet="PsychologicalStateDescription">
+                <ScalarProperty Name="HeaderID" ColumnName="HeaderID" />
                 <ScalarProperty Name="DescriptionContent" ColumnName="DescriptionContent" />
                 <ScalarProperty Name="SubCategory" ColumnName="SubCategory" />
                 <ScalarProperty Name="CategoryName" ColumnName="CategoryName" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PsychologicalStateHeader">
+            <EntityTypeMapping TypeName="TISS_MindRadarModel.PsychologicalStateHeader">
+              <MappingFragment StoreEntitySet="PsychologicalStateHeader">
+                <ScalarProperty Name="HeaderText" ColumnName="HeaderText" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>
@@ -1275,6 +1410,15 @@
                 <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
                 <ScalarProperty Name="QuestionID" ColumnName="QuestionID" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="QuestionCategory">
+            <EntityTypeMapping TypeName="TISS_MindRadarModel.QuestionCategory">
+              <MappingFragment StoreEntitySet="QuestionCategory">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
+                <ScalarProperty Name="QuestionID" ColumnName="QuestionID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -1393,14 +1537,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <AssociationSetMapping Name="QuestionCategory" TypeName="TISS_MindRadarModel.QuestionCategory" StoreEntitySet="QuestionCategory">
-            <EndProperty Name="MentalPhysicalState">
-              <ScalarProperty Name="ID" ColumnName="QuestionID" />
-            </EndProperty>
-            <EndProperty Name="Category">
-              <ScalarProperty Name="ID" ColumnName="CategoryID" />
-            </EndProperty>
-          </AssociationSetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

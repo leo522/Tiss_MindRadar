@@ -29,9 +29,11 @@ namespace Tiss_MindRadar.Models
         public string Option3 { get; set; }
         public string Option4 { get; set; }
         public string Option5 { get; set; }
+        public Nullable<int> CategoryID { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PsychologicalStateQuestionCategory> PsychologicalStateQuestionCategory { get; set; }
+        public virtual PsychologicalStateCategory PsychologicalStateCategory { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PsychologicalResponse> PsychologicalResponse { get; set; }
     }

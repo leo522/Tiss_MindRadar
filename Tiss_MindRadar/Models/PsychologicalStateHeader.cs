@@ -12,18 +12,18 @@ namespace Tiss_MindRadar.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class Category
+    public partial class PsychologicalStateHeader
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Category()
+        public PsychologicalStateHeader()
         {
-            this.QuestionCategory = new HashSet<QuestionCategory>();
+            this.PsychologicalStateDescription = new HashSet<PsychologicalStateDescription>();
         }
     
         public int ID { get; set; }
-        public string CategoryName { get; set; }
+        public string HeaderText { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<QuestionCategory> QuestionCategory { get; set; }
+        public virtual ICollection<PsychologicalStateDescription> PsychologicalStateDescription { get; set; }
     }
 }

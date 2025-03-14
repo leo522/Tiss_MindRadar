@@ -66,37 +66,42 @@
         <div class="mt-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">運動心理技能說明</h2>
             <table class="min-w-full bg-white shadow-md rounded border border-gray-300">
-                <thead>
+                @*<thead>
                     <tr class="bg-gray-200 text-gray-600 uppercase text-lg leading-normal">
                         <th class="py-3 px-6 text-left w-1/4">類別</th>
                         <th class="py-3 px-6 text-left w-1/4">心理技能</th>
                         <th class="py-3 px-6 text-left">描述</th>
                     </tr>
-                </thead>
-                <tbody>
-                    @if (ViewBag.PsychologicalDescriptions != null)
-                    {
-                        var descriptions = ViewBag.PsychologicalDescriptions as List<Tiss_MindRadar.Models.PsychologicalStateDescription>;
-                        if (descriptions != null)
-                        {
-                            string currentCategory = null;
+                </thead>*@
 
-                            // 預先計算 category 的 rowspan
-                            Dictionary<string, int> categoryRowSpans = descriptions
+                <tbody>
+                    @if (ViewBag.PsychologicalHeaders != null && ViewBag.PsychologicalDescriptions != null)
+                    {
+                        var headers = ViewBag.PsychologicalHeaders as List<Tiss_MindRadar.Models.PsychologicalStateHeader>;
+                        var descriptions = ViewBag.PsychologicalDescriptions as List<Tiss_MindRadar.Models.PsychologicalStateDescription>;
+
+                        string currentHeader = null;
+                        string currentCategory = null;
+
+                        foreach (var header in headers)
+                        {
+                            <tr class="bg-gray-300">
+                                <td colspan="3" class="py-3 px-6 font-bold text-lg">@header.HeaderText</td>
+                            </tr>
+
+                            var filteredDescriptions = descriptions.Where(d => d.HeaderID == header.ID).ToList();
+                            Dictionary<string, int> categoryRowSpans = filteredDescriptions
                                 .GroupBy(d => d.CategoryName)
                                 .ToDictionary(g => g.Key, g => g.Count());
 
-                            // 追蹤每個類別的編號
                             Dictionary<string, int> categoryItemIndex = new Dictionary<string, int>();
 
-                            foreach (var item in descriptions)
+                            foreach (var item in filteredDescriptions)
                             {
-                                // 設定背景顏色類別
                                 string categoryClass = item.CategoryName.Contains("基礎心理技能") ? "bg-yellow-200" :
                                                        item.CategoryName.Contains("身體心理技能") ? "bg-orange-300" :
                                                        item.CategoryName.Contains("認知技能") ? "bg-blue-300" : "";
 
-                                // 確保該類別的計數存在
                                 if (!categoryItemIndex.ContainsKey(item.CategoryName))
                                 {
                                     categoryItemIndex[item.CategoryName] = 1;
@@ -122,6 +127,7 @@
                         }
                     }
                 </tbody>
+
             </table>
         </div>
 

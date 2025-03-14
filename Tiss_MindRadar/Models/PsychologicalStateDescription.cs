@@ -18,5 +18,8 @@ namespace Tiss_MindRadar.Models
         public string CategoryName { get; set; }
         public string SubCategory { get; set; }
         public string DescriptionContent { get; set; }
+        public Nullable<int> HeaderID { get; set; }
+    
+        public virtual PsychologicalStateHeader PsychologicalStateHeader { get; set; }
     }
 }

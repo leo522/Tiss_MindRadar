@@ -17,7 +17,7 @@ namespace Tiss_MindRadar.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public MentalPhysicalState()
         {
-            this.Category = new HashSet<Category>();
+            this.QuestionCategory = new HashSet<QuestionCategory>();
         }
     
         public int ID { get; set; }
@@ -32,6 +32,6 @@ namespace Tiss_MindRadar.Models
         public int ScoreOption6 { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Category> Category { get; set; }
+        public virtual ICollection<QuestionCategory> QuestionCategory { get; set; }
     }
 }

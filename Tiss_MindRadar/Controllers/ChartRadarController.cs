@@ -93,10 +93,12 @@ namespace Tiss_MindRadar.Controllers
                 }
 
                 //取得心理狀態技能描述
-                var psy = _db.PsychologicalStateDescription
-                    .OrderBy(d => d.ID).ToList();
+                var psy = _db.PsychologicalStateDescription.OrderBy(d => d.ID).ToList();
+
+                var headers = _db.PsychologicalStateHeader.ToList();
 
                 ViewBag.PsychologicalDescriptions = psy;
+                ViewBag.PsychologicalHeaders = headers;
 
                 return View(radarData);
             }

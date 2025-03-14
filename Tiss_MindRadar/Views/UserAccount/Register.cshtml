@@ -39,12 +39,12 @@
                 <select class="form-control" id="Role" name="Role" required>
                     <option value="" disabled selected>請選擇註冊身份</option>
                     <option value="Player">選手</option>
-                    <option value="Consultant">訪談員</option>
+                    <option value="Consultant">運動心理人員</option>
                     <option value="Referee">裁判</option>
                 </select>
             </div>
             <div class="form-group" id="inviteCodeField" style="display: none;">
-                <label for="InviteCode">驗證碼 (訪談員/裁判專用)</label>
+                <label for="InviteCode">驗證碼 (運動心理人員/裁判專用)</label>
                 <input type="text" class="form-control" id="InviteCode" name="InviteCode" placeholder="請輸入驗證碼" />
                 <small id="inviteCodeError" class="text-danger"></small>
             </div>
@@ -142,12 +142,12 @@
 
                 let errors = [];
 
-                // 訪談員 Email 限制
+                // 運動心理人員 Email 限制
                 if (role === "Consultant" && !email.endsWith(officialDomain)) {
-                    errors.push("註冊訪談員須使用運科中心電子郵件帳號");
+                    errors.push("註冊運動心理人員須使用運科中心電子郵件帳號");
                 }
 
-                // 訪談員驗證碼檢查
+                // 運動心理人員驗證碼檢查
                 if ((role === "Consultant" || role === "Referee") && !inviteCode) {
                     errors.push("請輸入驗證碼");
                 }

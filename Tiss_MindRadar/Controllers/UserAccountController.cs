@@ -149,10 +149,10 @@ namespace Tiss_MindRadar.Controllers
                 return "角色選擇錯誤，請重新選擇";
             }
 
-            //限制訪談員Email
+            //限制運動心理人員Email
             if (Role == "Consultant" && !Email.EndsWith("@tiss.org.tw"))
             {
-                return "註冊訪談員帳號，需使用運科中心電子郵件帳號";
+                return "註冊運動心理人員帳號，需使用運科中心電子郵件帳號";
             }
 
             //邀請碼驗證
