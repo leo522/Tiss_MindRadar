@@ -63,6 +63,20 @@ namespace Tiss_MindRadar.Controllers
                     return Json(new { success = false, message = "帳號已存在，請使用其他帳號" });
                 }
 
+                string mappedGender;
+                switch (Gender)
+                {
+                    case "Male":
+                        mappedGender = "男";
+                        break;
+                    case "Female":
+                        mappedGender = "女";
+                        break;
+                    default:
+                        mappedGender = "未指定"; // 預設值
+                        break;
+                }
+
                 var newUser = new Users //建立使用者
                 {
                     Jobcode = Jobcode,
@@ -85,7 +99,7 @@ namespace Tiss_MindRadar.Controllers
                     TeamID = Role == "Player" ? TeamID : null,
                     Role = Role,
                     InviteCode = InviteCode,
-                    Gender = Gender,
+                    Gender = mappedGender,
                     IsVerified = true,
                     RefereeTeamID = Role == "Referee" ? RefereeTeamID : null
                 };

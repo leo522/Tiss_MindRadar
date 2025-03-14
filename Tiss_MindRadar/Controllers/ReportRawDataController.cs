@@ -38,7 +38,7 @@ namespace Tiss_MindRadar.Controllers
                     .Select(result => new TeamReportViewModel
                     {
                         UserName = result.temp.temp.u.UserName,
-                        Gender = result.up.Gender, // 取得性別欄位
+                        Gender = result.up.Gender,
                         Category = result.temp.ms.QuestionText,
                         Score = result.temp.temp.pr.Score,
                         SurveyDate = result.temp.temp.pr.SurveyDate
