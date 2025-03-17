@@ -26,7 +26,7 @@ namespace Tiss_MindRadar.Controllers
         }
         #endregion
 
-        #region 提交身心狀態檢測數據並保存到 MentalPhysicalStateUserResponse 表
+        #region 提交身心狀態檢測數據並保存到 UserResponse 表
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SubmitMentalPhysicalState(FormCollection form)
@@ -121,7 +121,8 @@ namespace Tiss_MindRadar.Controllers
                         int questionId = int.Parse(key.Replace("responses[", "").Replace("]", ""));
                         int.TryParse(form[key], out int score);
 
-                        if (questionId >= 15 && questionId <= 18) // **反向計分 (第15~18題)**
+                        // **將 7~10 題 & 15~18 題進行反向計分**
+                        if ((questionId >= 7 && questionId <= 10) || (questionId >= 15 && questionId <= 18))
                         {
                             score = 6 - score;
                         }

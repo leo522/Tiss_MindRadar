@@ -11,10 +11,16 @@
             @Html.DropDownList("teamId", ViewBag.Teams as SelectList, "請選擇隊伍", new { @class = "form-control", id = "teamSelect" })
         </div>
         <button type="button" id="downloadReport" class="bg-blue-500 text-white px-4 py-2 rounded">下載報表</button>
+        @if (Session["UserID"] != null)
+        {
+            <a href="@Url.Action("Logout", "UserAccount")"
+               class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">
+                登出
+            </a>
+        }
     </div>
     <p id="surveyCountText" class="text-gray-700 font-bold mt-2"></p>
 </form>
-
 @if (Model != null && Model.Any())
 {
     <h3 class="text-xl font-bold text-center mt-6 text-gray-700">隊伍成員與分數</h3>
@@ -32,7 +38,6 @@
             @{
                 var groupedData = Model.GroupBy(m => new { m.UserName, m.SurveyDate }).ToList();
             }
-
             @foreach (var group in groupedData)
             {
                 int rowSpanCount = group.Count();
@@ -60,7 +65,6 @@
         </tbody>
     </table>
 }
-
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const teamSelect = document.getElementById("teamSelect");

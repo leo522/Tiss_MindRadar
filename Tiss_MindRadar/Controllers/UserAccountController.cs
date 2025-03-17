@@ -27,6 +27,18 @@ namespace Tiss_MindRadar.Controllers
         {
             try
             {
+                // **檢查 Email 是否已經被註冊**
+                if (_db.Users.Any(u => u.Email == Email))
+                {
+                    return Json(new { success = false, message = "此 Email 已被註冊，請使用其他 Email" });
+                }
+
+                // **檢查 Jobcode 是否已經被註冊**
+                if (_db.Users.Any(u => u.Jobcode == Jobcode))
+                {
+                    return Json(new { success = false, message = "帳號已存在，請使用其他帳號" });
+                }
+
                 var validationMessage = ValidateRegistrationInputs(Jobcode, Email, Role, InviteCode);
                 if (!string.IsNullOrEmpty(validationMessage))
                 {

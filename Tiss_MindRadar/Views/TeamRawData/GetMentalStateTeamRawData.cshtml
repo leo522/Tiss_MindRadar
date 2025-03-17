@@ -19,7 +19,15 @@
         <a href="@Url.Action("TeamReportData", "ReportRawData")" class="btn btn-primary">
             查詢各隊伍選手明細
         </a>
+        @if (Session["UserID"] != null)
+        {
+            <a href="@Url.Action("Logout", "UserAccount")"
+               class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">
+                登出
+            </a>
+        }
     </div>
+
     <form id="teamForm" method="post" action="@Url.Action("GetMentalStateTeamRawData", "TeamRawData")">
         <div class="mb-4 flex items-center space-x-4">
             <div class="flex-1">
