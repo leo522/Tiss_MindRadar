@@ -4,30 +4,34 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="e082adac15d14bd39cd8c7755c705474" Name="Diagram1" ZoomLevel="59">
-        <EntityTypeShape EntityType="TISS_MindRadarModel.Category" Width="1.5" PointX="10.75" PointY="5.75" />
+      <Diagram DiagramId="e082adac15d14bd39cd8c7755c705474" Name="Diagram1" ZoomLevel="77">
+        <EntityTypeShape EntityType="TISS_MindRadarModel.Category" Width="1.5" PointX="10.75" PointY="13.75" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.ConsultantTeams" Width="1.5" PointX="5.25" PointY="12.875" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.Fatigue" Width="1.5" PointX="0.75" PointY="0.75" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.LackOfEnergy" Width="1.5" PointX="0.75" PointY="3.75" />
-        <EntityTypeShape EntityType="TISS_MindRadarModel.MentalPhysicalState" Width="1.5" PointX="13" PointY="5" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.MentalPhysicalState" Width="1.5" PointX="13" PointY="13" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.MentalRelaxation" Width="1.5" PointX="7.75" PointY="6.75" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.MentalState" Width="1.5" PointX="6" PointY="2.25" />
-        <EntityTypeShape EntityType="TISS_MindRadarModel.OverallSelfRegulation" Width="1.5" PointX="10.75" PointY="9.75" />
-        <EntityTypeShape EntityType="TISS_MindRadarModel.OverallStress" Width="1.5" PointX="12.75" PointY="9.75" />
-        <EntityTypeShape EntityType="TISS_MindRadarModel.PersonalAchievement" Width="1.5" PointX="10.75" PointY="12.75" />
-        <EntityTypeShape EntityType="TISS_MindRadarModel.PhysicalCondition" Width="1.5" PointX="12.75" PointY="12.75" />
-        <EntityTypeShape EntityType="TISS_MindRadarModel.PhysicalDiscomfort" Width="1.5" PointX="0.75" PointY="14.75" />
-        <EntityTypeShape EntityType="TISS_MindRadarModel.PhysiologicalRelaxation" Width="1.5" PointX="7.75" PointY="14.75" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.OverallSelfRegulation" Width="1.5" PointX="0.75" PointY="14.75" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.OverallStress" Width="1.5" PointX="7.75" PointY="14.75" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.PersonalAchievement" Width="1.5" PointX="15.75" PointY="0.75" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.PhysicalCondition" Width="1.5" PointX="15.75" PointY="8.75" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.PhysicalDiscomfort" Width="1.5" PointX="15.75" PointY="11.75" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.PhysiologicalRelaxation" Width="1.5" PointX="15.75" PointY="14.75" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.ProfessionalCapabilities" Width="1.5" PointX="13" PointY="5" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.ProfessionalCapabilitiesCategory" Width="1.5" PointX="10.75" PointY="5.625" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.ProfessionalCapabilitiesResponse" Width="1.5" PointX="15.25" PointY="5.375" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.PsychologicalResponse" Width="1.5" PointX="8.25" PointY="10.5" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.PsychologicalStateCategory" Width="1.5" PointX="3.75" PointY="3" />
-        <EntityTypeShape EntityType="TISS_MindRadarModel.PsychologicalStateDescription" Width="1.5" PointX="14.75" PointY="9.75" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.PsychologicalStateDescription" Width="1.5" PointX="13" PointY="8.875" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.PsychologicalStateHeader" Width="1.5" PointX="10.75" PointY="9.25" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.PsychologicalStateQuestionCategory" Width="1.5" PointX="8.25" PointY="3.875" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.RefereeTeam" Width="1.5" PointX="0.75" PointY="7" />
-        <EntityTypeShape EntityType="TISS_MindRadarModel.SelfEfficacy" Width="1.5" PointX="14.75" PointY="12.75" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.SelfEfficacy" Width="1.5" PointX="9.75" PointY="16.75" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.SmoothExperience" Width="1.5" PointX="11" PointY="1" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.SmoothExperienceCategory" Width="1.5" PointX="8.75" PointY="1.625" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.SmoothExperienceResponse" Width="1.5" PointX="13.25" PointY="1.375" />
-        <EntityTypeShape EntityType="TISS_MindRadarModel.Successful" Width="1.5" PointX="15.75" PointY="0.75" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.Successful" Width="1.5" PointX="17.75" PointY="0.75" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.Team" Width="1.5" PointX="3" PointY="6.375" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.UserProfile" Width="1.5" PointX="5.25" PointY="8.75" />
         <EntityTypeShape EntityType="TISS_MindRadarModel.UserResponse" Width="1.5" PointX="5.25" PointY="16.75" />
@@ -37,8 +41,11 @@
         <AssociationConnector Association="TISS_MindRadarModel.FK__Psycholog__Quest__282DF8C2" />
         <AssociationConnector Association="TISS_MindRadarModel.FK_MentalState_Category" />
         <AssociationConnector Association="TISS_MindRadarModel.FK_PsychologicalResponse_QuestionID" />
+        <AssociationConnector Association="TISS_MindRadarModel.FK_ProfessionalCapabilities_Category" />
+        <AssociationConnector Association="TISS_MindRadarModel.FK_ProfessionalCapabilitiesResponse_ProfessionalCapabilities" />
         <AssociationConnector Association="TISS_MindRadarModel.FK_PsychologicalResponse_UserID" />
         <AssociationConnector Association="TISS_MindRadarModel.FK__Psycholog__Categ__29221CFB" />
+        <AssociationConnector Association="TISS_MindRadarModel.FK_PsychologicalStateDescription_HeaderID" />
         <AssociationConnector Association="TISS_MindRadarModel.FK_UserProfile_RefereeTeam" />
         <AssociationConnector Association="TISS_MindRadarModel.FK_Users_RefereeTeam" />
         <AssociationConnector Association="TISS_MindRadarModel.FK_SmoothExperience_Category" />
@@ -47,8 +54,6 @@
         <AssociationConnector Association="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" />
         <AssociationConnector Association="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" />
         <AssociationConnector Association="TISS_MindRadarModel.QuestionCategory" />
-        <EntityTypeShape EntityType="TISS_MindRadarModel.PsychologicalStateHeader" Width="1.5" PointX="15.375" PointY="3.75" />
-        <AssociationConnector Association="TISS_MindRadarModel.FK_PsychologicalStateDescription_HeaderID" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

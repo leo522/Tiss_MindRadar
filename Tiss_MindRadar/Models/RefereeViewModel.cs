@@ -26,5 +26,23 @@ namespace Tiss_MindRadar.Models
             public int Score { get; set; }
         }
 
+        public class ProfessionalCapabilitiesViewModel
+        {
+            public int QuestionID { get; set; }
+            public string QuestionText { get; set; }
+        }
+
+        public class ProfessionalCapabilitiesCategoryViewModel
+        {
+            public int CategoryID { get; set; }
+            public string CategoryItem { get; set; }  // 分類名稱
+            public List<ProfessionalCapabilitiesViewModel> Questions { get; set; } // 問題列表
+        }
+
+        public class ProfessionalCapabilitiesResponseViewModel
+        {
+            public int QuestionID { get; set; }
+            public int Score { get; set; }
+        }
     }
 }

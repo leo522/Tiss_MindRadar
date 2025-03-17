@@ -224,6 +224,15 @@
     <Compile Include="Models\PhysiologicalRelaxation.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ProfessionalCapabilities.cs">
+      <DependentUpon>MindRadarModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ProfessionalCapabilitiesCategory.cs">
+      <DependentUpon>MindRadarModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ProfessionalCapabilitiesResponse.cs">
+      <DependentUpon>MindRadarModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\PsychologicalResponse.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
@@ -298,6 +307,8 @@
     <Content Include="img\heart-attack.png" />
     <Content Include="img\logo.svg" />
     <Content Include="img\medical-checkup.png" />
+    <Content Include="img\ProfessionalCapabilities.jpg" />
+    <Content Include="img\SmoothExperience.jpg" />
     <Content Include="img\TissLogo.jpg" />
     <Content Include="MindRadarCss\PsychologicalDescriptionsStyle.css" />
     <Content Include="RadarChartJS\chartjs-plugin-datalabels%402.2.js" />
@@ -373,6 +384,8 @@
     <Content Include="Views\TeamRawData\GetMentalPhysicalStateTeamRawData.cshtml" />
     <Content Include="Views\ReportRawData\TeamReportData.cshtml" />
     <Content Include="Views\RefereeSurvey\SmoothExperienceSurvey.cshtml" />
+    <Content Include="Views\RefereeSurvey\ChooseRefereeSurvey.cshtml" />
+    <Content Include="Views\RefereeSurvey\ProfessionalCapabilitiesSurvey.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
