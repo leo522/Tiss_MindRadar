@@ -7,6 +7,7 @@ namespace Tiss_MindRadar.Models
 {
 	public class RefereeViewModel
 	{
+        #region 流暢經驗
         public class SmoothExperienceViewModel
         {
             public int QuestionID { get; set; }
@@ -25,7 +26,9 @@ namespace Tiss_MindRadar.Models
             public int QuestionID { get; set; }
             public int Score { get; set; }
         }
+        #endregion
 
+        #region 專業能力
         public class ProfessionalCapabilitiesViewModel
         {
             public int QuestionID { get; set; }
@@ -44,5 +47,6 @@ namespace Tiss_MindRadar.Models
             public int QuestionID { get; set; }
             public int Score { get; set; }
         }
+        #endregion
     }
 }
