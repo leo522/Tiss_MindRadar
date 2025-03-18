@@ -53,76 +53,6 @@ namespace Tiss_MindRadar.Controllers
         }
         #endregion
 
-        #region 下載Excel報表
-        [HttpPost]
-        public ActionResult ExportTeamReportToExcel()
-        {
-            try
-            {
-                if (!int.TryParse(Request.Form["teamId"], out int teamId))
-                {
-                    return new HttpStatusCodeResult(400, "缺少必要參數");
-                }
-
-                var team = _db.Team.FirstOrDefault(t => t.TeamID == teamId);
-                if (team == null) return HttpNotFound("隊伍不存在");
-
-                string safeTeamName = string.Concat(team.TeamName.Split(Path.GetInvalidFileNameChars()));
-                string fileName = $"{safeTeamName}_報表.xlsx";
-
-                var reportData = _db.PsychologicalResponse
-                    .Join(_db.Users, pr => pr.UserID, u => u.UserID, (pr, u) => new { pr, u })
-                    .Where(x => x.u.TeamID == teamId)
-                    .Select(x => new
-                    {
-                        x.u.UserName,
-                        Gender = x.u.UserProfile.FirstOrDefault().Gender,
-                        x.pr.SurveyDate,
-                        x.pr.Score,
-                        x.pr.QuestionID
-                    }).ToList();
-
-                if (!reportData.Any()) return Content("沒有數據可下載");
-
-                //性別排序(女 → 男)
-                var groupedData = reportData
-                    .GroupBy(r => new { r.UserName, r.Gender, r.SurveyDate })
-                    .Select(g => new ReportDataModel
-                    {
-                        UserName = g.Key.UserName,
-                        Gender = g.Key.Gender,
-                        SurveyDate = g.Key.SurveyDate?.ToString("yyyy/MM/dd"),
-                        Scores = g.GroupBy(r => r.QuestionID).ToDictionary(q => q.Key, q => q.First().Score)
-                    })
-                    .OrderBy(g => g.Gender == "女" ? 0 : 1).ThenBy(g => g.UserName).ToList();
-
-                //計算大類別向度 & 小類別向度的平均數
-                var maleScores = reportData.Where(r => r.Gender == "男").GroupBy(r => r.QuestionID).ToDictionary(g => g.Key, g => g.Average(r => r.Score));
-
-                var femaleScores = reportData.Where(r => r.Gender == "女").GroupBy(r => r.QuestionID).ToDictionary(g => g.Key, g => g.Average(r => r.Score));
-
-                var categoryAverages = GetCategoryAverages(maleScores, femaleScores);
-
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
-                using (var package = new ExcelPackage())
-                {
-                    var worksheet = package.Workbook.Worksheets.Add($"{team.TeamName} 報表");
-                    
-                    GenerateReportSheet(worksheet, groupedData, categoryAverages); //產生報表
-
-                    var stream = new MemoryStream(package.GetAsByteArray());
-
-                    return File(stream, "application/octet-stream", fileName);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-        #endregion
-
         #region 產生報表
         private void GenerateReportSheet(ExcelWorksheet sheet, List<ReportDataModel> data, Dictionary<string, (double maleAvg, double femaleAvg)> categoryAverages)
         {
@@ -193,11 +123,83 @@ namespace Tiss_MindRadar.Controllers
                     sheet.Cells[row, 3].Value = category.Value.femaleAvg;
                     sheet.Cells[row, 2, row, 3].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
-                    row++; // 換行
+                    row++; //換行
                 }
             }
 
             sheet.Cells[sheet.Dimension.Address].AutoFitColumns(); //自動調整欄位寬度
+        }
+        #endregion
+
+        #region 下載Excel報表
+        [HttpPost]
+        public ActionResult ExportTeamReportToExcel()
+        {
+            try
+            {
+                if (!int.TryParse(Request.Form["teamId"], out int teamId))
+                {
+                    return new HttpStatusCodeResult(400, "缺少必要參數");
+                }
+
+                var team = _db.Team.FirstOrDefault(t => t.TeamID == teamId);
+                if (team == null) return HttpNotFound("隊伍不存在");
+
+                string safeTeamName = string.Concat(team.TeamName.Split(Path.GetInvalidFileNameChars()));
+                string fileName = $"{safeTeamName}_報表.xlsx";
+
+                var reportData = _db.PsychologicalResponse
+                    .Join(_db.Users, pr => pr.UserID, u => u.UserID, (pr, u) => new { pr, u })
+                    .Where(x => x.u.TeamID == teamId)
+                    .Select(x => new
+                    {
+                        x.u.UserName,
+                        Gender = x.u.UserProfile.FirstOrDefault().Gender,
+                        x.pr.SurveyDate,
+                        x.pr.Score,
+                        x.pr.QuestionID
+                    }).ToList();
+
+                if (!reportData.Any()) return Content("沒有數據可下載");
+
+                //性別排序(女 → 男)
+                var groupedData = reportData
+                    .GroupBy(r => new { r.UserName, r.Gender, r.SurveyDate })
+                    .Select(g => new ReportDataModel
+                    {
+                        UserName = g.Key.UserName,
+                        Gender = g.Key.Gender,
+                        SurveyDate = g.Key.SurveyDate?.ToString("yyyy/MM/dd"),
+                        Scores = g.GroupBy(r => r.QuestionID).ToDictionary(q => q.Key, q => q.First().Score)
+                    })
+                    .OrderBy(g => g.Gender == "女" ? 0 : 1).ThenBy(g => g.UserName).ToList();
+
+                //計算大類別向度 & 小類別向度的平均數
+                var maleScores = reportData.Where(r => r.Gender == "男").GroupBy(r => r.QuestionID).ToDictionary(g => g.Key, g => g.Average(r => r.Score));
+
+                var femaleScores = reportData.Where(r => r.Gender == "女").GroupBy(r => r.QuestionID).ToDictionary(g => g.Key, g => g.Average(r => r.Score));
+
+                var categoryAverages = GetCategoryAverages(maleScores, femaleScores);
+
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add($"{team.TeamName} 報表");
+                    
+                    GenerateReportSheet(worksheet, groupedData, categoryAverages); //產生報表
+
+                    GenerateRadarChart(worksheet, categoryAverages);
+
+                    var stream = new MemoryStream(package.GetAsByteArray());
+
+                    return File(stream, "application/octet-stream", fileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
         #endregion
 
@@ -244,6 +246,52 @@ namespace Tiss_MindRadar.Controllers
             { "4.再專注", GetAverage(new[] { 21, 22 }, maleScores, femaleScores) },
             { "5.競賽計畫", GetAverage(new[] { 23, 24 }, maleScores, femaleScores) }
         };
+        }
+        #endregion
+
+        #region 產生報表內雷達圖
+        private void GenerateRadarChart(ExcelWorksheet sheet, Dictionary<string, (double maleAvg, double femaleAvg)> categoryAverages)
+        {
+            var chart = sheet.Drawings.AddChart("RadarChart", eChartType.Radar);
+            
+            chart.Title.Text = "向度大類別平均分數（男女區分）"; //設定圖表標題
+
+            //取得數據 (只取三大向度)
+            var categories = new List<string> { "一、基礎心理技能", "二、身體心理技能", "三、認知技能" };
+            var maleData = categories.Select(c => categoryAverages.ContainsKey(c) ? categoryAverages[c].maleAvg : 0).ToList();
+            var femaleData = categories.Select(c => categoryAverages.ContainsKey(c) ? categoryAverages[c].femaleAvg : 0).ToList();
+
+            int startRow = sheet.Dimension.End.Row + 2; //避免與報表數據重疊
+            int startCol = 1;
+
+            // 寫入類別標題
+            sheet.Cells[startRow, startCol].Value = "類別";
+            sheet.Cells[startRow, startCol + 1].Value = "男性平均分數";
+            sheet.Cells[startRow, startCol + 2].Value = "女性平均分數";
+
+            //寫入數據
+            for (int i = 0; i < categories.Count; i++) 
+            {
+                sheet.Cells[startRow + i + 1, startCol].Value = categories[i];
+                sheet.Cells[startRow + i + 1, startCol + 1].Value = maleData[i];
+                sheet.Cells[startRow + i + 1, startCol + 2].Value = femaleData[i];
+            }
+
+            //設定數據範圍
+            var dataRange = sheet.Cells[startRow + 1, startCol, startRow + categories.Count, startCol];
+            var maleRange = sheet.Cells[startRow + 1, startCol + 1, startRow + categories.Count, startCol + 1];
+            var femaleRange = sheet.Cells[startRow + 1, startCol + 2, startRow + categories.Count, startCol + 2];
+
+            //添加系列數據
+            var maleSeries = chart.Series.Add(maleRange, dataRange);
+            maleSeries.Header = "男性平均分數";
+
+            var femaleSeries = chart.Series.Add(femaleRange, dataRange);
+            femaleSeries.Header = "女性平均分數";
+
+            //設定圖表樣式
+            chart.SetPosition(startRow - 1, 0, startCol + 4, 0); //設置圖表位置
+            chart.SetSize(500, 400); //設定圖表大小
         }
         #endregion
 
