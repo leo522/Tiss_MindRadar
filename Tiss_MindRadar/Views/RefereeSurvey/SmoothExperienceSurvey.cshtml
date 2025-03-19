@@ -44,9 +44,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @{
-                            int index = 0; // 確保唯一索引值
-                        }
                         @foreach (var category in Model)
                         {
                             foreach (var item in category.Questions)
@@ -59,12 +56,10 @@
                                     @for (int j = 1; j <= 5; j++)
                                     {
                                         <td class="py-3 px-4 text-center border border-gray-400">
-                                            <input type="radio" name="Responses[@index].Score" value="@j" class="form-radio text-blue-600 w-5 h-5">
-                                            <input type="hidden" name="Responses[@index].QuestionID" value="@item.QuestionID">
+                                            <input type="radio" name="responses[@item.QuestionID]" value="@j" class="form-radio text-blue-600 w-5 h-5">
                                         </td>
                                     }
                                 </tr>
-                                index++; // 每筆資料都要有唯一 index
                             }
                         }
                     </tbody>
@@ -77,39 +72,42 @@
                 </button>
             </div>
         }
-
     </div>
 
     <script>
-    document.getElementById('flowExperienceForm').addEventListener('submit', function (e) {
+   document.getElementById('flowExperienceForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
-    let missingQuestions = [];
-    document.querySelectorAll('tbody tr').forEach(row => {
-        const questionNumber = row.querySelector('td:nth-child(2) span')?.textContent.trim();
-        const radioButtons = row.querySelectorAll('input[type="radio"]');
-        const isChecked = [...radioButtons].some(radio => radio.checked);
+    let responses = [];
 
-        if (!isChecked && questionNumber) {
-            missingQuestions.push(questionNumber);
+    document.querySelectorAll('tbody tr').forEach(row => {
+        let questionId = row.querySelector('td:nth-child(2) span')?.textContent.trim();
+        let selectedOption = row.querySelector('input[type="radio"]:checked');
+
+        if (selectedOption) {
+            responses.push({
+                QuestionID: parseInt(questionId),
+                Score: parseInt(selectedOption.value)
+            });
         }
     });
 
-    if (missingQuestions.length > 0) {
+    if (responses.length === 0) {
         Swal.fire({
             icon: 'error',
             title: '未填寫答案',
-            html: `請填寫以下題號的答案：<br><strong>${missingQuestions.join(", ")}</strong>`,
+            text: '請填寫至少一個問題',
             confirmButtonText: '確定'
         });
         return;
     }
 
-    let formData = new FormData(document.getElementById('flowExperienceForm'));
-
     fetch('@Url.Action("SubmitSmoothExperienceSurvey", "RefereeSurvey")', {
         method: 'POST',
-        body: formData
+        headers: {
+            'Content-Type': 'application/json' // 確保是 JSON
+        },
+        body: JSON.stringify({ Responses: responses }) // 轉換成 JSON
     })
     .then(response => response.json())
     .then(data => {
@@ -140,6 +138,7 @@
         });
     });
 });
+
     </script>
 </body>
 </html>

@@ -233,6 +233,7 @@
     <Compile Include="Models\ProfessionalCapabilitiesResponse.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ProfessionalCapabilitiesCategoryViewModel.cs" />
     <Compile Include="Models\PsychologicalResponse.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>

@@ -5,6 +5,8 @@ using System.Web;
 using System.Web.Mvc;
 using Tiss_MindRadar.Models;
 using static Tiss_MindRadar.Models.RefereeViewModel;
+using System.Web.Script.Serialization;
+using System.IO;
 
 namespace Tiss_MindRadar.Controllers
 {
@@ -39,35 +41,51 @@ namespace Tiss_MindRadar.Controllers
 
         #region 儲存_流暢經驗答案
         [HttpPost]
-        public ActionResult SubmitSmoothExperienceSurvey(List<SmoothExperienceResponseViewModel> Responses)
+        public ActionResult SubmitSmoothExperienceSurvey()
         {
-            if (Responses == null || !Responses.Any())
+            try
             {
-                return Json(new { success = false, message = "請填寫所有問題" });
-            }
-
-            HashSet<int> reverseScoringQuestions = new HashSet<int> { 1, 3, 5, 6 }; //需要反向計分的題目
-
-            foreach (var response in Responses)
-            {
-                int finalScore = reverseScoringQuestions.Contains(response.QuestionID)
-                    ? ReverseScore(response.Score)
-                    : response.Score;
-
-                var newResponse = new SmoothExperienceResponse
+                // 讀取前端發送的 JSON
+                string jsonString;
+                using (var reader = new StreamReader(Request.InputStream))
                 {
-                    QuestionID = response.QuestionID,
-                    Score = finalScore,
-                    SubmittedAt = DateTime.Now
-                };
+                    jsonString = reader.ReadToEnd();
+                }
 
-                _db.SmoothExperienceResponse.Add(newResponse);
+                // 解析 JSON
+                JavaScriptSerializer serializer = new JavaScriptSerializer();
+                SmoothExperienceSurveyRequest request = serializer.Deserialize<SmoothExperienceSurveyRequest>(jsonString);
+
+                if (request == null || request.Responses == null || !request.Responses.Any())
+                {
+                    return Json(new { success = false, message = "請填寫所有問題" });
+                }
+
+                HashSet<int> reverseScoringQuestions = new HashSet<int> { 1, 3, 5, 6 };
+
+                foreach (var response in request.Responses)
+                {
+                    int finalScore = reverseScoringQuestions.Contains(response.QuestionID)
+                        ? ReverseScore(response.Score)
+                        : response.Score;
+
+                    var newResponse = new SmoothExperienceResponse
+                    {
+                        QuestionID = response.QuestionID,
+                        Score = finalScore,
+                        SubmittedAt = DateTime.Now
+                    };
+
+                    _db.SmoothExperienceResponse.Add(newResponse);
+                }
+
+                _db.SaveChanges();
+                return Json(new { success = true, message = "提交成功" });
             }
-
-            //TempData["SuccessMessage"] = "您的答案已成功提交！";
-
-            _db.SaveChanges();
-            return RedirectToAction("SmoothExperienceSurvey");
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "系統錯誤：" + ex.Message });
+            }
         }
         #endregion
 
@@ -101,12 +119,15 @@ namespace Tiss_MindRadar.Controllers
             return View(categories);
         }
 
+        #endregion
+
+        #region 儲存_專業能力答案
         [HttpPost]
         public ActionResult SubmitProfessionalCapabilitiesSurvey(List<ProfessionalCapabilitiesResponseViewModel> responses)
         {
             if (responses == null || !responses.Any())
             {
-                return RedirectToAction("ProfessionalCapabilitiesSurvey");
+                return Json(new { success = false, message = "請填寫所有問題" });
             }
 
             foreach (var res in responses)
@@ -123,8 +144,9 @@ namespace Tiss_MindRadar.Controllers
 
             _db.SaveChanges();
 
-            return RedirectToAction("ProfessionalCapabilitiesSurvey");
+            return Json(new { success = true, message = "提交成功" });
         }
+
         #endregion
 
         #region 選擇量表頁面
