@@ -266,6 +266,7 @@
     <Compile Include="Models\SmoothExperienceResponse.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\SmoothExperienceResponseViewModel.cs" />
     <Compile Include="Models\Successful.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>

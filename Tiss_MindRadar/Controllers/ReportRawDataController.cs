@@ -294,6 +294,5 @@ namespace Tiss_MindRadar.Controllers
             chart.SetSize(500, 400); //設定圖表大小
         }
         #endregion
-
     }
 }

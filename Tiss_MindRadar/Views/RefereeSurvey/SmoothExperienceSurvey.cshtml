@@ -18,51 +18,53 @@
             <img src="~/img/TissLogo.jpg" alt="Logo" class="h-16 mx-auto">
         </div>
     </div>
+    <div class="mt-6">
+        <a href="@Url.Action("ProfessionalCapabilitiesSurvey", "RefereeSurvey")"
+           class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-6 rounded-lg" id="switchToProfessional">
+            切換到專業能力量表
+        </a>
+    </div>
     <div class="container mx-auto p-4">
         <h1 class="text-2xl font-bold text-center mb-6">流暢經驗量表</h1>
 
-        @using (Html.BeginForm("SubmitFlowExperience", "Survey", FormMethod.Post, new { id = "flowExperienceForm" }))
+        @using (Html.BeginForm("SubmitSmoothExperienceSurvey", "RefereeSurvey", FormMethod.Post, new { id = "flowExperienceForm" }))
         {
             @Html.AntiForgeryToken()
             <div class="table-container">
-                <table class="responsive-table sticky-header border-collapse border border-gray-400 w-full">
+                <table class="responsive-table border border-gray-400 w-full">
                     <thead>
                         <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                            <th class="py-3 px-6 text-center w-1/10 border border-gray-400">流暢經驗</th>
-                            <th class="py-3 px-6 text-center w-1/10 border border-gray-400">請根據自己的實際狀況，填答以下15題</th>
-                            <th class="py-3 px-6 text-center w-1/10 min-w-[80px] border border-gray-400">非常不符合</th>
-                            <th class="py-3 px-6 text-center w-1/10 min-w-[80px] border border-gray-400">不符合</th>
-                            <th class="py-3 px-6 text-center w-1/10 min-w-[80px] border border-gray-400">普通</th>
-                            <th class="py-3 px-6 text-center w-1/10 min-w-[80px] border border-gray-400">符合</th>
-                            <th class="py-3 px-6 text-center w-1/8 min-w-[80px] border border-gray-400">非常符合</th>
+                            <th class="py-3 px-6 text-center border border-gray-400">流暢經驗</th>
+                            <th class="py-3 px-6 text-center border border-gray-400">題目</th>
+                            <th class="py-3 px-6 text-center border border-gray-400">1</th>
+                            <th class="py-3 px-6 text-center border border-gray-400">2</th>
+                            <th class="py-3 px-6 text-center border border-gray-400">3</th>
+                            <th class="py-3 px-6 text-center border border-gray-400">4</th>
+                            <th class="py-3 px-6 text-center border border-gray-400">5</th>
                         </tr>
                     </thead>
-                    <tbody class="text-gray-700 text-sm">
+                    <tbody>
+                        @{
+                            int index = 0; // 確保唯一索引值
+                        }
                         @foreach (var category in Model)
                         {
-                            var questionCount = category.Questions.Count;
-                            bool isFirstRow = true;
-
                             foreach (var item in category.Questions)
                             {
                                 <tr class="border-b border-gray-200 hover:bg-gray-100">
-                                    @if (isFirstRow)
-                                    {
-                                        <td rowspan="@questionCount" class="py-2 px-4 font-bold text-center align-middle border border-gray-400 bg-gray-300">
-                                            @category.CategoryItem
-                                        </td>
-                                        isFirstRow = false;
-                                    }
-                                    <td class="py-3 px-1 text-left break-words whitespace-normal overflow-visible w-1/2 border border-gray-400">
-                                        <span class="font-bold mr-2">@item.QuestionID.</span>@item.QuestionText
+                                    <td class="py-3 px-1 text-left border border-gray-400">@category.CategoryItem</td>
+                                    <td class="py-3 px-1 text-left border border-gray-400">
+                                        <span class="font-bold">@item.QuestionID.</span>@item.QuestionText
                                     </td>
-                                    @for (int i = 1; i <= 5; i++)
+                                    @for (int j = 1; j <= 5; j++)
                                     {
                                         <td class="py-3 px-4 text-center border border-gray-400">
-                                            <input type="radio" name="responses[@item.QuestionID]" value="@i" class="form-radio text-blue-600 w-5 h-5">
+                                            <input type="radio" name="Responses[@index].Score" value="@j" class="form-radio text-blue-600 w-5 h-5">
+                                            <input type="hidden" name="Responses[@index].QuestionID" value="@item.QuestionID">
                                         </td>
                                     }
                                 </tr>
+                                index++; // 每筆資料都要有唯一 index
                             }
                         }
                     </tbody>
@@ -75,32 +77,69 @@
                 </button>
             </div>
         }
+
     </div>
 
     <script>
-        document.getElementById('flowExperienceForm').addEventListener('submit', function (e) {
-            let missingQuestions = [];
+    document.getElementById('flowExperienceForm').addEventListener('submit', function (e) {
+    e.preventDefault();
 
-            document.querySelectorAll('tbody tr').forEach(row => {
-                const questionNumber = row.querySelector('td:nth-child(2) span')?.textContent.trim();
-                const radioButtons = row.querySelectorAll('input[type="radio"]');
-                const isChecked = [...radioButtons].some(radio => radio.checked);
+    let missingQuestions = [];
+    document.querySelectorAll('tbody tr').forEach(row => {
+        const questionNumber = row.querySelector('td:nth-child(2) span')?.textContent.trim();
+        const radioButtons = row.querySelectorAll('input[type="radio"]');
+        const isChecked = [...radioButtons].some(radio => radio.checked);
 
-                if (!isChecked && questionNumber) {
-                    missingQuestions.push(questionNumber);
-                }
-            });
+        if (!isChecked && questionNumber) {
+            missingQuestions.push(questionNumber);
+        }
+    });
 
-            if (missingQuestions.length > 0) {
-                e.preventDefault(); // 阻止表單提交
-                Swal.fire({
-                    icon: 'error',
-                    title: '未填寫答案',
-                    html: `請填寫以下題號的答案：<br><strong>${missingQuestions.join(", ")}</strong>`,
-                    confirmButtonText: '確定'
-                });
-            }
+    if (missingQuestions.length > 0) {
+        Swal.fire({
+            icon: 'error',
+            title: '未填寫答案',
+            html: `請填寫以下題號的答案：<br><strong>${missingQuestions.join(", ")}</strong>`,
+            confirmButtonText: '確定'
         });
+        return;
+    }
+
+    let formData = new FormData(document.getElementById('flowExperienceForm'));
+
+    fetch('@Url.Action("SubmitSmoothExperienceSurvey", "RefereeSurvey")', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: '提交成功',
+                text: data.message,
+                confirmButtonText: '確定'
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: '提交失敗',
+                text: data.message,
+                confirmButtonText: '確定'
+            });
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: '系統錯誤',
+            text: '請稍後再試！',
+            confirmButtonText: '確定'
+        });
+    });
+});
     </script>
 </body>
 </html>

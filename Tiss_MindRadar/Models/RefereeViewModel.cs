@@ -21,11 +21,11 @@ namespace Tiss_MindRadar.Models
             public List<SmoothExperienceViewModel> Questions { get; set; } // 問題列表
         }
 
-        public class SmoothExperienceResponseViewModel
-        {
-            public int QuestionID { get; set; }
-            public int Score { get; set; }
-        }
+        //public class SmoothExperienceResponseViewModel
+        //{
+        //    public int QuestionID { get; set; }
+        //    public int Score { get; set; }
+        //}
         #endregion
 
         #region 專業能力

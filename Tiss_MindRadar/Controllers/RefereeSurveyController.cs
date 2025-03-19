@@ -12,13 +12,6 @@ namespace Tiss_MindRadar.Controllers
     {
         private TISS_MindRadarEntities _db = new TISS_MindRadarEntities(); //資料庫
 
-        #region 選擇量表頁面
-        public ActionResult ChooseRefereeSurvey()
-        {
-            return View();
-        }
-        #endregion
-
         #region 流暢經驗_裁判版
         public ActionResult SmoothExperienceSurvey()
         {
@@ -42,28 +35,46 @@ namespace Tiss_MindRadar.Controllers
 
             return View(categories);
         }
+        #endregion
 
+        #region 儲存_流暢經驗答案
         [HttpPost]
-        public ActionResult SubmitSmoothExperienceSurvey(List<SmoothExperienceResponseViewModel> responses)
+        public ActionResult SubmitSmoothExperienceSurvey(List<SmoothExperienceResponseViewModel> Responses)
         {
-            if (responses == null || !responses.Any())
+            if (Responses == null || !Responses.Any())
             {
-                return RedirectToAction("SmoothExperienceSurvey");
+                return Json(new { success = false, message = "請填寫所有問題" });
             }
 
-            foreach (var res in responses)
+            HashSet<int> reverseScoringQuestions = new HashSet<int> { 1, 3, 5, 6 }; //需要反向計分的題目
+
+            foreach (var response in Responses)
             {
+                int finalScore = reverseScoringQuestions.Contains(response.QuestionID)
+                    ? ReverseScore(response.Score)
+                    : response.Score;
+
                 var newResponse = new SmoothExperienceResponse
                 {
-                    QuestionID = res.QuestionID,
-                    Score = res.Score,
+                    QuestionID = response.QuestionID,
+                    Score = finalScore,
                     SubmittedAt = DateTime.Now
                 };
+
                 _db.SmoothExperienceResponse.Add(newResponse);
             }
 
+            //TempData["SuccessMessage"] = "您的答案已成功提交！";
+
             _db.SaveChanges();
             return RedirectToAction("SmoothExperienceSurvey");
+        }
+        #endregion
+
+        #region 反向計分函數
+        private int ReverseScore(int score)
+        {
+            return 6 - score; // 5 -> 1, 4 -> 2, 3 -> 3, 2 -> 4, 1 -> 5
         }
         #endregion
 
@@ -113,6 +124,13 @@ namespace Tiss_MindRadar.Controllers
             _db.SaveChanges();
 
             return RedirectToAction("ProfessionalCapabilitiesSurvey");
+        }
+        #endregion
+
+        #region 選擇量表頁面
+        public ActionResult ChooseRefereeSurvey()
+        {
+            return View();
         }
         #endregion
     }
