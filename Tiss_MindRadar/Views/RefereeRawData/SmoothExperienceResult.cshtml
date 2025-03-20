@@ -1,4 +1,4 @@
-﻿@{
+﻿﻿@{
     ViewBag.Title = "流暢經驗量表結果";
     Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
 }
@@ -33,21 +33,35 @@
         <div class="bg-white shadow-md rounded p-6 mb-12">
             <h2 class="text-lg font-bold mb-4">填答結果 - 每個問題</h2>
             <table class="border border-gray-400 w-full">
-                <thead class="bg-gray-200">
+                <thead class="bg-gray-700 text-white">
                     <tr>
+                        <th class="border border-gray-400 px-4 py-2 text-center">流暢經驗</th>
                         <th class="border border-gray-400 px-4 py-2 text-center">題號</th>
                         <th class="border border-gray-400 px-4 py-2 text-center">題目</th>
                         <th class="border border-gray-400 px-4 py-2 text-center">分數</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var question in (List<Dictionary<string, object>>)ViewBag.QuestionScores)
+                    @foreach (var category in Model)
                     {
-                        <tr>
-                            <td class="border border-gray-400 px-4 py-2 text-center">@question["QuestionID"]</td>
-                            <td class="border border-gray-400 px-4 py-2">@question["QuestionText"]</td>
-                            <td class="border border-gray-400 px-4 py-2 text-center">@question["Score"]</td>
-                        </tr>
+                        var questionCount = category.Questions.Count;
+                        bool isFirstRow = true;
+
+                        foreach (var question in category.Questions)
+                        {
+                            <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                @if (isFirstRow)
+                                {
+                                    <td rowspan="@questionCount" class="border px-4 py-2 bg-blue-200 font-bold text-center align-middle">
+                                        @category.CategoryItem
+                                    </td>
+                                    isFirstRow = false;
+                                }
+                                <td class="border px-4 py-2 text-center">@question.QuestionID</td>
+                                <td class="border px-4 py-2">@question.QuestionText</td>
+                                <td class="border px-4 py-2 text-center">@question.Score</td>
+                            </tr>
+                        }
                     }
                 </tbody>
             </table>
@@ -80,20 +94,46 @@
     console.log("雷達圖類別:", categories);
     console.log("雷達圖分數:", scores);
 
+    // **✅ 檢查數據是否為空，避免錯誤**
     if (!categories || categories.length === 0 || !scores || scores.length === 0) {
         console.error("⚠️ 雷達圖數據為空，請檢查後端數據是否正確提供！");
+        document.getElementById("radarChart").style.display = "none"; // 隱藏雷達圖
         return;
     }
 
+    // **計算最高分與最低分**
+    let maxScore = Math.max(...scores);
+    let minScore = Math.min(...scores);
+    let maxIndices = scores.map((s, i) => (s === maxScore ? i : -1)).filter(i => i !== -1);
+    let minIndices = scores.map((s, i) => (s === minScore ? i : -1)).filter(i => i !== -1);
+
     let radarData = {
         labels: categories,
-        datasets: [{
-            label: "平均分數",
-            data: scores,
-            backgroundColor: "rgba(54, 162, 235, 0.2)",
-            borderColor: "rgba(54, 162, 235, 1)",
-            borderWidth: 2
-        }]
+        datasets: [
+            {
+                label: "平均分數",
+                data: scores,
+                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 2
+            },
+            {
+                label: `最高分: ${maxScore}`,
+                data: scores.map((s, i) => (maxIndices.includes(i) ? s : null)),
+                pointBackgroundColor: "red",
+                borderColor: "rgba(0, 0, 0, 0)",
+                pointRadius: 6,
+                pointHoverRadius: 8
+            },
+            {
+                label: `最低分: ${minScore}`,
+                data: scores.map((s, i) => (minIndices.includes(i) ? s : null)),
+                pointBackgroundColor: "blue",
+                borderColor: "rgba(0, 0, 0, 0)",
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }
+        ]
     };
 
     let ctx = document.getElementById("radarChart").getContext("2d");
@@ -104,17 +144,7 @@
             responsive: true,
             maintainAspectRatio: false,
             elements: {
-                line: {
-                    borderWidth: 3
-                }
-            },
-            layout: {
-                padding: {
-                    left: 0,
-                    right: 0,
-                    top: 10,
-                    bottom: 10
-                }
+                line: { borderWidth: 3 }
             },
             scales: {
                 r: {
@@ -123,23 +153,28 @@
                     max: 5,
                     ticks: {
                         stepSize: 1,
-                        font: {
-                            size: 14
-                        }
+                        font: { size: 14 }
                     },
                     pointLabels: {
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        }
+                        font: { size: 16, weight: 'bold' }
                     }
                 }
             },
             plugins: {
                 legend: {
-                    labels: {
-                        font: {
-                            size: 14
+                    labels: { font: { size: 14 }, usePointStyle: true }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (tooltipItem) {
+                            let datasetLabel = tooltipItem.dataset.label || "";
+                            let value = tooltipItem.raw;
+                            if (datasetLabel.includes("最高分")) {
+                                return `🔥 最高分: ${value}`;
+                            } else if (datasetLabel.includes("最低分")) {
+                                return `❄️ 最低分: ${value}`;
+                            }
+                            return `📊 平均分數: ${value}`;
                         }
                     }
                 }
@@ -147,6 +182,7 @@
         }
     });
 });
+
     </script>
 </body>
 </html>

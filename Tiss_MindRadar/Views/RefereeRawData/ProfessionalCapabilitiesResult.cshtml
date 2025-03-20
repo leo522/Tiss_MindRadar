@@ -1,5 +1,7 @@
-﻿@{
-    ViewBag.Title = "專業能力量表結果";
+﻿@using Tiss_MindRadar.Models
+@model List<Tiss_MindRadar.Models.ProfessionalCapabilitiesCategoryViewModel>
+@{
+    ViewBag.Title = "專業能力量表_裁判版結果";
     Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
 }
 <!DOCTYPE html>
@@ -7,7 +9,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專業能力_裁判版量表結果</title>
+    <title>專業能力量表結果_裁判版</title>
     <script src="~/RadarChartJS/chart.js"></script>
 </head>
 <body class="bg-gray-100">
@@ -18,33 +20,47 @@
             </div>
         </div>
 
-        <h1 class="text-2xl font-bold text-center mb-6">專業能力_裁判量表結果</h1>
+        <h1 class="text-2xl font-bold text-center mb-6">專業能力量表結果_裁判版</h1>
 
-        <!-- **每一題的填答分數** -->
+        <!-- **每一題的填答分數 (直行顯示)** -->
         <div class="bg-white shadow-md rounded p-6 mb-12">
             <h2 class="text-lg font-bold mb-4">填答結果 - 每個問題</h2>
             <table class="border border-gray-400 w-full">
-                <thead class="bg-gray-200">
+                <thead class="bg-gray-700 text-white">
                     <tr>
+                        <th class="border border-gray-400 px-4 py-2 text-center">專業能力</th>
                         <th class="border border-gray-400 px-4 py-2 text-center">題號</th>
                         <th class="border border-gray-400 px-4 py-2 text-center">題目</th>
                         <th class="border border-gray-400 px-4 py-2 text-center">分數</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var question in (List<Dictionary<string, object>>)ViewBag.QuestionScores)
+                    @foreach (var category in Model)
                     {
-                        <tr>
-                            <td class="border border-gray-400 px-4 py-2 text-center">@question["QuestionID"]</td>
-                            <td class="border border-gray-400 px-4 py-2">@question["QuestionText"]</td>
-                            <td class="border border-gray-400 px-4 py-2 text-center">@question["Score"]</td>
-                        </tr>
+                        var questionCount = category.Questions.Count;
+                        bool isFirstRow = true; //記錄是否是該類別的第一行
+
+                        foreach (var question in category.Questions)
+                        {
+                            <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                @if (isFirstRow)
+                                {
+                                    <td rowspan="@questionCount" class="border px-4 py-2 bg-green-200 font-bold text-center align-middle">
+                                        @category.CategoryItem
+                                    </td>
+                                    isFirstRow = false; //只在第一列顯示類別名稱
+                                }
+                                <td class="border px-4 py-2 text-center">@question.QuestionID</td>
+                                <td class="border px-4 py-2">@question.QuestionText</td>
+                                <td class="border px-4 py-2 text-center">@question.Score</td>
+                            </tr>
+                        }
                     }
                 </tbody>
             </table>
         </div>
 
-        <!-- **雷達圖 - 類別平均分數** -->
+        <!--雷達圖 - 類別平均分數 -->
         <div class="bg-white shadow-md rounded-lg p-6 mt-12 w-full"
              style="margin: 0 auto; text-align: center; display: flex; flex-direction: column; align-items: center;">
             <h2 class="text-lg font-bold mb-4">類別平均分數</h2>
@@ -63,73 +79,104 @@
     </div>
 
     <!-- **雷達圖 JS** -->
-    <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let categories = @Html.Raw(Json.Encode(ViewBag.Categories));
-        let scores = @Html.Raw(Json.Encode(ViewBag.Scores));
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let categories = @Html.Raw(Json.Encode(ViewBag.Categories));
+    let scores = @Html.Raw(Json.Encode(ViewBag.Scores));
 
-        console.log("雷達圖類別:", categories);
-        console.log("雷達圖分數:", scores);
+    //檢查數據是否為空，避免錯誤
+    if (!categories || categories.length === 0 || !scores || scores.length === 0) {
+        console.error("⚠️ 雷達圖數據為空，請檢查後端數據是否正確提供！");
+        document.getElementById("radarChart").style.display = "none"; //隱藏雷達圖
+        return;
+    }
 
-        if (!categories || categories.length === 0 || !scores || scores.length === 0) {
-            console.error("⚠️ 雷達圖數據為空，請檢查後端數據是否正確提供！");
-            return;
-        }
+    //計算最高分與最低分
+    let maxScore = Math.max(...scores);
+    let minScore = Math.min(...scores);
+    let maxIndices = scores.map((s, i) => (s === maxScore ? i : -1)).filter(i => i !== -1);
+    let minIndices = scores.map((s, i) => (s === minScore ? i : -1)).filter(i => i !== -1);
 
-        let radarData = {
-            labels: categories,
-            datasets: [{
+    let radarData = {
+        labels: categories,
+        datasets: [
+            {
                 label: "平均分數",
                 data: scores,
                 backgroundColor: "rgba(54, 162, 235, 0.2)",
                 borderColor: "rgba(54, 162, 235, 1)",
                 borderWidth: 2
-            }]
-        };
+            },
+            {
+                label: `最高分: ${maxScore}`,
+                data: scores.map((s, i) => (maxIndices.includes(i) ? s : null)),
+                pointBackgroundColor: "red",
+                borderColor: "rgba(0, 0, 0, 0)",
+                pointRadius: 6,
+                pointHoverRadius: 8
+            },
+            {
+                label: `最低分: ${minScore}`,
+                data: scores.map((s, i) => (minIndices.includes(i) ? s : null)),
+                pointBackgroundColor: "blue",
+                borderColor: "rgba(0, 0, 0, 0)",
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }
+        ]
+    };
 
-        let ctx = document.getElementById("radarChart").getContext("2d");
-        new Chart(ctx, {
-            type: "radar",
-            data: radarData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                elements: {
-                    line: {
-                        borderWidth: 3
+    let ctx = document.getElementById("radarChart").getContext("2d");
+    new Chart(ctx, {
+        type: "radar",
+        data: radarData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            elements: {
+                line: {
+                    borderWidth: 3
+                }
+            },
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    min: 0,
+                    max: 5,
+                    ticks: {
+                        stepSize: 1,
+                        font: { size: 14 }
+                    },
+                    pointLabels: {
+                        font: { size: 16, weight: 'bold' }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        font: { size: 14 },
+                        usePointStyle: true
                     }
                 },
-                scales: {
-                    r: {
-                        beginAtZero: true,
-                        min: 0,
-                        max: 5,
-                        ticks: {
-                            stepSize: 1,
-                            font: {
-                                size: 14
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            let datasetLabel = tooltipItem.dataset.label || "";
+                            let value = tooltipItem.raw;
+                            if (datasetLabel.includes("最高分")) {
+                                return `🔥 最高分: ${value}`;
+                            } else if (datasetLabel.includes("最低分")) {
+                                return `❄️ 最低分: ${value}`;
                             }
-                        },
-                        pointLabels: {
-                            font: {
-                                size: 16,
-                                weight: 'bold'
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        labels: {
-                            font: {
-                                size: 14
-                            }
+                            return `📊 平均分數: ${value}`;
                         }
                     }
                 }
             }
-        });
+        }
     });
-    </script>
+});
+</script>
 </body>
 </html>

@@ -17,6 +17,7 @@ namespace Tiss_MindRadar.Models
     {
         public int QuestionID { get; set; }
         public string QuestionText { get; set; }
+        public int Score { get; set; }
     }
 
     public class ProfessionalCapabilitiesResponseViewModel
