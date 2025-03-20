@@ -69,14 +69,28 @@ namespace Tiss_MindRadar.Controllers
                         ? ReverseScore(response.Score)
                         : response.Score;
 
-                    var newResponse = new SmoothExperienceResponse
-                    {
-                        QuestionID = response.QuestionID,
-                        Score = finalScore,
-                        SubmittedAt = DateTime.Now
-                    };
+                    // **檢查資料庫是否已存在相同 `QuestionID` 的紀錄**
+                    var existingResponse = _db.SmoothExperienceResponse
+                        .FirstOrDefault(r => r.QuestionID == response.QuestionID);
 
-                    _db.SmoothExperienceResponse.Add(newResponse);
+                    if (existingResponse != null)
+                    {
+                        // **如果已存在，則更新分數**
+                        existingResponse.Score = finalScore;
+                        existingResponse.SubmittedAt = DateTime.Now;
+                    }
+                    else
+                    {
+                        // **如果不存在，則新增新的紀錄**
+                        var newResponse = new SmoothExperienceResponse
+                        {
+                            QuestionID = response.QuestionID,
+                            Score = finalScore,
+                            SubmittedAt = DateTime.Now
+                        };
+
+                        _db.SmoothExperienceResponse.Add(newResponse);
+                    }
                 }
 
                 _db.SaveChanges();
@@ -87,6 +101,7 @@ namespace Tiss_MindRadar.Controllers
                 return Json(new { success = false, message = "系統錯誤：" + ex.Message });
             }
         }
+
         #endregion
 
         #region 反向計分函數

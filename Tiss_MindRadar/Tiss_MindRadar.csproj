@@ -162,6 +162,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\ChartRadarController.cs" />
     <Compile Include="Controllers\RadarErrorController.cs" />
+    <Compile Include="Controllers\RefereeRawDataController.cs" />
     <Compile Include="Controllers\RefereeSurveyController.cs" />
     <Compile Include="Controllers\ReportRawDataController.cs" />
     <Compile Include="Controllers\SurveyController.cs" />
@@ -389,6 +390,7 @@
     <Content Include="Views\RefereeSurvey\SmoothExperienceSurvey.cshtml" />
     <Content Include="Views\RefereeSurvey\ChooseRefereeSurvey.cshtml" />
     <Content Include="Views\RefereeSurvey\ProfessionalCapabilitiesSurvey.cshtml" />
+    <Content Include="Views\RefereeRawData\SmoothExperienceResult.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
