@@ -32,8 +32,8 @@
             @Html.AntiForgeryToken()
             <div class="table-container">
                 <table class="responsive-table border border-gray-400 w-full">
-                    <thead>
-                        <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                    <thead class="bg-gray-700 text-white font-bold text-sm">
+                        <tr>
                             <th class="py-3 px-6 text-center border border-gray-400">專業能力</th>
                             <th class="py-3 px-6 text-center border border-gray-400">題目</th>
                             <th class="py-3 px-6 text-center border border-gray-400">1</th>
@@ -49,23 +49,30 @@
                         }
                         @foreach (var category in Model)
                         {
+                            var questionCount = category.Questions.Count;
+                            bool isFirstRow = true;
+                            int rowIndex = 0;
+
                             foreach (var item in category.Questions)
                             {
-                                <tr class="border-b border-gray-200 hover:bg-gray-100">
-                                    <td class="py-3 px-1 text-left border border-gray-400">@category.CategoryItem</td>
-                                    <td class="py-3 px-1 text-left border border-gray-400">
-                                        <span class="font-bold">@item.QuestionID.</span>@item.QuestionText
-                                        <input type="hidden" name="responses[@index].QuestionID" value="@item.QuestionID">
-                                    </td>
+                                <tr class="border-b border-gray-200 @(rowIndex % 2 == 0 ? "bg-white" : "bg-gray-100") hover:bg-gray-200">
+                                    @if (isFirstRow)
+                                    {
+                                        <td rowspan="@questionCount" class="py-3 px-1 text-left border border-gray-400 bg-green-200 font-bold text-center">
+                                            @category.CategoryItem
+                                        </td>
+                                        isFirstRow = false;
+                                    }
+                                    <td class="py-3 px-1 text-left border border-gray-400">@item.QuestionID. @item.QuestionText</td>
                                     @for (int j = 1; j <= 5; j++)
                                     {
                                         <td class="py-3 px-4 text-center border border-gray-400">
                                             <input type="radio" name="responses[@index].Score" value="@j" class="form-radio text-blue-600 w-5 h-5">
-                                            <input type="hidden" name="responses[@index].QuestionID" value="@item.QuestionID">
                                         </td>
                                     }
                                 </tr>
-                                index++; // 確保 index 唯一
+                                rowIndex++;
+                                index++;
                             }
                         }
                     </tbody>
@@ -83,8 +90,7 @@
             </div>
         }
     </div>
-
-    <script>
+<script>
    document.getElementById('professionalCapabilitiesForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -151,7 +157,6 @@
         });
     });
 });
-
-    </script>
+</script>
 </body>
 </html>
