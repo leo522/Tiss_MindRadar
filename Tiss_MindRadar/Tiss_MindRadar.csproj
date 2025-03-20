@@ -391,6 +391,7 @@
     <Content Include="Views\RefereeSurvey\ChooseRefereeSurvey.cshtml" />
     <Content Include="Views\RefereeSurvey\ProfessionalCapabilitiesSurvey.cshtml" />
     <Content Include="Views\RefereeRawData\SmoothExperienceResult.cshtml" />
+    <Content Include="Views\RefereeRawData\ProfessionalCapabilitiesResult.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -18,17 +18,4 @@ namespace Tiss_MindRadar.Models
         public int Score { get; set; }
     }
     #endregion
-
-    //#region 專業能力
-    //public class ProfessionalCapabilitiesSurveyRequest
-    //{
-    //    public List<ProfessionalCapabilitiesResponseViewModel> Responses { get; set; }
-    //}
-
-    //public class ProfessionalCapabilitiesResponseViewModel
-    //{
-    //    public int QuestionID { get; set; }
-    //    public int Score { get; set; }
-    //}
-    //#endregion
 }

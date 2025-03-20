@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "流暢經驗量表結果";
+    ViewBag.Title = "專業能力量表結果";
     Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
 }
 <!DOCTYPE html>
@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>流暢經驗_裁判版量表結果</title>
+    <title>專業能力_裁判版量表結果</title>
     <script src="~/RadarChartJS/chart.js"></script>
 </head>
 <body class="bg-gray-100">
@@ -16,18 +16,9 @@
             <div class="text-2xl font-bold text-gray-800">
                 受訪者: @ViewBag.RefereeName <span class="text-lg text-gray-600">(隊伍: @ViewBag.RefereeTeamName)</span>
             </div>
-            <div class="flex justify-end space-x-4 mb-4">
-                @if (Session["UserID"] != null)
-                {
-                    <a href="@Url.Action("Logout", "UserAccount")"
-                       class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">
-                        登出
-                    </a>
-                }
-            </div>
         </div>
 
-        <h1 class="text-2xl font-bold text-center mb-6">流暢經驗_裁判版量表結果</h1>
+        <h1 class="text-2xl font-bold text-center mb-6">專業能力_裁判量表結果</h1>
 
         <!-- **每一題的填答分數** -->
         <div class="bg-white shadow-md rounded p-6 mb-12">
@@ -64,7 +55,7 @@
 
         <!-- 返回按鈕 -->
         <div class="mt-6 text-center">
-            <a href="@Url.Action("SmoothExperienceSurvey", "RefereeSurvey")"
+            <a href="@Url.Action("ProfessionalCapabilitiesSurvey", "RefereeSurvey")"
                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg">
                 返回填寫頁面
             </a>
@@ -73,80 +64,72 @@
 
     <!-- **雷達圖 JS** -->
     <script>
-   document.addEventListener("DOMContentLoaded", function () {
-    let categories = @Html.Raw(Json.Encode(ViewBag.Categories));
-    let scores = @Html.Raw(Json.Encode(ViewBag.Scores));
+    document.addEventListener("DOMContentLoaded", function () {
+        let categories = @Html.Raw(Json.Encode(ViewBag.Categories));
+        let scores = @Html.Raw(Json.Encode(ViewBag.Scores));
 
-    console.log("雷達圖類別:", categories);
-    console.log("雷達圖分數:", scores);
+        console.log("雷達圖類別:", categories);
+        console.log("雷達圖分數:", scores);
 
-    if (!categories || categories.length === 0 || !scores || scores.length === 0) {
-        console.error("⚠️ 雷達圖數據為空，請檢查後端數據是否正確提供！");
-        return;
-    }
+        if (!categories || categories.length === 0 || !scores || scores.length === 0) {
+            console.error("⚠️ 雷達圖數據為空，請檢查後端數據是否正確提供！");
+            return;
+        }
 
-    let radarData = {
-        labels: categories,
-        datasets: [{
-            label: "平均分數",
-            data: scores,
-            backgroundColor: "rgba(54, 162, 235, 0.2)",
-            borderColor: "rgba(54, 162, 235, 1)",
-            borderWidth: 2
-        }]
-    };
+        let radarData = {
+            labels: categories,
+            datasets: [{
+                label: "平均分數",
+                data: scores,
+                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 2
+            }]
+        };
 
-    let ctx = document.getElementById("radarChart").getContext("2d");
-    new Chart(ctx, {
-        type: "radar",
-        data: radarData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            elements: {
-                line: {
-                    borderWidth: 3
-                }
-            },
-            layout: {
-                padding: {
-                    left: 0,
-                    right: 0,
-                    top: 10,
-                    bottom: 10
-                }
-            },
-            scales: {
-                r: {
-                    beginAtZero: true,
-                    min: 0,
-                    max: 5,
-                    ticks: {
-                        stepSize: 1,
-                        font: {
-                            size: 14
-                        }
-                    },
-                    pointLabels: {
-                        font: {
-                            size: 16,
-                            weight: 'bold'
+        let ctx = document.getElementById("radarChart").getContext("2d");
+        new Chart(ctx, {
+            type: "radar",
+            data: radarData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                elements: {
+                    line: {
+                        borderWidth: 3
+                    }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        min: 0,
+                        max: 5,
+                        ticks: {
+                            stepSize: 1,
+                            font: {
+                                size: 14
+                            }
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
                         }
                     }
-                }
-            },
-            plugins: {
-                legend: {
-                    labels: {
-                        font: {
-                            size: 14
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            font: {
+                                size: 14
+                            }
                         }
                     }
                 }
             }
-        }
+        });
     });
-});
     </script>
 </body>
 </html>
