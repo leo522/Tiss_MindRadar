@@ -8,6 +8,7 @@ using Tiss_MindRadar.Models;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using static Tiss_MindRadar.Models.RadarChartVIewModel;
+using System.Runtime.Remoting.Messaging;
 
 namespace Tiss_MindRadar.Controllers
 {
@@ -80,8 +81,17 @@ namespace Tiss_MindRadar.Controllers
                 List<RadarChartVIewModel> radarData = new List<RadarChartVIewModel>();
                 foreach (var date in selectedDates)
                 {
-                    string query = @"SELECT c.CategoryName, COALESCE(AVG(pr.Score), 0) AS AverageScore FROM PsychologicalResponse pr
-                       INNER JOIN PsychologicalStateCategory c ON pr.CategoryID = c.ID WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1 GROUP BY c.CategoryName";
+                    string query = @"SELECT d.CategoryName AS Dimension, d.SubCategory AS CategoryName, 
+                                    COALESCE(AVG(pr.Score), 0) AS AverageScore 
+                                    FROM PsychologicalResponse pr 
+                                    INNER JOIN PsychologicalStateDescription d ON pr.CategoryID = d.ID 
+                                    WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1 
+                                    GROUP BY d.CategoryName, d.SubCategory, d.ID, d.HeaderID
+                                    ORDER BY CASE 
+                                    WHEN d.CategoryName = '基礎心理技能' THEN 1 
+                                    WHEN d.CategoryName = '身體心理技能' THEN 2 
+                                    WHEN d.CategoryName = '認知技能' THEN 3 
+                                    ELSE 4 END, d.ID";
 
                     object[] parameters = { userId, date };
                     var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();
@@ -90,6 +100,7 @@ namespace Tiss_MindRadar.Controllers
                     {
                         item.SurveyDate = date.ToString("yyyy-MM-dd"); // 存入日期以便前端區分數據
                     }
+
                     radarData.AddRange(data);
                 }
 

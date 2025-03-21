@@ -56,9 +56,9 @@
                 </button>
             </form>
             <div class="radar-chart-container mt-4">
-                @*產生雷達圖*@
-                <canvas id="radarChart" width="580" height="580"></canvas>
+                <canvas id="radarChart" width="580" height="580"></canvas>@*產生雷達圖*@
             </div>
+
             <script id="radarData" type="application/json">
                 @Html.Raw(JsonConvert.SerializeObject(Model))
             </script>
@@ -137,46 +137,45 @@
                 </tbody>
             </table>
         </div>
+</div>
 
-
-
-    </div>
-    <script>
-        const radarData = @Html.Raw(JsonConvert.SerializeObject(Model));
-
+<script>
        document.addEventListener("DOMContentLoaded", function () {
-            attachEventListeners();
-            initRadarChart();
+    attachEventListeners();
+    initRadarChart();
+});
+
+//綁定事件
+function attachEventListeners() {
+    document.querySelectorAll("#dateCheckboxContainer input[type='checkbox']").forEach(checkbox => {
+        checkbox.addEventListener("change", function () {
+            enforceMaxSelection();
         });
+    });
 
-        function attachEventListeners() {
-            document.querySelectorAll("#dateCheckboxContainer input[type='checkbox']").forEach(checkbox => {
-                checkbox.addEventListener("change", function () {
-                    enforceMaxSelection();
-                });
-            });
+    document.getElementById("updateChartBtn").addEventListener("click", function () {
+        updateRadarChart();
+    });
+}
 
-            document.getElementById("updateChartBtn").addEventListener("click", function () {
-                updateRadarChart();
-            });
-        }
+// 限制最多選擇 3 個日期
+function enforceMaxSelection() {
+    const checkboxes = document.querySelectorAll("#dateCheckboxContainer input[type='checkbox']");
+    const checked = document.querySelectorAll("#dateCheckboxContainer input:checked");
 
-        function enforceMaxSelection() {
-            const checkboxes = document.querySelectorAll("#dateCheckboxContainer input[type='checkbox']");
-            const checked = document.querySelectorAll("#dateCheckboxContainer input:checked");
+    if (checked.length > 3) {
+        checked[checked.length - 1].checked = false;
+        Swal.fire({
+            icon: 'warning',
+            title: '最多只能選擇 3 個日期',
+            text: '請取消一個再選擇其他日期！',
+            confirmButtonText: '確定'
+        });
+    }
+}
 
-            if (checked.length > 3) {
-                checked[checked.length - 1].checked = false;
-                Swal.fire({
-                    icon: 'warning',
-                    title: '最多只能選擇 3 個日期',
-                    text: '請取消一個再選擇其他日期！',
-                    confirmButtonText: '確定'
-                });
-            }
-        }
-
-       function updateRadarChart() {
+// 取得並更新雷達圖
+function updateRadarChart() {
     const selectedDates = [];
     document.querySelectorAll("#dateCheckboxContainer input:checked").forEach(checkbox => {
         selectedDates.push(checkbox.value);
@@ -192,7 +191,7 @@
         return;
     }
 
-    // **獲取 CSRF Token**
+    //獲取 CSRF Token
     const csrfTokenElement = document.querySelector("input[name='__RequestVerificationToken']");
     if (!csrfTokenElement) {
         console.error("CSRF Token 不存在");
@@ -200,12 +199,12 @@
     }
     const csrfToken = csrfTokenElement.value;
 
-    // **轉換為 `application/x-www-form-urlencoded` 格式**
+    // 轉換為 `application/x-www-form-urlencoded` 格式
     const formData = new URLSearchParams();
     selectedDates.forEach(date => formData.append("surveyDates", date));
     formData.append("__RequestVerificationToken", csrfToken);
 
-    fetch("@Url.Action("MentalStateRadarChart", "ChartRadar")", {
+    fetch("/ChartRadar/MentalStateRadarChart", {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
@@ -217,14 +216,12 @@
         const tempDiv = document.createElement("div");
         tempDiv.innerHTML = html;
 
-        // **確保 `mainContent` 存在**
         const mainContent = document.getElementById("mainContent");
         if (!mainContent) {
             console.error("Error: 頁面不存在，無法更新內容");
             return;
         }
 
-        // **更新雷達圖區塊**
         const newChartContainer = tempDiv.querySelector(".radar-chart-container");
         const chartContainer = document.querySelector(".radar-chart-container");
 
@@ -232,7 +229,6 @@
             chartContainer.innerHTML = newChartContainer.innerHTML;
         }
 
-        // **解析新的 `radarData`，避免 `null` 或 `undefined` 錯誤**
         const newRadarDataElement = tempDiv.querySelector("#radarData");
         if (!newRadarDataElement) {
             console.error("Error: 日期不存在，無法更新");
@@ -249,7 +245,6 @@
 
         console.log("新的 Radar Data:", newRadarData);
 
-        // **刪除舊的 Chart，避免重複繪製**
         if (window.myRadarChart) {
             window.myRadarChart.destroy();
         }
@@ -276,24 +271,120 @@
     });
 }
 
-        function initRadarChart() {
-            const radarDataElement = document.getElementById("radarData");
-            const radarData = radarDataElement ? JSON.parse(radarDataElement.textContent) : [];
+// **初始化雷達圖**
+function initRadarChart() {
+    const radarDataElement = document.getElementById("radarData");
+    const radarData = radarDataElement ? JSON.parse(radarDataElement.textContent) : [];
 
-            if (radarData.length > 0) {
-                renderRadarChart("radarChart", radarData);
-            }
-        }
-       document.addEventListener("DOMContentLoaded", function () {
-        const viewRawDataBtn = document.getElementById("viewRawDataBtn");
-        const viewRawDataForm = document.getElementById("viewRawDataForm");
+    if (radarData.length > 0) {
+        renderRadarChart("radarChart", radarData);
+    }
+}
 
-        if (viewRawDataBtn && viewRawDataForm) {
-            viewRawDataBtn.addEventListener("click", function () {
-                viewRawDataForm.submit();
-            });
+// **渲染雷達圖**
+    function renderRadarChart(canvasId, radarData) {
+        const ctx = document.getElementById(canvasId).getContext("2d");
+
+        // **確保向度按照順序排列**
+        const categoryOrder = ["基礎心理技能", "身體心理技能", "認知技能"];
+
+        radarData.sort((a, b) => {
+            // 先按照 categoryOrder 排序，確保向度順序正確
+            const orderA = categoryOrder.indexOf(a.Dimension);
+            const orderB = categoryOrder.indexOf(b.Dimension);
+            if (orderA !== orderB) return orderA - orderB;
+            return a.CategoryName.localeCompare(b.CategoryName); // 再依分類名稱排序
+        });
+
+        // **轉換資料格式**
+        const labels = radarData.map(item => `${item.Dimension} - ${item.CategoryName}`);
+        const dataValues = radarData.map(item => item.AverageScore);
+
+        // **找出最高分與最低分**
+        const maxScore = Math.max(...dataValues);
+        const minScore = Math.min(...dataValues);
+
+        const maxIndices = [];
+        const minIndices = [];
+
+        dataValues.forEach((value, index) => {
+            if (value === maxScore) maxIndices.push(index);
+            if (value === minScore) minIndices.push(index);
+        });
+
+        if (window.myRadarChart) {
+            window.myRadarChart.destroy();
         }
-    });
-    </script>
+
+        window.myRadarChart = new Chart(ctx, {
+            type: "radar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "心理狀態分數",
+                    data: dataValues,
+                    backgroundColor: "rgba(255, 99, 132, 0.2)",
+                    borderColor: "rgba(255, 99, 132, 1)",
+                    borderWidth: 2,
+                    pointBackgroundColor: dataValues.map((value, index) =>
+                        maxIndices.includes(index) ? "red" : minIndices.includes(index) ? "blue" : "black"
+                    ),
+                    pointBorderColor: "#fff",
+                    pointRadius: dataValues.map((value, index) =>
+                        maxIndices.includes(index) || minIndices.includes(index) ? 7 : 5
+                    ),
+                    pointHoverRadius: 9
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: "top"
+                    },
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            label: function (tooltipItem) {
+                                return `分數: ${tooltipItem.raw}`;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: "black",
+                        font: {
+                            weight: "bold",
+                            size: 14
+                        },
+                        anchor: "end",
+                        align: "top",
+                        formatter: function (value) {
+                            return value.toFixed(1);
+                        }
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: { display: true },
+                        suggestedMin: 0,
+                        suggestedMax: 5,
+                        ticks: {
+                            stepSize: 1,
+                            backdropColor: "rgba(255, 255, 255, 0.5)"
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    }
+</script>
 </body>
 </html>
