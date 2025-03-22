@@ -49,7 +49,7 @@ namespace Tiss_MindRadar.Controllers
 
                 string teamName = null; // 如果是選手，檢查隊伍是否存在
 
-                if (Role == "Player")
+                if (Role == "Player" || Role == "Coach")
                 {
                     var selectedTeam = _db.Team.FirstOrDefault(t => t.TeamID == TeamID);
                     if (selectedTeam == null)
@@ -107,8 +107,8 @@ namespace Tiss_MindRadar.Controllers
                 var newUserProfile = new UserProfile
                 {
                     UserID = newUser.UserID,
-                    Age = Role == "Player" ? Age : null,
-                    TeamID = Role == "Player" ? TeamID : null,
+                    Age = (Role == "Player" || Role == "Coach") ? Age : null,
+                    TeamID = (Role == "Player" || Role == "Coach") ? TeamID : null,
                     Role = Role,
                     InviteCode = InviteCode,
                     Gender = mappedGender,
@@ -168,11 +168,13 @@ namespace Tiss_MindRadar.Controllers
             }
 
             //邀請碼驗證
-            const string consultantInviteCode = "Tiss@dmin!@#";
-            const string coachInviteCode = "Referee@123";
+            const string ConsultantInviteCode = "Tiss@dmin!@#";
+            const string RefereeInviteCode = "Referee@123";
+            const string CoachInviteCode = "Coach@123";
 
-            if ((Role == "Consultant" && InviteCode != consultantInviteCode) ||
-                (Role == "Referee" && InviteCode != coachInviteCode))
+            if ((Role == "Consultant" && InviteCode != ConsultantInviteCode) ||
+                (Role == "Referee" && InviteCode != RefereeInviteCode) ||
+                (Role == "Coach" && InviteCode != CoachInviteCode))
             {
                 return "無效的驗證碼！";
             }

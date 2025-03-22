@@ -39,6 +39,7 @@
                 <select class="form-control" id="Role" name="Role" required>
                     <option value="" disabled selected>請選擇註冊身份</option>
                     <option value="Player">選手</option>
+                    <option value="Coach">教練</option>
                     <option value="Consultant">運動心理人員</option>
                     <option value="Referee">裁判</option>
                 </select>
@@ -116,7 +117,16 @@
                     document.getElementById("Age").removeAttribute("required");
                     document.getElementById("TeamID").removeAttribute("required");
                     document.getElementById("RefereeTeamID").setAttribute("required", "required");
-                } else { // Player
+                } else if (this.value === "Coach") {
+                    inviteCodeField.style.display = "block";
+                    ageField.style.display = "block";
+                    teamField.style.display = "block";
+                    refereeTeamField.style.display = "none";
+                    document.getElementById("Age").setAttribute("required", "required");
+                    document.getElementById("TeamID").setAttribute("required", "required");
+                    document.getElementById("RefereeTeamID").removeAttribute("required");
+                }
+                else { // Player
                     inviteCodeField.style.display = "none";
                     ageField.style.display = "block";
                     teamField.style.display = "block";
