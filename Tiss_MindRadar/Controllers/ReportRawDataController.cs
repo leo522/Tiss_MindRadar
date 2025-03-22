@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml.Style;
+﻿using System.Drawing;
+using OfficeOpenXml.Style;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing.Chart;
 using System;
@@ -249,49 +250,72 @@ namespace Tiss_MindRadar.Controllers
         }
         #endregion
 
-        #region 產生報表內雷達圖
+        #region 產生報表內雷達圖_EPPlus版本
         private void GenerateRadarChart(ExcelWorksheet sheet, Dictionary<string, (double maleAvg, double femaleAvg)> categoryAverages)
         {
-            var chart = sheet.Drawings.AddChart("RadarChart", eChartType.Radar);
-            
-            chart.Title.Text = "向度大類別平均分數（男女區分）"; //設定圖表標題
+            var chart = sheet.Drawings.AddChart("RadarChart", eChartType.RadarFilled);
+            chart.Title.Text = "向度大類別平均分數（男女區分）";
+            chart.Title.Font.Size = 14;
+            chart.Title.Font.Bold = true;
 
-            //取得數據 (只取三大向度)
             var categories = new List<string> { "一、基礎心理技能", "二、身體心理技能", "三、認知技能" };
             var maleData = categories.Select(c => categoryAverages.ContainsKey(c) ? categoryAverages[c].maleAvg : 0).ToList();
             var femaleData = categories.Select(c => categoryAverages.ContainsKey(c) ? categoryAverages[c].femaleAvg : 0).ToList();
 
-            int startRow = sheet.Dimension.End.Row + 2; //避免與報表數據重疊
+            int startRow = sheet.Dimension.End.Row + 2;
             int startCol = 1;
 
-            // 寫入類別標題
+            // 寫入資料
             sheet.Cells[startRow, startCol].Value = "類別";
             sheet.Cells[startRow, startCol + 1].Value = "男性平均分數";
             sheet.Cells[startRow, startCol + 2].Value = "女性平均分數";
+            sheet.Cells[startRow, startCol, startRow, startCol + 2].Style.Font.Bold = true;
 
-            //寫入數據
-            for (int i = 0; i < categories.Count; i++) 
+            for (int i = 0; i < categories.Count; i++)
             {
                 sheet.Cells[startRow + i + 1, startCol].Value = categories[i];
                 sheet.Cells[startRow + i + 1, startCol + 1].Value = maleData[i];
                 sheet.Cells[startRow + i + 1, startCol + 2].Value = femaleData[i];
             }
 
-            //設定數據範圍
             var dataRange = sheet.Cells[startRow + 1, startCol, startRow + categories.Count, startCol];
             var maleRange = sheet.Cells[startRow + 1, startCol + 1, startRow + categories.Count, startCol + 1];
             var femaleRange = sheet.Cells[startRow + 1, startCol + 2, startRow + categories.Count, startCol + 2];
 
-            //添加系列數據
             var maleSeries = chart.Series.Add(maleRange, dataRange);
             maleSeries.Header = "男性平均分數";
 
             var femaleSeries = chart.Series.Add(femaleRange, dataRange);
             femaleSeries.Header = "女性平均分數";
 
-            //設定圖表樣式
-            chart.SetPosition(startRow - 1, 0, startCol + 4, 0); //設置圖表位置
-            chart.SetSize(500, 400); //設定圖表大小
+            // 提高辨識度
+            maleSeries.Border.Fill.Color = System.Drawing.Color.Blue;
+            maleSeries.Border.Width = 2;
+
+            femaleSeries.Border.Fill.Color = System.Drawing.Color.Orange;
+            femaleSeries.Border.Width = 2;
+
+            chart.Legend.Position = eLegendPosition.Bottom;
+            chart.Legend.Font.Size = 12;
+            chart.Legend.Font.Bold = true;
+
+            chart.SetPosition(startRow - 1, 0, startCol + 4, 0);
+            chart.SetSize(600, 600);
+            chart.DisplayBlanksAs = eDisplayBlanksAs.Gap;
+
+            // 補充數據表格在圖表下方
+            int tableStartRow = startRow + categories.Count + 10;
+            sheet.Cells[tableStartRow, 1].Value = "向度名稱";
+            sheet.Cells[tableStartRow, 2].Value = "男性平均分數";
+            sheet.Cells[tableStartRow, 3].Value = "女性平均分數";
+            sheet.Cells[tableStartRow, 1, tableStartRow, 3].Style.Font.Bold = true;
+
+            for (int i = 0; i < categories.Count; i++)
+            {
+                sheet.Cells[tableStartRow + i + 1, 1].Value = categories[i];
+                sheet.Cells[tableStartRow + i + 1, 2].Value = maleData[i];
+                sheet.Cells[tableStartRow + i + 1, 3].Value = femaleData[i];
+            }
         }
         #endregion
     }
