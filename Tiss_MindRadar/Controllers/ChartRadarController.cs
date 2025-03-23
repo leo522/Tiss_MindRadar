@@ -23,6 +23,7 @@ namespace Tiss_MindRadar.Controllers
             var form = new FormCollection { { "surveyDates", date } };
             return MentalStateRadarChart(form);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult MentalStateRadarChart(FormCollection form)
@@ -43,37 +44,33 @@ namespace Tiss_MindRadar.Controllers
                 ViewBag.Age = Session["Age"];
                 ViewBag.TeamName = Session["TeamName"];
 
-                // 取得該用戶所有有填寫問卷的日期，並按時間排序
                 List<DateTime> surveyDatesList = _db.PsychologicalResponse
                     .Where(ur => ur.UserID == userId && ur.SurveyDate.HasValue)
-                    .Select(ur => ur.SurveyDate.Value)
-                    .Distinct()
-                    .OrderByDescending(d => d)
-                    .ToList();
+                    .Select(ur => ur.SurveyDate.Value).Distinct().OrderBy(d => d).ToList();
 
                 ViewBag.SurveyDates = surveyDatesList;
 
                 string[] surveyDatesRaw = form.GetValues("surveyDates");
+
                 List<DateTime> selectedDates = new List<DateTime>();
 
-                if (surveyDatesRaw != null)
+                if (surveyDatesRaw != null && surveyDatesRaw.Any())
                 {
                     try
                     {
                         selectedDates = surveyDatesRaw
-                            .Select(d => DateTime.ParseExact(d, "yyyy-MM-dd", CultureInfo.InvariantCulture))
-                            .ToList();
+                            .Select(d => DateTime.ParseExact(d, "yyyy-MM-dd", CultureInfo.InvariantCulture)).ToList();
                     }
                     catch (FormatException)
                     {
                         ViewBag.ErrorMessage = "提交失敗：日期格式錯誤";
-                        return View("MentalStateRadarChart", new List<RadarChartVIewModel>());
+                        return View("MentalPhysicalStateRadarChart", new List<RadarChartVIewModel>());
                     }
                 }
-                else if (surveyDatesList.Any())
-                {
-                    selectedDates.Add(surveyDatesList.First()); // 預設選擇最新日期
-                }
+                //else if (surveyDatesList.Any())
+                //{
+                //    selectedDates.Add(surveyDatesList.First()); // ✅ 預設最早或最新都可
+                //}
 
                 ViewBag.SelectedDates = selectedDates;
 
@@ -130,6 +127,7 @@ namespace Tiss_MindRadar.Controllers
             var form = new FormCollection { { "surveyDates", date } };
             return MentalPhysicalStateRadarChart(form);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult MentalPhysicalStateRadarChart(FormCollection form)
@@ -150,9 +148,10 @@ namespace Tiss_MindRadar.Controllers
                 ViewBag.Age = Session["Age"];
                 ViewBag.TeamName = Session["TeamName"];
 
-                // 取得該用戶所有有填寫問卷的日期，並按時間排序
-                List<DateTime> surveyDatesList = _db.UserResponse.Where(ur => ur.UserID == userId && ur.SurveyDate.HasValue)
-                    .Select(ur => ur.SurveyDate.Value).Distinct().OrderByDescending(d => d).ToList();
+                // 改為由舊到新排序
+                List<DateTime> surveyDatesList = _db.UserResponse
+                    .Where(ur => ur.UserID == userId && ur.SurveyDate.HasValue)
+                    .Select(ur => ur.SurveyDate.Value).Distinct().OrderBy(d => d).ToList();
 
                 ViewBag.SurveyDates = surveyDatesList;  // 送到前端
 
@@ -160,7 +159,7 @@ namespace Tiss_MindRadar.Controllers
 
                 List<DateTime> selectedDates = new List<DateTime>();
 
-                if (surveyDatesRaw != null)
+                if (surveyDatesRaw != null && surveyDatesRaw.Any())
                 {
                     try
                     {
@@ -173,10 +172,9 @@ namespace Tiss_MindRadar.Controllers
                         return View("MentalPhysicalStateRadarChart", new List<RadarChartVIewModel>());
                     }
                 }
-
-                if (!selectedDates.Any() && surveyDatesList.Any())
+                else if (surveyDatesList.Any())
                 {
-                    selectedDates.Add(surveyDatesList.First()); // 預設選擇最新日期
+                    selectedDates.Add(surveyDatesList.First()); // ✅ 預設最早或最新都可
                 }
 
                 ViewBag.SelectedDates = selectedDates;
