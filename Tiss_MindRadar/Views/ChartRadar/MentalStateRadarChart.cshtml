@@ -7,12 +7,13 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>心理狀態檢測向度雷達圖</title>
     <script src="~/RadarChartJS/chart.js"></script>
     <script src="~/RadarChartJS/chartjs-plugin-datalabels@2.2.js"></script>
     <link href="~/MindRadarCss/MentalStateRadarChart.css" rel="stylesheet" />
+    <link href="~/MindRadarCss/PsychologicalDescriptionsStyle.css" rel="stylesheet" />
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto p-6 max-w-full">
@@ -23,13 +24,18 @@
             <div class="flex justify-end space-x-4 mb-4">
                 @if (Session["UserID"] != null)
                 {
-                    <a href="@Url.Action("Logout", "UserAccount")" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">登出</a>
+                    <a href="@Url.Action("Logout", "UserAccount")"
+                       class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">登出</a>
                 }
-                <a href="@Url.Action("MentalState", "Survey")" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md">返回心理狀態檢測題目頁</a>
+                <a href="@Url.Action("MentalState", "Survey")"
+                   class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md">
+                    返回心理狀態檢測題目頁
+                </a>
             </div>
         </div>
 
         <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">心理狀態檢測向度雷達圖</h1>
+
         <div id="mainContent">
             <form id="radarChartForm" method="POST" action="@Url.Action("MentalStateRadarChart", "ChartRadar")">
                 @Html.AntiForgeryToken()
@@ -38,30 +44,107 @@
                     @foreach (var date in ViewBag.SurveyDates as List<DateTime>)
                     {
                         <label class="inline-flex items-center">
-                            <input type="checkbox" name="surveyDates" class="form-checkbox h-5 w-5 text-blue-600" value="@date.ToString("yyyy-MM-dd")">
+                            <input type="checkbox" name="surveyDates" class="form-checkbox h-5 w-5 text-blue-600"
+                                   value="@date.ToString("yyyy-MM-dd")"
+                                   @(ViewBag.SelectedDates != null && ViewBag.SelectedDates.Contains(date) ? "checked" : "") />
                             <span class="ml-2">@date.ToString("yyyy/MM/dd")</span>
                         </label>
                     }
                 </div>
-                <button type="button" id="updateChartBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">更新雷達圖</button>
+                <button type="button" id="updateChartBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                    更新雷達圖
+                </button>
             </form>
+
             <div class="radar-chart-container mt-4">
-                <canvas id="radarChart" width="580" height="580"></canvas>
+                <canvas id="radarChart" width="400" height="400" style="max-width: 100%; max-height:100%;"></canvas>
             </div>
+
             <script id="radarData" type="application/json">
                 @Html.Raw(JsonConvert.SerializeObject(Model))
             </script>
+        </div>
+
+        <div class="mt-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">運動心理技能說明</h2>
+            <table class="min-w-full w-full bg-white shadow-md rounded border border-gray-300">
+                <tbody>
+                    @if (ViewBag.PsychologicalHeaders != null && ViewBag.PsychologicalDescriptions != null && ViewBag.MentalStateQuestions != null)
+                    {
+                        var descriptions = ViewBag.PsychologicalDescriptions as List<Tiss_MindRadar.Models.PsychologicalStateDescription>;
+                        var questions = ViewBag.MentalStateQuestions as List<Tiss_MindRadar.Models.MentalState>;
+
+                        string currentCategory = null;
+                        var categoryRowSpans = descriptions.GroupBy(d => d.CategoryName)
+                            .ToDictionary(g => g.Key, g => g.Count());
+                        var categoryItemIndex = new Dictionary<string, int>();
+
+                        foreach (var header in ViewBag.PsychologicalHeaders)
+                        {
+                            var firstCategory = descriptions.FirstOrDefault(d => d.HeaderID == header.ID)?.CategoryName ?? "";
+                            string headerClass = firstCategory.Contains("基礎") ? "bg-yellow-200" :
+                                                 firstCategory.Contains("身體") ? "bg-orange-300" :
+                                                 firstCategory.Contains("認知") ? "bg-blue-300" : "bg-gray-200";
+
+                            <tr class="@headerClass">
+                                <td colspan="4" class="py-3 px-6 font-bold text-lg">@header.HeaderText</td>
+                            </tr>
+
+                            var filteredDescriptions = descriptions.Where(d => d.HeaderID == header.ID).ToList();
+                            foreach (var item in filteredDescriptions)
+                            {
+                                string categoryClass = item.CategoryName.Contains("基礎") ? "bg-yellow-200" :
+                                                       item.CategoryName.Contains("身體") ? "bg-orange-300" :
+                                                       item.CategoryName.Contains("認知") ? "bg-blue-300" : "";
+
+                                if (!categoryItemIndex.ContainsKey(item.CategoryName))
+                                {
+                                    categoryItemIndex[item.CategoryName] = 1;
+                                }
+                                else
+                                {
+                                    categoryItemIndex[item.CategoryName]++;
+                                }
+
+                                <tr class="border-b border-gray-200">
+                                    @if (currentCategory != item.CategoryName)
+                                    {
+                                        int rowspan = categoryRowSpans[item.CategoryName];
+                                        <td class="py-3 px-6 text-left font-bold @categoryClass" rowspan="@rowspan">
+                                            @item.CategoryName
+                                        </td>
+                                        currentCategory = item.CategoryName;
+                                    }
+                                    <td class="py-3 px-6">@categoryItemIndex[item.CategoryName]. @item.SubCategory</td>
+                                    <td class="py-3 px-6">@item.DescriptionContent</td>
+                                    <td class="py-3 px-6">
+                                        <ul class="list-disc ml-5">
+                                            @foreach (var q in questions.Where(q => q.CategoryID == item.ID).OrderBy(q => q.QuestionNumber))
+                                            {
+                                                <li>@q.QuestionNumber. @q.QuestionText</li>
+                                            }
+                                        </ul>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             attachEventListeners();
-            initRadarChart();
+            const data = JSON.parse(document.getElementById("radarData").textContent || "[]");
+            if (data.length > 0) {
+                renderRadarChart("radarChart", data);
+            }
         });
 
         function attachEventListeners() {
-            document.querySelectorAll("#dateCheckboxContainer input[type='checkbox']").forEach(cb => {
+            document.querySelectorAll("#dateCheckboxContainer input").forEach(cb => {
                 cb.addEventListener("change", enforceMaxSelection);
             });
             document.getElementById("updateChartBtn").addEventListener("click", updateRadarChart);
@@ -71,52 +154,42 @@
             const checked = document.querySelectorAll("#dateCheckboxContainer input:checked");
             if (checked.length > 3) {
                 checked[checked.length - 1].checked = false;
-                Swal.fire({ icon: 'warning', title: '最多只能選擇 3 個日期', text: '請取消一個再選擇其他日期！', confirmButtonText: '確定' });
+                Swal.fire({ icon: "warning", title: "最多只能選擇 3 個日期", confirmButtonText: "確定" });
             }
         }
 
         function updateRadarChart() {
-            const selectedDates = Array.from(document.querySelectorAll("#dateCheckboxContainer input:checked")).map(cb => cb.value);
+            const selectedDates = [];
+            document.querySelectorAll("#dateCheckboxContainer input:checked").forEach(cb => selectedDates.push(cb.value));
             if (selectedDates.length === 0) {
-                Swal.fire({ icon: 'warning', title: '請選擇至少一個日期', text: '請勾選至少一個日期以生成雷達圖！', confirmButtonText: '確定' });
+                Swal.fire({ icon: "warning", title: "請選擇至少一個日期", confirmButtonText: "確定" });
                 return;
             }
 
-            const csrfToken = document.querySelector("input[name='__RequestVerificationToken']").value;
+            const token = document.querySelector("input[name='__RequestVerificationToken']").value;
             const formData = new URLSearchParams();
-            selectedDates.forEach(date => formData.append("surveyDates", date));
-            formData.append("__RequestVerificationToken", csrfToken);
+            selectedDates.forEach(d => formData.append("surveyDates", d));
+            formData.append("__RequestVerificationToken", token);
 
             fetch("@Url.Action("MentalStateRadarChart", "ChartRadar")", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: formData.toString()
             })
-                .then(res => res.text())
-                .then(html => {
-                    const tempDiv = document.createElement("div");
-                    tempDiv.innerHTML = html;
+            .then(res => res.text())
+            .then(html => {
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = html;
+                const newData = tempDiv.querySelector("#radarData");
+                if (!newData) {
+                    Swal.fire({ icon: "error", title: "資料錯誤", confirmButtonText: "確定" });
+                    return;
+                }
 
-                    const newChartContainer = tempDiv.querySelector(".radar-chart-container");
-                    const chartContainer = document.querySelector(".radar-chart-container");
-                    if (chartContainer && newChartContainer) {
-                        chartContainer.innerHTML = newChartContainer.innerHTML;
-                    }
-
-                    const newRadarDataElement = tempDiv.querySelector("#radarData");
-                    const newRadarData = JSON.parse(newRadarDataElement?.textContent || "[]");
-
-                    if (window.myRadarChart) window.myRadarChart.destroy();
-                    if (newRadarData.length > 0) renderRadarChart("radarChart", newRadarData);
-                });
-        }
-
-        function initRadarChart() {
-            const radarDataElement = document.getElementById("radarData");
-            const radarData = radarDataElement ? JSON.parse(radarDataElement.textContent) : [];
-            if (radarData.length > 0) {
-                renderRadarChart("radarChart", radarData);
-            }
+                const parsedData = JSON.parse(newData.textContent || "[]");
+                if (window.myRadarChart) window.myRadarChart.destroy();
+                renderRadarChart("radarChart", parsedData);
+            });
         }
 
         function renderRadarChart(canvasId, radarData) {
@@ -126,25 +199,32 @@
                 if (!grouped[item.SurveyDate]) grouped[item.SurveyDate] = [];
                 grouped[item.SurveyDate].push(item);
             });
-            const labels = [...new Set(radarData.map(x => `${x.Dimension} - ${x.CategoryName}`))];
-            const colorSet = [
-                "rgba(255,99,132,0.6)", "rgba(54,162,235,0.6)", "rgba(255,206,86,0.6)",
-                "rgba(75,192,192,0.6)", "rgba(153,102,255,0.6)"
-            ];
-            const datasets = Object.keys(grouped).map((date, index) => {
-                const group = grouped[date];
-                const dataValues = labels.map(label => {
-                    const item = group.find(x => `${x.Dimension} - ${x.CategoryName}` === label);
-                    return item ? item.AverageScore : 0;
+
+            const labels = [...new Set(radarData.map(d => `${d.Dimension} - ${d.CategoryName}`))];
+            const colorSet = ["rgba(255,99,132,0.6)", "rgba(54,162,235,0.6)", "rgba(75,192,192,0.6)"];
+
+            const datasets = Object.keys(grouped).map((date, i) => {
+                const data = grouped[date];
+                const scores = data.map(d => d.AverageScore);
+                const max = Math.max(...scores), min = Math.min(...scores);
+                const maxIndices = [], minIndices = [];
+                scores.forEach((v, i) => {
+                    if (v === max) maxIndices.push(i);
+                    if (v === min) minIndices.push(i);
                 });
+
                 return {
                     label: `心理狀態分數（${date}）`,
-                    data: dataValues,
-                    backgroundColor: colorSet[index % colorSet.length],
-                    borderColor: colorSet[index % colorSet.length].replace("0.6", "1"),
+                    data: scores,
+                    backgroundColor: colorSet[i % colorSet.length],
+                    borderColor: colorSet[i % colorSet.length].replace("0.6", "1"),
                     borderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
+                    pointBackgroundColor: scores.map((v, i) =>
+                        maxIndices.includes(i) ? "red" : minIndices.includes(i) ? "blue" : "black"),
+                    pointBorderColor: "#fff",
+                    pointRadius: scores.map((v, i) =>
+                        maxIndices.includes(i) || minIndices.includes(i) ? 7 : 5),
+                    pointHoverRadius: 9
                 };
             });
 
@@ -153,29 +233,17 @@
                 data: { labels: labels, datasets: datasets },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: true, position: "top" },
-                        tooltip: {
-                            callbacks: {
-                                label: function (tooltipItem) {
-                                    return `分數: ${tooltipItem.raw}`;
-                                }
-                            }
-                        },
+                        legend: { display: true },
+                        tooltip: { callbacks: { label: ctx => `分數: ${ctx.raw}` } },
                         datalabels: {
-                            color: "black",
-                            font: { weight: "bold", size: 12 },
-                            anchor: "end",
-                            align: "top",
-                            formatter: (v) => v.toFixed(1)
+                            color: "#000", font: { size: 12, weight: "bold" },
+                            formatter: v => v.toFixed(1)
                         }
                     },
                     scales: {
                         r: {
-                            suggestedMin: 0,
-                            suggestedMax: 5,
-                            ticks: { stepSize: 1 },
+                            suggestedMin: 0, suggestedMax: 5, ticks: { stepSize: 1 },
                             pointLabels: { font: { size: 14 } }
                         }
                     }
