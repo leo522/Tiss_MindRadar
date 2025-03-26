@@ -128,11 +128,15 @@ namespace Tiss_MindRadar.Controllers
 
                     foreach (var date in recentDates)
                     {
-                        string query = @"SELECT c.CategoryName, COALESCE(AVG(pr.Score), 0) AS AverageScore 
-                                FROM PsychologicalResponse pr
-                                INNER JOIN PsychologicalStateCategory c ON pr.CategoryID = c.ID 
-                                WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1 
-                                GROUP BY c.CategoryName";
+                        string query = @"SELECT d.CategoryName AS Dimension, d.SubCategory AS CategoryName, 
+                                        COALESCE(AVG(pr.Score), 0) AS AverageScore FROM PsychologicalResponse pr
+                                        INNER JOIN PsychologicalStateDescription d ON pr.CategoryID = d.ID
+                                        WHERE pr.UserID = @p0 AND pr.SurveyDate = @p1
+                                        GROUP BY d.CategoryName, d.SubCategory, d.ID, d.HeaderID
+                                        ORDER BY CASE 
+                                        WHEN d.CategoryName = '基礎心理技能' THEN 1 
+                                        WHEN d.CategoryName = '身體心理技能' THEN 2 
+                                        WHEN d.CategoryName = '認知技能' THEN 3 ELSE 4 END, d.ID";
 
                         object[] parameters = { userId, date };
                         var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();
@@ -145,9 +149,14 @@ namespace Tiss_MindRadar.Controllers
                     }
                 }
 
-                // 取得心理狀態技能說明
-                var psyDescriptions = _db.PsychologicalStateDescription.OrderBy(d => d.ID).ToList();
-                ViewBag.PsychologicalDescriptions = psyDescriptions;
+                // 取得心理狀態技能描述
+                var psy = _db.PsychologicalStateDescription.OrderBy(d => d.ID).ToList();
+                var headers = _db.PsychologicalStateHeader.ToList();
+                var mentalStates = _db.MentalState.OrderBy(m => m.QuestionNumber).ToList();
+
+                ViewBag.PsychologicalDescriptions = psy;
+                ViewBag.PsychologicalHeaders = headers;
+                ViewBag.MentalStateQuestions = mentalStates;
 
                 ViewBag.RadarData = radarData;
 

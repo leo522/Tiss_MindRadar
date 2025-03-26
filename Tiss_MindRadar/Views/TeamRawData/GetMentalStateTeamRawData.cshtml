@@ -90,68 +90,76 @@
 
         <div class="radar-chart-container mt-4" style="display: flex; justify-content: center;">
             @*產生雷達圖*@
-            <canvas id="radarChart" width="580" height="580"></canvas>
+            <canvas id="radarChart" style="max-width: 600px; max-height: 600px;"></canvas>
         </div>
 
         <script id="radarData" type="application/json">
         @Html.Raw(JsonConvert.SerializeObject(ViewBag.RadarData))
         </script>
     }
-
-    @if (ViewBag.PsychologicalDescriptions != null)
+    @if (ViewBag.PsychologicalHeaders != null && ViewBag.PsychologicalDescriptions != null && ViewBag.MentalStateQuestions != null)
     {
         <div class="mt-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">運動心理技能說明</h2>
-            <table class="min-w-full bg-white shadow-md rounded border border-gray-300">
-                <thead>
-                    <tr class="bg-gray-200 text-gray-600 uppercase text-lg leading-normal">
-                        <th class="py-3 px-6 text-left w-1/4">類別</th>
-                        <th class="py-3 px-6 text-left w-1/4">心理技能</th>
-                        <th class="py-3 px-6 text-left">描述</th>
-                    </tr>
-                </thead>
+            <table class="min-w-full w-full bg-white shadow-md rounded border border-gray-300">
                 <tbody>
                     @{
-                        string currentCategory = null;
-
-                        // 轉型避免動態類型錯誤
                         var descriptions = ViewBag.PsychologicalDescriptions as List<Tiss_MindRadar.Models.PsychologicalStateDescription>;
+                        var questions = ViewBag.MentalStateQuestions as List<Tiss_MindRadar.Models.MentalState>;
 
-                        // 確保 descriptions 不為 null
-                        var categoryRowSpans = descriptions != null
-                            ? descriptions.GroupBy(d => d.CategoryName)
-                                         .ToDictionary(g => g.Key, g => g.Count())
-                            : new Dictionary<string, int>();
-
+                        string currentCategory = null;
+                        var categoryRowSpans = descriptions.GroupBy(d => d.CategoryName)
+                            .ToDictionary(g => g.Key, g => g.Count());
                         var categoryItemIndex = new Dictionary<string, int>();
 
-                        foreach (var item in descriptions ?? new List<Tiss_MindRadar.Models.PsychologicalStateDescription>())
+                        foreach (var header in ViewBag.PsychologicalHeaders)
                         {
-                            string categoryClass = item.CategoryName.Contains("基礎心理技能") ? "bg-yellow-200" :
-                                                   item.CategoryName.Contains("身體心理技能") ? "bg-orange-300" :
-                                                   item.CategoryName.Contains("認知技能") ? "bg-blue-300" : "";
+                            var firstCategory = descriptions.FirstOrDefault(d => d.HeaderID == header.ID)?.CategoryName ?? "";
+                            string headerClass = firstCategory.Contains("基礎") ? "bg-yellow-200" :
+                                                 firstCategory.Contains("身體") ? "bg-orange-300" :
+                                                 firstCategory.Contains("認知") ? "bg-blue-300" : "bg-gray-200";
 
-                            if (!categoryItemIndex.ContainsKey(item.CategoryName))
-                            {
-                                categoryItemIndex[item.CategoryName] = 1;
-                            }
-                            else
-                            {
-                                categoryItemIndex[item.CategoryName]++;
-                            }
-
-                            <tr class="border-b border-gray-200">
-                                @if (currentCategory != item.CategoryName)
-                                {
-                                    int categoryRowSpan = categoryRowSpans[item.CategoryName];
-                                    <td class="py-3 px-6 text-left font-bold @categoryClass" rowspan="@categoryRowSpan">
-                                        @item.CategoryName
-                                    </td>
-                                    currentCategory = item.CategoryName;
-                                }
-                                <td class="py-3 px-6 text-left">@categoryItemIndex[item.CategoryName]. @item.SubCategory</td>
-                                <td class="py-3 px-6 text-left">@item.DescriptionContent</td>
+                            <tr class="@headerClass">
+                                <td colspan="4" class="py-3 px-6 font-bold text-lg">@header.HeaderText</td>
                             </tr>
+
+                            var filteredDescriptions = descriptions.Where(d => d.HeaderID == header.ID).ToList();
+                            foreach (var item in filteredDescriptions)
+                            {
+                                string categoryClass = item.CategoryName.Contains("基礎") ? "bg-yellow-200" :
+                                                       item.CategoryName.Contains("身體") ? "bg-orange-300" :
+                                                       item.CategoryName.Contains("認知") ? "bg-blue-300" : "";
+
+                                if (!categoryItemIndex.ContainsKey(item.CategoryName))
+                                {
+                                    categoryItemIndex[item.CategoryName] = 1;
+                                }
+                                else
+                                {
+                                    categoryItemIndex[item.CategoryName]++;
+                                }
+
+                                <tr class="border-b border-gray-200">
+                                    @if (currentCategory != item.CategoryName)
+                                    {
+                                        int rowspan = categoryRowSpans[item.CategoryName];
+                                        <td class="py-3 px-6 text-left font-bold @categoryClass" rowspan="@rowspan">
+                                            @item.CategoryName
+                                        </td>
+                                        currentCategory = item.CategoryName;
+                                    }
+                                    <td class="py-3 px-6">@categoryItemIndex[item.CategoryName]. @item.SubCategory</td>
+                                    <td class="py-3 px-6">@item.DescriptionContent</td>
+                                    <td class="py-3 px-6">
+                                        <ul class="list-disc ml-5">
+                                            @foreach (var q in questions.Where(q => q.CategoryID == item.ID).OrderBy(q => q.QuestionNumber))
+                                            {
+                                                <li>@q.QuestionNumber. @q.QuestionText</li>
+                                            }
+                                        </ul>
+                                    </td>
+                                </tr>
+                            }
                         }
                     }
                 </tbody>
@@ -279,70 +287,84 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function renderRadarChart(canvasId, radarData) {
-        const canvas = document.getElementById(canvasId);
-        const ctx = canvas.getContext("2d");
+        const ctx = document.getElementById(canvasId).getContext("2d");
 
         if (radarChartInstance instanceof Chart) {
             radarChartInstance.destroy();
         }
 
+        // 分組：以 SurveyDate 為 key
+        const grouped = {};
+        radarData.forEach(item => {
+            if (!grouped[item.SurveyDate]) grouped[item.SurveyDate] = [];
+            grouped[item.SurveyDate].push(item);
+        });
+
+        // 標籤 = 向度-子分類名稱
+        const labels = [...new Set(radarData.map(d => `${d.Dimension} - ${d.CategoryName}`))];
+
+        const colorSet = [
+            "rgba(255,99,132,0.6)",
+            "rgba(54,162,235,0.6)",
+            "rgba(75,192,192,0.6)",
+            "rgba(255,206,86,0.6)"
+        ];
+
+        const datasets = Object.keys(grouped).map((date, i) => {
+            const data = grouped[date];
+            const scores = data.map(d => d.AverageScore);
+            const max = Math.max(...scores);
+            const min = Math.min(...scores);
+            const maxIndices = [], minIndices = [];
+
+            scores.forEach((v, i) => {
+                if (v === max) maxIndices.push(i);
+                if (v === min) minIndices.push(i);
+            });
+
+            return {
+                label: `心理狀態分數（${date}）`,
+                data: scores,
+                backgroundColor: colorSet[i % colorSet.length],
+                borderColor: colorSet[i % colorSet.length].replace("0.6", "1"),
+                borderWidth: 2,
+                pointBackgroundColor: scores.map((v, i) =>
+                    maxIndices.includes(i) ? "red" :
+                        minIndices.includes(i) ? "blue" : "black"),
+                pointRadius: scores.map((v, i) =>
+                    maxIndices.includes(i) || minIndices.includes(i) ? 7 : 5),
+                pointHoverRadius: 9
+            };
+        });
+
         radarChartInstance = new Chart(ctx, {
             type: "radar",
             data: {
-                labels: radarData.map(d => d.CategoryName),
-                datasets: [{
-                    label: "心理狀態",
-                    data: radarData.map(d => d.AverageScore),
-                    backgroundColor: "rgba(255, 99, 132, 0.2)",
-                    borderColor: "rgba(255, 99, 132, 1)",
-                    pointBackgroundColor: radarData.map(d =>
-                        d.IsMax ? "red" : d.IsMin ? "blue" : "rgba(255, 99, 132, 1)"
-                    ),
-                    pointRadius: radarData.map(d =>
-                        d.IsMax || d.IsMin ? 10 : 5
-                    ),
-                    borderWidth: 2
-                }]
+                labels: labels,
+                datasets: datasets
             },
             options: {
-                responsive: false,
+                responsive: true,
+                plugins: {
+                    legend: { display: true, position: "top" },
+                    tooltip: {
+                        callbacks: {
+                            label: context => `分數: ${context.raw}`
+                        }
+                    },
+                    datalabels: {
+                        color: "#000",
+                        font: { size: 12, weight: "bold" },
+                        formatter: value => value.toFixed(1)
+                    }
+                },
                 scales: {
                     r: {
                         suggestedMin: 0,
                         suggestedMax: 5,
-                        pointLabels: { font: { size: 14 } },
-                        ticks: {
-                            stepSize: 1,
-                            font: { size: 12 }
-                        }
-                    }
-                },
-                plugins: {
-                    legend: { display: true, position: "top" },
-                    datalabels: {
-                        color: function (context) {
-                            let value = context.dataset.data[context.dataIndex];
-                            return value === Math.max(...radarData.map(d => d.AverageScore)) ? "red" :
-                                   value === Math.min(...radarData.map(d => d.AverageScore)) ? "blue" :
-                                   "black";
-                        },
-                        anchor: "center",
-                        align: function (context) {
-                            let value = context.dataset.data[context.dataIndex];
-                            return value === Math.max(...radarData.map(d => d.AverageScore)) ? "right" :
-                                   value === Math.min(...radarData.map(d => d.AverageScore)) ? "left" :
-                                   "top";
-                        },
-                        offset: 15,
-                        font: { size: 16, weight: "bold" },
-                        formatter: function (value) {
-                            if (value === Math.max(...radarData.map(d => d.AverageScore))) {
-                                return `⬆ ${value.toFixed(1)}`;
-                            }
-                            if (value === Math.min(...radarData.map(d => d.AverageScore))) {
-                                return `⬇ ${value.toFixed(1)}`;
-                            }
-                            return value.toFixed(1);
+                        ticks: { stepSize: 1 },
+                        pointLabels: {
+                            font: { size: 14 }
                         }
                     }
                 }
@@ -350,6 +372,7 @@ document.addEventListener("DOMContentLoaded", function () {
             plugins: [ChartDataLabels]
         });
     }
+
 });
     </script>
 </body>
