@@ -21,6 +21,9 @@ namespace Tiss_MindRadar.Models
             this.PsychologicalResponse = new HashSet<PsychologicalResponse>();
             this.UserProfile = new HashSet<UserProfile>();
             this.UserResponse = new HashSet<UserResponse>();
+            this.RadarChartComment = new HashSet<RadarChartComment>();
+            this.RadarChartReply = new HashSet<RadarChartReply>();
+            this.RadarCommentLog = new HashSet<RadarCommentLog>();
         }
     
         public int UserID { get; set; }
@@ -43,5 +46,11 @@ namespace Tiss_MindRadar.Models
         public virtual ICollection<UserProfile> UserProfile { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UserResponse> UserResponse { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<RadarChartComment> RadarChartComment { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<RadarChartReply> RadarChartReply { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<RadarCommentLog> RadarCommentLog { get; set; }
     }
 }

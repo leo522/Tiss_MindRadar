@@ -67,11 +67,7 @@ namespace Tiss_MindRadar.Controllers
                         return View("MentalPhysicalStateRadarChart", new List<RadarChartVIewModel>());
                     }
                 }
-                //else if (surveyDatesList.Any())
-                //{
-                //    selectedDates.Add(surveyDatesList.First()); // ✅ 預設最早或最新都可
-                //}
-
+ 
                 ViewBag.SelectedDates = selectedDates;
 
                 // 查詢所有選擇的日期的數據
@@ -101,6 +97,7 @@ namespace Tiss_MindRadar.Controllers
                     radarData.AddRange(data);
                 }
 
+
                 // 取得心理狀態技能描述
                 var psy = _db.PsychologicalStateDescription.OrderBy(d => d.ID).ToList();
                 var headers = _db.PsychologicalStateHeader.ToList();
@@ -118,6 +115,74 @@ namespace Tiss_MindRadar.Controllers
                 return View(new List<RadarChartVIewModel>());
             }
         }
+        #endregion
+
+        #region 心理狀態檢測留言
+        [HttpPost]
+        public JsonResult AddRadarComment(string commentText, string surveyDate)
+        {
+            if (Session["UserID"] == null || string.IsNullOrWhiteSpace(commentText) || string.IsNullOrWhiteSpace(surveyDate))
+            {
+                return Json(new { success = false, message = "未登入或資料不完整" });
+            }
+
+            int userId = (int)Session["UserID"];
+            string role = Session["UserRole"]?.ToString() ?? "Unknown";
+
+            var comment = new RadarChartComment
+            {
+                UserID = userId,
+                Role = role,
+                RadarType = "心理狀態",
+                SurveyDate = DateTime.ParseExact(surveyDate, "yyyy-MM-dd", CultureInfo.InvariantCulture),
+                CommentText = commentText,
+                CreatedAt = DateTime.Now
+            };
+
+            _db.RadarChartComment.Add(comment);
+            _db.SaveChanges();
+
+            // 紀錄 Log
+            var log = new RadarCommentLog
+            {
+                ActionType = "Create",
+                TargetType = "Comment",
+                TargetID = comment.CommentID,
+                PerformedBy = userId,
+                PerformedRole = role,
+                PerformedAt = DateTime.Now
+            };
+            _db.RadarCommentLog.Add(log);
+            _db.SaveChanges();
+
+            return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public JsonResult GetRadarComments(string surveyDate)
+        {
+            var comments = _db.RadarChartComment
+                .Where(c => c.RadarType == "心理狀態" && c.SurveyDate.ToString() == surveyDate)
+                .OrderByDescending(c => c.CreatedAt)
+                .Select(c => new RadarCommentViewModel
+                {
+                    CommentID = c.CommentID,
+                    CommentText = c.CommentText,
+                    CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                    SurveyDate = c.SurveyDate.ToString("yyyy-MM-dd"),
+                    Role = c.Role,
+                    UserName = c.Users.UserName,
+                    Replies = c.RadarChartReply.Select(r => new RadarReplyViewModel
+                    {
+                        ReplyText = r.ReplyText,
+                        CreatedAt = r.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                        PsychologistName = r.Users.UserName
+                    }).ToList()
+                }).ToList();
+
+            return Json(new { success = true, comments }, JsonRequestBehavior.AllowGet);
+        }
+
         #endregion
 
         #region 身心狀態檢測雷達圖

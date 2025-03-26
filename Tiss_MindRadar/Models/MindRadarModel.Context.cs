@@ -56,5 +56,8 @@ namespace Tiss_MindRadar.Models
         public virtual DbSet<UserProfile> UserProfile { get; set; }
         public virtual DbSet<UserResponse> UserResponse { get; set; }
         public virtual DbSet<Users> Users { get; set; }
+        public virtual DbSet<RadarChartComment> RadarChartComment { get; set; }
+        public virtual DbSet<RadarChartReply> RadarChartReply { get; set; }
+        public virtual DbSet<RadarCommentLog> RadarCommentLog { get; set; }
     }
 }

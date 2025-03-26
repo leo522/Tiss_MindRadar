@@ -60,6 +60,24 @@
                 <canvas id="radarChart" width="400" height="400" style="max-width: 100%; max-height:100%;"></canvas>
             </div>
 
+            <div class="mt-12">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">留言與回覆區（僅顯示當前勾選日期）</h2>
+
+                <div id="commentSection" class="space-y-4"></div>
+
+                @if (Session["UserID"] != null && (Session["UserRole"]?.ToString() == "Player" || Session["UserRole"].ToString() == "Coach" || Session["UserRole"].ToString() == "Referee"))
+                {
+                    <div class="mt-4">
+                        <label for="commentText" class="block font-bold text-gray-700 mb-1">我要留言（針對選取日期）</label>
+                        <textarea id="commentText" class="form-textarea w-full border border-gray-300 rounded p-2" rows="3" placeholder="請輸入留言內容..."></textarea>
+                        <button id="submitCommentBtn" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                            送出留言
+                        </button>
+                    </div>
+                }
+            </div>
+
+
             <script id="radarData" type="application/json">
                 @Html.Raw(JsonConvert.SerializeObject(Model))
             </script>
@@ -251,6 +269,83 @@
                 plugins: [ChartDataLabels]
             });
         }
+
+        function loadComments() {
+            const selectedDates = [...document.querySelectorAll("#dateCheckboxContainer input:checked")].map(cb => cb.value);
+            if (selectedDates.length === 0) return;
+
+            fetch("/RadarComment/GetComments", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    radarType: "心理狀態",
+                    surveyDates: selectedDates
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById("commentSection");
+                    container.innerHTML = "";
+
+                    if (data.length === 0) {
+                        container.innerHTML = `<p class="text-gray-500">尚無留言</p>`;
+                        return;
+                    }
+
+                    data.forEach(c => {
+                        const repliesHtml = c.Replies.map(r =>
+                            `<div class='ml-6 mt-1 border-l-4 pl-2 border-blue-300 text-sm text-gray-800'>🧠 心理人員回覆：${r.ReplyText}</div>`
+                        ).join("");
+
+                        container.innerHTML += `
+                <div class='border p-3 bg-white rounded shadow-sm'>
+                    <div class='text-sm text-gray-700 mb-1'>🧑‍💼 <strong>${c.UserName}</strong>（${c.Role}）於 <strong>${c.SurveyDate}</strong> 留言：</div>
+                    <div class='text-gray-900'>${c.CommentText}</div>
+                    ${repliesHtml}
+                </div>`;
+                    });
+                });
+        }
+
+        function submitComment() {
+            const selectedDates = [...document.querySelectorAll("#dateCheckboxContainer input:checked")].map(cb => cb.value);
+            const commentText = document.getElementById("commentText").value.trim();
+            if (selectedDates.length === 0) {
+                Swal.fire("請先選擇留言的日期");
+                return;
+            }
+            if (!commentText) {
+                Swal.fire("請輸入留言內容");
+                return;
+            }
+
+            fetch("/RadarComment/SubmitComment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    radarType: "心理狀態",
+                    surveyDates: selectedDates,
+                    commentText: commentText
+                })
+            })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        Swal.fire("留言成功");
+                        document.getElementById("commentText").value = "";
+                        loadComments();
+                    } else {
+                        Swal.fire("留言失敗", result.message);
+                    }
+                });
+        }
+
+        // 初始化載入留言、綁定按鈕
+        window.addEventListener("load", loadComments);
+        document.getElementById("updateChartBtn").addEventListener("click", () => {
+            setTimeout(() => loadComments(), 500);
+        });
+        document.getElementById("submitCommentBtn")?.addEventListener("click", submitComment);
     </script>
 </body>
 </html>

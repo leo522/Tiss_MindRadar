@@ -54,6 +54,13 @@
         <AssociationConnector Association="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" />
         <AssociationConnector Association="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" />
         <AssociationConnector Association="TISS_MindRadarModel.QuestionCategory" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.RadarChartComment" Width="1.5" PointX="5.25" PointY="23.5" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.RadarChartReply" Width="1.5" PointX="7.5" PointY="17.875" />
+        <EntityTypeShape EntityType="TISS_MindRadarModel.RadarCommentLog" Width="1.5" PointX="5.25" PointY="20.25" />
+        <AssociationConnector Association="TISS_MindRadarModel.FK_RadarChartComment_User" />
+        <AssociationConnector Association="TISS_MindRadarModel.FK_RadarChartReply_Comment" />
+        <AssociationConnector Association="TISS_MindRadarModel.FK_RadarChartReply_Psychologist" />
+        <AssociationConnector Association="TISS_MindRadarModel.FK_RadarCommentLog_User" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

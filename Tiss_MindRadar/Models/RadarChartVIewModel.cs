@@ -27,5 +27,23 @@ namespace Tiss_MindRadar.Models
             public int Score { get; set; }           // 分數
             public string Category { get; set; }
         }
+
+        public class RadarCommentViewModel
+        {
+            public int CommentID { get; set; }
+            public string CommentText { get; set; }
+            public string SurveyDate { get; set; }
+            public string CreatedAt { get; set; }
+            public string UserName { get; set; }
+            public string Role { get; set; }
+            public List<RadarReplyViewModel> Replies { get; set; }
+        }
+
+        public class RadarReplyViewModel
+        {
+            public string ReplyText { get; set; }
+            public string CreatedAt { get; set; }
+            public string PsychologistName { get; set; }
+        }
     }
 }

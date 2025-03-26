@@ -250,7 +250,16 @@
     <Compile Include="Models\PsychologicalStateQuestionCategory.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\RadarChartComment.cs">
+      <DependentUpon>MindRadarModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\RadarChartReply.cs">
+      <DependentUpon>MindRadarModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\RadarChartVIewModel.cs" />
+    <Compile Include="Models\RadarCommentLog.cs">
+      <DependentUpon>MindRadarModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\RefereeTeam.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
