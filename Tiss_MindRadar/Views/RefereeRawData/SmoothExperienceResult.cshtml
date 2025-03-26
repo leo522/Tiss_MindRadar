@@ -1,4 +1,4 @@
-﻿﻿@{
+﻿@{
     ViewBag.Title = "流暢經驗量表結果";
     Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
 }
@@ -26,6 +26,19 @@
                 }
             </div>
         </div>
+        <form method="get" class="mb-6 text-right">
+            <label for="selectedDate" class="font-bold mr-2">選擇填寫日期：</label>
+            <select name="selectedDate" id="selectedDate" class="form-control inline w-auto">
+                @foreach (var date in ViewBag.SurveyDates as List<DateTime>)
+                {
+                    <option value="@date.ToString("yyyy-MM-dd")"
+                            @(ViewBag.SelectedDate == date.ToString("yyyy-MM-dd") ? "selected" : "")>
+                        @date.ToString("yyyy/MM/dd")
+                    </option>
+                }
+            </select>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded ml-2">查詢</button>
+        </form>
 
         <h1 class="text-2xl font-bold text-center mb-6">流暢經驗_裁判版量表結果</h1>
 
@@ -182,7 +195,6 @@
         }
     });
 });
-
     </script>
 </body>
 </html>

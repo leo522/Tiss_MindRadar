@@ -108,8 +108,7 @@
                         var questions = ViewBag.MentalStateQuestions as List<Tiss_MindRadar.Models.MentalState>;
 
                         string currentCategory = null;
-                        var categoryRowSpans = descriptions.GroupBy(d => d.CategoryName)
-                            .ToDictionary(g => g.Key, g => g.Count());
+                        var categoryRowSpans = descriptions.GroupBy(d => d.CategoryName).ToDictionary(g => g.Key, g => g.Count());
                         var categoryItemIndex = new Dictionary<string, int>();
 
                         foreach (var header in ViewBag.PsychologicalHeaders)
