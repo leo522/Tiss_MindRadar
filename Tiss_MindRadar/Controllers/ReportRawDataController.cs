@@ -14,6 +14,7 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Numerics;
+using System.ComponentModel;
 
 namespace Tiss_MindRadar.Controllers
 {
@@ -182,7 +183,8 @@ namespace Tiss_MindRadar.Controllers
 
                 var categoryAverages = GetCategoryAverages(maleScores, femaleScores);
 
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                //ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                ExcelPackage.License.SetNonCommercialPersonal("TissMindRadarTeam");
 
                 using (var package = new ExcelPackage())
                 {
@@ -199,7 +201,8 @@ namespace Tiss_MindRadar.Controllers
             }
             catch (Exception ex)
             {
-                throw ex;
+                var errorBytes = System.Text.Encoding.UTF8.GetBytes("產生報表失敗：" + ex.Message);
+                return File(errorBytes, "text/plain", "報表錯誤訊息.txt");
             }
         }
         #endregion

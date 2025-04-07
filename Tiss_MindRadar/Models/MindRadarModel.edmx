@@ -232,7 +232,7 @@
           <Property Name="ReplyID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="CommentID" Type="int" Nullable="false" />
           <Property Name="PsychologistID" Type="int" Nullable="false" />
-          <Property Name="ReplyText" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="ReplyText" Type="nvarchar" MaxLength="150" Nullable="false" />
           <Property Name="CreatedAt" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="RadarCommentLog">
@@ -240,7 +240,7 @@
             <PropertyRef Name="LogID" />
           </Key>
           <Property Name="LogID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="ActionType" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="ActionType" Type="nvarchar" MaxLength="20" Nullable="false" />
           <Property Name="TargetType" Type="nvarchar" MaxLength="20" Nullable="false" />
           <Property Name="TargetID" Type="int" Nullable="false" />
           <Property Name="PerformedBy" Type="int" Nullable="false" />
@@ -783,6 +783,9 @@
           <EntitySet Name="PsychologicalStateDescription" EntityType="TISS_MindRadarModel.PsychologicalStateDescription" />
           <EntitySet Name="PsychologicalStateHeader" EntityType="TISS_MindRadarModel.PsychologicalStateHeader" />
           <EntitySet Name="PsychologicalStateQuestionCategory" EntityType="TISS_MindRadarModel.PsychologicalStateQuestionCategory" />
+          <EntitySet Name="RadarChartComment" EntityType="TISS_MindRadarModel.RadarChartComment" />
+          <EntitySet Name="RadarChartReply" EntityType="TISS_MindRadarModel.RadarChartReply" />
+          <EntitySet Name="RadarCommentLog" EntityType="TISS_MindRadarModel.RadarCommentLog" />
           <EntitySet Name="RefereeTeam" EntityType="TISS_MindRadarModel.RefereeTeam" />
           <EntitySet Name="SelfEfficacy" EntityType="TISS_MindRadarModel.SelfEfficacy" />
           <EntitySet Name="SmoothExperience" EntityType="TISS_MindRadarModel.SmoothExperience" />
@@ -833,6 +836,22 @@
             <End Role="PsychologicalStateHeader" EntitySet="PsychologicalStateHeader" />
             <End Role="PsychologicalStateDescription" EntitySet="PsychologicalStateDescription" />
           </AssociationSet>
+          <AssociationSet Name="FK_RadarChartComment_User" Association="TISS_MindRadarModel.FK_RadarChartComment_User">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="RadarChartComment" EntitySet="RadarChartComment" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RadarChartReply_Comment" Association="TISS_MindRadarModel.FK_RadarChartReply_Comment">
+            <End Role="RadarChartComment" EntitySet="RadarChartComment" />
+            <End Role="RadarChartReply" EntitySet="RadarChartReply" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RadarChartReply_Psychologist" Association="TISS_MindRadarModel.FK_RadarChartReply_Psychologist">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="RadarChartReply" EntitySet="RadarChartReply" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RadarCommentLog_User" Association="TISS_MindRadarModel.FK_RadarCommentLog_User">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="RadarCommentLog" EntitySet="RadarCommentLog" />
+          </AssociationSet>
           <AssociationSet Name="FK_UserProfile_RefereeTeam" Association="TISS_MindRadarModel.FK_UserProfile_RefereeTeam">
             <End Role="RefereeTeam" EntitySet="RefereeTeam" />
             <End Role="UserProfile" EntitySet="UserProfile" />
@@ -864,25 +883,6 @@
           <AssociationSet Name="QuestionCategory" Association="TISS_MindRadarModel.QuestionCategory">
             <End Role="Category" EntitySet="Category" />
             <End Role="MentalPhysicalState" EntitySet="MentalPhysicalState" />
-          </AssociationSet>
-          <EntitySet Name="RadarChartComment" EntityType="TISS_MindRadarModel.RadarChartComment" />
-          <EntitySet Name="RadarChartReply" EntityType="TISS_MindRadarModel.RadarChartReply" />
-          <EntitySet Name="RadarCommentLog" EntityType="TISS_MindRadarModel.RadarCommentLog" />
-          <AssociationSet Name="FK_RadarChartComment_User" Association="TISS_MindRadarModel.FK_RadarChartComment_User">
-            <End Role="Users" EntitySet="Users" />
-            <End Role="RadarChartComment" EntitySet="RadarChartComment" />
-          </AssociationSet>
-          <AssociationSet Name="FK_RadarChartReply_Comment" Association="TISS_MindRadarModel.FK_RadarChartReply_Comment">
-            <End Role="RadarChartComment" EntitySet="RadarChartComment" />
-            <End Role="RadarChartReply" EntitySet="RadarChartReply" />
-          </AssociationSet>
-          <AssociationSet Name="FK_RadarChartReply_Psychologist" Association="TISS_MindRadarModel.FK_RadarChartReply_Psychologist">
-            <End Role="Users" EntitySet="Users" />
-            <End Role="RadarChartReply" EntitySet="RadarChartReply" />
-          </AssociationSet>
-          <AssociationSet Name="FK_RadarCommentLog_User" Association="TISS_MindRadarModel.FK_RadarCommentLog_User">
-            <End Role="Users" EntitySet="Users" />
-            <End Role="RadarCommentLog" EntitySet="RadarCommentLog" />
           </AssociationSet>
         </EntityContainer>
         <EntityType Name="Category">
@@ -1104,6 +1104,45 @@
           <NavigationProperty Name="MentalState" Relationship="TISS_MindRadarModel.FK__Psycholog__Quest__282DF8C2" FromRole="PsychologicalStateQuestionCategory" ToRole="MentalState" />
           <NavigationProperty Name="PsychologicalStateCategory" Relationship="TISS_MindRadarModel.FK__Psycholog__Categ__29221CFB" FromRole="PsychologicalStateQuestionCategory" ToRole="PsychologicalStateCategory" />
         </EntityType>
+        <EntityType Name="RadarChartComment">
+          <Key>
+            <PropertyRef Name="CommentID" />
+          </Key>
+          <Property Name="CommentID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="Role" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="RadarType" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="SurveyDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="CommentText" Type="String" Nullable="false" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK_RadarChartComment_User" FromRole="RadarChartComment" ToRole="Users" />
+          <NavigationProperty Name="RadarChartReply" Relationship="TISS_MindRadarModel.FK_RadarChartReply_Comment" FromRole="RadarChartComment" ToRole="RadarChartReply" />
+        </EntityType>
+        <EntityType Name="RadarChartReply">
+          <Key>
+            <PropertyRef Name="ReplyID" />
+          </Key>
+          <Property Name="ReplyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CommentID" Type="Int32" Nullable="false" />
+          <Property Name="PsychologistID" Type="Int32" Nullable="false" />
+          <Property Name="ReplyText" Type="String" Nullable="false" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="RadarChartComment" Relationship="TISS_MindRadarModel.FK_RadarChartReply_Comment" FromRole="RadarChartReply" ToRole="RadarChartComment" />
+          <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK_RadarChartReply_Psychologist" FromRole="RadarChartReply" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="RadarCommentLog">
+          <Key>
+            <PropertyRef Name="LogID" />
+          </Key>
+          <Property Name="LogID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ActionType" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="TargetType" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="TargetID" Type="Int32" Nullable="false" />
+          <Property Name="PerformedBy" Type="Int32" Nullable="false" />
+          <Property Name="PerformedRole" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="PerformedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK_RadarCommentLog_User" FromRole="RadarCommentLog" ToRole="Users" />
+        </EntityType>
         <EntityType Name="RefereeTeam">
           <Key>
             <PropertyRef Name="RefereeTeamID" />
@@ -1222,12 +1261,12 @@
           <Property Name="RefereeTeamID" Type="Int32" />
           <NavigationProperty Name="ConsultantTeams" Relationship="TISS_MindRadarModel.FK_ConsultantTeams_ConsultantID" FromRole="Users" ToRole="ConsultantTeams" />
           <NavigationProperty Name="PsychologicalResponse" Relationship="TISS_MindRadarModel.FK_PsychologicalResponse_UserID" FromRole="Users" ToRole="PsychologicalResponse" />
-          <NavigationProperty Name="RefereeTeam" Relationship="TISS_MindRadarModel.FK_Users_RefereeTeam" FromRole="Users" ToRole="RefereeTeam" />
-          <NavigationProperty Name="UserProfile" Relationship="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" FromRole="Users" ToRole="UserProfile" />
-          <NavigationProperty Name="UserResponse" Relationship="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" FromRole="Users" ToRole="UserResponse" />
           <NavigationProperty Name="RadarChartComment" Relationship="TISS_MindRadarModel.FK_RadarChartComment_User" FromRole="Users" ToRole="RadarChartComment" />
           <NavigationProperty Name="RadarChartReply" Relationship="TISS_MindRadarModel.FK_RadarChartReply_Psychologist" FromRole="Users" ToRole="RadarChartReply" />
           <NavigationProperty Name="RadarCommentLog" Relationship="TISS_MindRadarModel.FK_RadarCommentLog_User" FromRole="Users" ToRole="RadarCommentLog" />
+          <NavigationProperty Name="RefereeTeam" Relationship="TISS_MindRadarModel.FK_Users_RefereeTeam" FromRole="Users" ToRole="RefereeTeam" />
+          <NavigationProperty Name="UserProfile" Relationship="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" FromRole="Users" ToRole="UserProfile" />
+          <NavigationProperty Name="UserResponse" Relationship="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" FromRole="Users" ToRole="UserResponse" />
         </EntityType>
         <Association Name="FK_ConsultantTeams_ConsultantID">
           <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
@@ -1349,6 +1388,54 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_RadarChartComment_User">
+          <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="TISS_MindRadarModel.RadarChartComment" Role="RadarChartComment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="RadarChartComment">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RadarChartReply_Comment">
+          <End Type="TISS_MindRadarModel.RadarChartComment" Role="RadarChartComment" Multiplicity="1" />
+          <End Type="TISS_MindRadarModel.RadarChartReply" Role="RadarChartReply" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RadarChartComment">
+              <PropertyRef Name="CommentID" />
+            </Principal>
+            <Dependent Role="RadarChartReply">
+              <PropertyRef Name="CommentID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RadarChartReply_Psychologist">
+          <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="TISS_MindRadarModel.RadarChartReply" Role="RadarChartReply" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="RadarChartReply">
+              <PropertyRef Name="PsychologistID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RadarCommentLog_User">
+          <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="TISS_MindRadarModel.RadarCommentLog" Role="RadarCommentLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="RadarCommentLog">
+              <PropertyRef Name="PerformedBy" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_UserProfile_RefereeTeam">
           <End Type="TISS_MindRadarModel.RefereeTeam" Role="RefereeTeam" Multiplicity="0..1" />
           <End Type="TISS_MindRadarModel.UserProfile" Role="UserProfile" Multiplicity="*" />
@@ -1436,93 +1523,6 @@
         <Association Name="QuestionCategory">
           <End Type="TISS_MindRadarModel.Category" Role="Category" Multiplicity="*" />
           <End Type="TISS_MindRadarModel.MentalPhysicalState" Role="MentalPhysicalState" Multiplicity="*" />
-        </Association>
-        <EntityType Name="RadarChartComment">
-          <Key>
-            <PropertyRef Name="CommentID" />
-          </Key>
-          <Property Name="CommentID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="UserID" Type="Int32" Nullable="false" />
-          <Property Name="Role" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
-          <Property Name="RadarType" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="SurveyDate" Type="DateTime" Nullable="false" Precision="0" />
-          <Property Name="CommentText" Type="String" Nullable="false" MaxLength="150" FixedLength="false" Unicode="true" />
-          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK_RadarChartComment_User" FromRole="RadarChartComment" ToRole="Users" />
-          <NavigationProperty Name="RadarChartReply" Relationship="TISS_MindRadarModel.FK_RadarChartReply_Comment" FromRole="RadarChartComment" ToRole="RadarChartReply" />
-        </EntityType>
-        <EntityType Name="RadarChartReply">
-          <Key>
-            <PropertyRef Name="ReplyID" />
-          </Key>
-          <Property Name="ReplyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="CommentID" Type="Int32" Nullable="false" />
-          <Property Name="PsychologistID" Type="Int32" Nullable="false" />
-          <Property Name="ReplyText" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="RadarChartComment" Relationship="TISS_MindRadarModel.FK_RadarChartReply_Comment" FromRole="RadarChartReply" ToRole="RadarChartComment" />
-          <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK_RadarChartReply_Psychologist" FromRole="RadarChartReply" ToRole="Users" />
-        </EntityType>
-        <EntityType Name="RadarCommentLog">
-          <Key>
-            <PropertyRef Name="LogID" />
-          </Key>
-          <Property Name="LogID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="ActionType" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="TargetType" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
-          <Property Name="TargetID" Type="Int32" Nullable="false" />
-          <Property Name="PerformedBy" Type="Int32" Nullable="false" />
-          <Property Name="PerformedRole" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
-          <Property Name="PerformedAt" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK_RadarCommentLog_User" FromRole="RadarCommentLog" ToRole="Users" />
-        </EntityType>
-        <Association Name="FK_RadarChartComment_User">
-          <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
-          <End Type="TISS_MindRadarModel.RadarChartComment" Role="RadarChartComment" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Users">
-              <PropertyRef Name="UserID" />
-            </Principal>
-            <Dependent Role="RadarChartComment">
-              <PropertyRef Name="UserID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_RadarChartReply_Comment">
-          <End Type="TISS_MindRadarModel.RadarChartComment" Role="RadarChartComment" Multiplicity="1" />
-          <End Type="TISS_MindRadarModel.RadarChartReply" Role="RadarChartReply" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="RadarChartComment">
-              <PropertyRef Name="CommentID" />
-            </Principal>
-            <Dependent Role="RadarChartReply">
-              <PropertyRef Name="CommentID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_RadarChartReply_Psychologist">
-          <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
-          <End Type="TISS_MindRadarModel.RadarChartReply" Role="RadarChartReply" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Users">
-              <PropertyRef Name="UserID" />
-            </Principal>
-            <Dependent Role="RadarChartReply">
-              <PropertyRef Name="PsychologistID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_RadarCommentLog_User">
-          <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
-          <End Type="TISS_MindRadarModel.RadarCommentLog" Role="RadarCommentLog" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Users">
-              <PropertyRef Name="UserID" />
-            </Principal>
-            <Dependent Role="RadarCommentLog">
-              <PropertyRef Name="PerformedBy" />
-            </Dependent>
-          </ReferentialConstraint>
         </Association>
         </Schema>
     </edmx:ConceptualModels>
@@ -1750,6 +1750,43 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="RadarChartComment">
+            <EntityTypeMapping TypeName="TISS_MindRadarModel.RadarChartComment">
+              <MappingFragment StoreEntitySet="RadarChartComment">
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="CommentText" ColumnName="CommentText" />
+                <ScalarProperty Name="SurveyDate" ColumnName="SurveyDate" />
+                <ScalarProperty Name="RadarType" ColumnName="RadarType" />
+                <ScalarProperty Name="Role" ColumnName="Role" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="CommentID" ColumnName="CommentID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RadarChartReply">
+            <EntityTypeMapping TypeName="TISS_MindRadarModel.RadarChartReply">
+              <MappingFragment StoreEntitySet="RadarChartReply">
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="ReplyText" ColumnName="ReplyText" />
+                <ScalarProperty Name="PsychologistID" ColumnName="PsychologistID" />
+                <ScalarProperty Name="CommentID" ColumnName="CommentID" />
+                <ScalarProperty Name="ReplyID" ColumnName="ReplyID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RadarCommentLog">
+            <EntityTypeMapping TypeName="TISS_MindRadarModel.RadarCommentLog">
+              <MappingFragment StoreEntitySet="RadarCommentLog">
+                <ScalarProperty Name="PerformedAt" ColumnName="PerformedAt" />
+                <ScalarProperty Name="PerformedRole" ColumnName="PerformedRole" />
+                <ScalarProperty Name="PerformedBy" ColumnName="PerformedBy" />
+                <ScalarProperty Name="TargetID" ColumnName="TargetID" />
+                <ScalarProperty Name="TargetType" ColumnName="TargetType" />
+                <ScalarProperty Name="ActionType" ColumnName="ActionType" />
+                <ScalarProperty Name="LogID" ColumnName="LogID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="RefereeTeam">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.RefereeTeam">
               <MappingFragment StoreEntitySet="RefereeTeam">
@@ -1873,43 +1910,6 @@
               <ScalarProperty Name="ID" ColumnName="CategoryID" />
             </EndProperty>
           </AssociationSetMapping>
-          <EntitySetMapping Name="RadarChartComment">
-            <EntityTypeMapping TypeName="TISS_MindRadarModel.RadarChartComment">
-              <MappingFragment StoreEntitySet="RadarChartComment">
-                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
-                <ScalarProperty Name="CommentText" ColumnName="CommentText" />
-                <ScalarProperty Name="SurveyDate" ColumnName="SurveyDate" />
-                <ScalarProperty Name="RadarType" ColumnName="RadarType" />
-                <ScalarProperty Name="Role" ColumnName="Role" />
-                <ScalarProperty Name="UserID" ColumnName="UserID" />
-                <ScalarProperty Name="CommentID" ColumnName="CommentID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="RadarChartReply">
-            <EntityTypeMapping TypeName="TISS_MindRadarModel.RadarChartReply">
-              <MappingFragment StoreEntitySet="RadarChartReply">
-                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
-                <ScalarProperty Name="ReplyText" ColumnName="ReplyText" />
-                <ScalarProperty Name="PsychologistID" ColumnName="PsychologistID" />
-                <ScalarProperty Name="CommentID" ColumnName="CommentID" />
-                <ScalarProperty Name="ReplyID" ColumnName="ReplyID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="RadarCommentLog">
-            <EntityTypeMapping TypeName="TISS_MindRadarModel.RadarCommentLog">
-              <MappingFragment StoreEntitySet="RadarCommentLog">
-                <ScalarProperty Name="PerformedAt" ColumnName="PerformedAt" />
-                <ScalarProperty Name="PerformedRole" ColumnName="PerformedRole" />
-                <ScalarProperty Name="PerformedBy" ColumnName="PerformedBy" />
-                <ScalarProperty Name="TargetID" ColumnName="TargetID" />
-                <ScalarProperty Name="TargetType" ColumnName="TargetType" />
-                <ScalarProperty Name="ActionType" ColumnName="ActionType" />
-                <ScalarProperty Name="LogID" ColumnName="LogID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

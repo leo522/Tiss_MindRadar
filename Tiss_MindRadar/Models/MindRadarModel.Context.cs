@@ -46,6 +46,9 @@ namespace Tiss_MindRadar.Models
         public virtual DbSet<PsychologicalStateDescription> PsychologicalStateDescription { get; set; }
         public virtual DbSet<PsychologicalStateHeader> PsychologicalStateHeader { get; set; }
         public virtual DbSet<PsychologicalStateQuestionCategory> PsychologicalStateQuestionCategory { get; set; }
+        public virtual DbSet<RadarChartComment> RadarChartComment { get; set; }
+        public virtual DbSet<RadarChartReply> RadarChartReply { get; set; }
+        public virtual DbSet<RadarCommentLog> RadarCommentLog { get; set; }
         public virtual DbSet<RefereeTeam> RefereeTeam { get; set; }
         public virtual DbSet<SelfEfficacy> SelfEfficacy { get; set; }
         public virtual DbSet<SmoothExperience> SmoothExperience { get; set; }
@@ -56,8 +59,5 @@ namespace Tiss_MindRadar.Models
         public virtual DbSet<UserProfile> UserProfile { get; set; }
         public virtual DbSet<UserResponse> UserResponse { get; set; }
         public virtual DbSet<Users> Users { get; set; }
-        public virtual DbSet<RadarChartComment> RadarChartComment { get; set; }
-        public virtual DbSet<RadarChartReply> RadarChartReply { get; set; }
-        public virtual DbSet<RadarCommentLog> RadarCommentLog { get; set; }
     }
 }
