@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Tiss_MindRadar.Models;
+using Tiss_MindRadar.Utility;
 
 namespace Tiss_MindRadar.Controllers
 {
@@ -15,7 +16,7 @@ namespace Tiss_MindRadar.Controllers
         public ActionResult MentalPhysicalState()
         {
             ViewBag.Title = "身心狀態檢測";
-            ViewBag.UserName = Session["UserName"];
+            ViewBag.UserName = MaskingHelper.MaskUserName(Session["UserName"]?.ToString());
             ViewBag.Age = Session["Age"];
             ViewBag.TeamName = Session["TeamName"];
 
@@ -82,7 +83,7 @@ namespace Tiss_MindRadar.Controllers
         public ActionResult MentalState()
         {
             ViewBag.Title = "心理狀態檢測";
-            ViewBag.UserName = Session["UserName"];
+            ViewBag.UserName = MaskingHelper.MaskUserName(Session["UserName"]?.ToString());
             ViewBag.Age = Session["Age"];
             ViewBag.TeamName = Session["TeamName"];
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Tiss_MindRadar.Models;
+using Tiss_MindRadar.Utility;
 
 namespace Tiss_MindRadar.Controllers
 {
@@ -35,10 +36,11 @@ namespace Tiss_MindRadar.Controllers
         [HttpPost]
         public JsonResult GetUsersByTeam(int teamId)
         {
-            var users = _db.Users
-                .Where(u => u.TeamID == teamId)
-                .Select(u => new { u.UserID, u.UserName })
-                .ToList();
+            var users = _db.Users.Where(u => u.TeamID == teamId).ToList().Select(u => new
+            {
+                u.UserID,
+                UserName = MaskingHelper.MaskUserName(u.UserName)
+            }).ToList();
 
             return Json(users);
         }
@@ -88,9 +90,13 @@ namespace Tiss_MindRadar.Controllers
                 {
                     var users = _db.Users
                         .Where(u => u.TeamID == teamId)
-                        .Select(u => new { u.UserID, u.UserName })
-                        .ToList();
-                    ViewBag.Users = new SelectList(users, "UserID", "UserName", userId);
+                        .Select(u =>
+                        new { 
+                            u.UserID, 
+                            MaskedName = MaskingHelper.MaskUserName(u.UserName) 
+                        }).ToList();
+
+                    ViewBag.Users = new SelectList(users, "UserID", "MaskedName", userId);
                 }
                 else
                 {
@@ -109,7 +115,7 @@ namespace Tiss_MindRadar.Controllers
                         .Select(result => new TeamRawDataViewModel
                         {
                             TeamName = result.temp.u.TeamName,
-                            UserName = result.temp.u.UserName,
+                            UserName = MaskingHelper.MaskUserName(result.temp.u.UserName),
                             Category = result.ms.QuestionText,
                             Score = result.temp.pr.Score,
                             SurveyDate = result.temp.pr.SurveyDate

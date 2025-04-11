@@ -9,6 +9,7 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using static Tiss_MindRadar.Models.RadarChartVIewModel;
 using System.Runtime.Remoting.Messaging;
+using Tiss_MindRadar.Utility;
 
 namespace Tiss_MindRadar.Controllers
 {
@@ -40,7 +41,7 @@ namespace Tiss_MindRadar.Controllers
                     return RedirectToAction("Login", "UserAccount");
                 }
 
-                ViewBag.UserName = Session["UserName"];
+                ViewBag.UserName = MaskingHelper.MaskUserName(Session["UserName"]?.ToString());
                 ViewBag.Age = Session["Age"];
                 ViewBag.TeamName = Session["TeamName"];
 
@@ -209,7 +210,7 @@ namespace Tiss_MindRadar.Controllers
                     return RedirectToAction("Login", "UserAccount");
                 }
 
-                ViewBag.UserName = Session["UserName"];
+                ViewBag.UserName = MaskingHelper.MaskUserName(Session["UserName"]?.ToString());
                 ViewBag.Age = Session["Age"];
                 ViewBag.TeamName = Session["TeamName"];
 

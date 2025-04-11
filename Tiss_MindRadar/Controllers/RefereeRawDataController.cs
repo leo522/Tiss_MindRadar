@@ -9,12 +9,14 @@ using OfficeOpenXml;
 using OfficeOpenXml.Drawing.Chart;
 using static Tiss_MindRadar.Models.RefereeViewModel;
 using System.Data.Entity;
+using Tiss_MindRadar.Utility;
 
 namespace Tiss_MindRadar.Controllers
 {
     public class RefereeRawDataController : Controller
     {
         private TISS_MindRadarEntities _db = new TISS_MindRadarEntities(); //資料庫
+
 
         #region 流暢經驗_裁判版量表分數 (雷達圖)
         public ActionResult SmoothExperienceResult(DateTime? selectedDate)
@@ -26,7 +28,7 @@ namespace Tiss_MindRadar.Controllers
                     return RedirectToAction("Login", "UserAccount");
                 }
 
-                ViewBag.RefereeName = Session["UserName"];
+                ViewBag.RefereeName = MaskingHelper.MaskUserName(Session["UserName"]?.ToString());
                 ViewBag.RefereeTeamName = Session["RefereeTeamName"];
 
                 // 取得所有填寫日期（不重複）
@@ -114,7 +116,7 @@ namespace Tiss_MindRadar.Controllers
                     return RedirectToAction("Login", "UserAccount");
                 }
 
-                ViewBag.RefereeName = Session["UserName"];
+                ViewBag.RefereeName = MaskingHelper.MaskUserName(Session["UserName"]?.ToString());
                 ViewBag.RefereeTeamName = Session["RefereeTeamName"];
 
                 var allDates = _db.ProfessionalCapabilitiesResponse.Select(r => r.SubmittedAt).AsEnumerable()

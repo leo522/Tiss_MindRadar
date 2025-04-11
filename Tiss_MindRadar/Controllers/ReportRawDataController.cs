@@ -184,7 +184,7 @@ namespace Tiss_MindRadar.Controllers
                 var categoryAverages = GetCategoryAverages(maleScores, femaleScores);
 
                 //ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                ExcelPackage.License.SetNonCommercialPersonal("TissMindRadarTeam");
+                ExcelPackage.License.SetNonCommercialPersonal("YourName");
 
                 using (var package = new ExcelPackage())
                 {

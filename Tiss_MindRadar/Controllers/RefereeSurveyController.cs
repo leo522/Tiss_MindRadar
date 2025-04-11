@@ -7,6 +7,7 @@ using Tiss_MindRadar.Models;
 using static Tiss_MindRadar.Models.RefereeViewModel;
 using System.Web.Script.Serialization;
 using System.IO;
+using Tiss_MindRadar.Utility;
 
 namespace Tiss_MindRadar.Controllers
 {
@@ -17,7 +18,7 @@ namespace Tiss_MindRadar.Controllers
         #region 流暢經驗_裁判版
         public ActionResult SmoothExperienceSurvey()
         {
-            ViewBag.RefereeName = Session["UserName"];
+            ViewBag.RefereeName = MaskingHelper.MaskUserName(Session["UserName"]?.ToString());
             ViewBag.RefereeTeamName = Session["RefereeTeamName"];
 
             // 取得流暢經驗分類資料
@@ -114,7 +115,7 @@ namespace Tiss_MindRadar.Controllers
         #region 專業能力_裁判版
         public ActionResult ProfessionalCapabilitiesSurvey()
         {
-            ViewBag.RefereeName = Session["UserName"];
+            ViewBag.RefereeName = MaskingHelper.MaskUserName(Session["UserName"]?.ToString());
             ViewBag.RefereeTeamName = Session["RefereeTeamName"];
 
             // 取得專業能力分類資料
