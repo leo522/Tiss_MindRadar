@@ -87,7 +87,9 @@
     @if (ViewBag.RadarData != null)
     {
         <h3 class="text-xl font-bold text-center mt-6 text-gray-700">心理狀態檢測向度雷達圖</h3>
-
+        <p class="text-center text-gray-600 text-base mb-4">
+            選手：<strong>@ViewBag.MaskedUserName</strong>
+        </p>
         <div class="radar-chart-container mt-4" style="display: flex; justify-content: center;">
             @*產生雷達圖*@
             <canvas id="radarChart" style="max-width: 600px; max-height: 600px;"></canvas>

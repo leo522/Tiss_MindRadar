@@ -90,13 +90,9 @@ namespace Tiss_MindRadar.Controllers
                 {
                     var users = _db.Users
                         .Where(u => u.TeamID == teamId)
-                        .Select(u =>
-                        new { 
-                            u.UserID, 
-                            MaskedName = MaskingHelper.MaskUserName(u.UserName) 
-                        }).ToList();
-
-                    ViewBag.Users = new SelectList(users, "UserID", "MaskedName", userId);
+                        .Select(u => new { u.UserID, u.UserName })
+                        .ToList();
+                    ViewBag.Users = new SelectList(users, "UserID", "UserName", userId);
                 }
                 else
                 {
@@ -115,7 +111,7 @@ namespace Tiss_MindRadar.Controllers
                         .Select(result => new TeamRawDataViewModel
                         {
                             TeamName = result.temp.u.TeamName,
-                            UserName = MaskingHelper.MaskUserName(result.temp.u.UserName),
+                            UserName = result.temp.u.UserName,
                             Category = result.ms.QuestionText,
                             Score = result.temp.pr.Score,
                             SurveyDate = result.temp.pr.SurveyDate
@@ -151,6 +147,12 @@ namespace Tiss_MindRadar.Controllers
                         {
                             item.SurveyDate = date?.ToString("yyyy-MM-dd");
                         }
+
+                        ViewBag.MaskedUserName = MaskingHelper.MaskUserName(
+    _db.Users.Where(u => u.UserID == userId).Select(u => u.UserName).FirstOrDefault()
+);
+
+
                         radarData.AddRange(data);
                     }
                 }
