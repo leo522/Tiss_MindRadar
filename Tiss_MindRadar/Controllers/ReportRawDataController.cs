@@ -15,6 +15,7 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Numerics;
 using System.ComponentModel;
+using Tiss_MindRadar.Utility;
 
 namespace Tiss_MindRadar.Controllers
 {
@@ -38,9 +39,10 @@ namespace Tiss_MindRadar.Controllers
                     .Join(_db.MentalState, temp => temp.pr.CategoryID, ms => ms.QuestionNumber, (temp, ms) => new { temp, ms })
                     .Join(_db.UserProfile, temp => temp.temp.u.UserID, up => up.UserID, (temp, up) => new { temp, up })
                     .Where(result => result.temp.temp.u.TeamID == teamId)
+                    .ToList()
                     .Select(result => new TeamReportViewModel
                     {
-                        UserName = result.temp.temp.u.UserName,
+                        UserName = MaskingHelper.MaskUserName(result.temp.temp.u.UserName),
                         Gender = result.up.Gender,
                         Category = result.temp.ms.QuestionText,
                         Score = result.temp.temp.pr.Score,
@@ -169,7 +171,7 @@ namespace Tiss_MindRadar.Controllers
                     .GroupBy(r => new { r.UserName, r.Gender, r.SurveyDate })
                     .Select(g => new ReportDataModel
                     {
-                        UserName = g.Key.UserName,
+                        UserName = MaskingHelper.MaskUserName(g.Key.UserName),
                         Gender = g.Key.Gender,
                         SurveyDate = g.Key.SurveyDate?.ToString("yyyy/MM/dd"),
                         Scores = g.GroupBy(r => r.QuestionID).ToDictionary(q => q.Key, q => q.First().Score)
@@ -269,10 +271,10 @@ namespace Tiss_MindRadar.Controllers
             int startCol = 1;
 
             // 寫入資料
-            sheet.Cells[startRow, startCol].Value = "類別";
-            sheet.Cells[startRow, startCol + 1].Value = "男性平均分數";
-            sheet.Cells[startRow, startCol + 2].Value = "女性平均分數";
-            sheet.Cells[startRow, startCol, startRow, startCol + 2].Style.Font.Bold = true;
+            //sheet.Cells[startRow, startCol].Value = "類別";
+            //sheet.Cells[startRow, startCol + 1].Value = "男性平均分數";
+            //sheet.Cells[startRow, startCol + 2].Value = "女性平均分數";
+            //sheet.Cells[startRow, startCol, startRow, startCol + 2].Style.Font.Bold = true;
 
             for (int i = 0; i < categories.Count; i++)
             {
