@@ -135,6 +135,43 @@ namespace Tiss_MindRadar.Controllers
         }
         #endregion
 
+        #region 產生報表（直向）
+        private void GenerateReportSheetVertical(ExcelWorksheet sheet, List<ReportDataModel> data)
+        {
+            sheet.Cells[1, 1].Value = "心理技能報表（直向）";
+            sheet.Cells[1, 1].Style.Font.Bold = true;
+
+            var questionList = _db.MentalState.OrderBy(q => q.QuestionNumber).ToList();
+
+            sheet.Cells[2, 1].Value = "題號";
+            sheet.Cells[2, 2].Value = "題目";
+
+            for (int i = 0; i < data.Count; i++)
+            {
+                sheet.Cells[2, i + 3].Value = data[i].UserName + "\n(" + data[i].SurveyDate + ")";
+                sheet.Cells[2, i + 3].Style.WrapText = true;
+                sheet.Cells[2, i + 3].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            }
+
+            int row = 3;
+            foreach (var q in questionList)
+            {
+                sheet.Cells[row, 1].Value = q.QuestionNumber;
+                sheet.Cells[row, 2].Value = q.QuestionText;
+
+                for (int i = 0; i < data.Count; i++)
+                {
+                    var score = data[i].Scores.ContainsKey(q.QuestionNumber) ? data[i].Scores[q.QuestionNumber] : 0;
+                    sheet.Cells[row, i + 3].Value = score;
+                }
+
+                row++;
+            }
+
+            sheet.Cells[sheet.Dimension.Address].AutoFitColumns();
+        }
+        #endregion
+
         #region 下載Excel報表
         [HttpPost]
         public ActionResult ExportTeamReportToExcel()
@@ -192,8 +229,8 @@ namespace Tiss_MindRadar.Controllers
                 {
                     var worksheet = package.Workbook.Worksheets.Add($"{team.TeamName} 報表");
                     
-                    GenerateReportSheet(worksheet, groupedData, categoryAverages); //產生報表
-
+                    //GenerateReportSheet(worksheet, groupedData, categoryAverages); //產生報表
+                    GenerateReportSheetVertical(worksheet, groupedData); //使用直向格式
                     GenerateRadarChart(worksheet, categoryAverages);
 
                     var stream = new MemoryStream(package.GetAsByteArray());
