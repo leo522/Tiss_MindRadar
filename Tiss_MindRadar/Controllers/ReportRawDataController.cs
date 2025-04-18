@@ -15,6 +15,7 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Numerics;
 using System.ComponentModel;
+using Tiss_MindRadar.Utility;
 
 namespace Tiss_MindRadar.Controllers
 {
@@ -38,9 +39,10 @@ namespace Tiss_MindRadar.Controllers
                     .Join(_db.MentalState, temp => temp.pr.CategoryID, ms => ms.QuestionNumber, (temp, ms) => new { temp, ms })
                     .Join(_db.UserProfile, temp => temp.temp.u.UserID, up => up.UserID, (temp, up) => new { temp, up })
                     .Where(result => result.temp.temp.u.TeamID == teamId)
+                    .ToList()
                     .Select(result => new TeamReportViewModel
                     {
-                        UserName = result.temp.temp.u.UserName,
+                        UserName = MaskingHelper.MaskUserName(result.temp.temp.u.UserName),
                         Gender = result.up.Gender,
                         Category = result.temp.ms.QuestionText,
                         Score = result.temp.temp.pr.Score,
@@ -133,6 +135,43 @@ namespace Tiss_MindRadar.Controllers
         }
         #endregion
 
+        #region 產生報表（直向）
+        private void GenerateReportSheetVertical(ExcelWorksheet sheet, List<ReportDataModel> data)
+        {
+            sheet.Cells[1, 1].Value = "心理技能報表（直向）";
+            sheet.Cells[1, 1].Style.Font.Bold = true;
+
+            var questionList = _db.MentalState.OrderBy(q => q.QuestionNumber).ToList();
+
+            sheet.Cells[2, 1].Value = "題號";
+            sheet.Cells[2, 2].Value = "題目";
+
+            for (int i = 0; i < data.Count; i++)
+            {
+                sheet.Cells[2, i + 3].Value = data[i].UserName + "\n(" + data[i].SurveyDate + ")";
+                sheet.Cells[2, i + 3].Style.WrapText = true;
+                sheet.Cells[2, i + 3].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            }
+
+            int row = 3;
+            foreach (var q in questionList)
+            {
+                sheet.Cells[row, 1].Value = q.QuestionNumber;
+                sheet.Cells[row, 2].Value = q.QuestionText;
+
+                for (int i = 0; i < data.Count; i++)
+                {
+                    var score = data[i].Scores.ContainsKey(q.QuestionNumber) ? data[i].Scores[q.QuestionNumber] : 0;
+                    sheet.Cells[row, i + 3].Value = score;
+                }
+
+                row++;
+            }
+
+            sheet.Cells[sheet.Dimension.Address].AutoFitColumns();
+        }
+        #endregion
+
         #region 下載Excel報表
         [HttpPost]
         public ActionResult ExportTeamReportToExcel()
@@ -169,7 +208,7 @@ namespace Tiss_MindRadar.Controllers
                     .GroupBy(r => new { r.UserName, r.Gender, r.SurveyDate })
                     .Select(g => new ReportDataModel
                     {
-                        UserName = g.Key.UserName,
+                        UserName = MaskingHelper.MaskUserName(g.Key.UserName),
                         Gender = g.Key.Gender,
                         SurveyDate = g.Key.SurveyDate?.ToString("yyyy/MM/dd"),
                         Scores = g.GroupBy(r => r.QuestionID).ToDictionary(q => q.Key, q => q.First().Score)
@@ -190,8 +229,8 @@ namespace Tiss_MindRadar.Controllers
                 {
                     var worksheet = package.Workbook.Worksheets.Add($"{team.TeamName} 報表");
                     
-                    GenerateReportSheet(worksheet, groupedData, categoryAverages); //產生報表
-
+                    //GenerateReportSheet(worksheet, groupedData, categoryAverages); //產生報表
+                    GenerateReportSheetVertical(worksheet, groupedData); //使用直向格式
                     GenerateRadarChart(worksheet, categoryAverages);
 
                     var stream = new MemoryStream(package.GetAsByteArray());
@@ -269,10 +308,10 @@ namespace Tiss_MindRadar.Controllers
             int startCol = 1;
 
             // 寫入資料
-            sheet.Cells[startRow, startCol].Value = "類別";
-            sheet.Cells[startRow, startCol + 1].Value = "男性平均分數";
-            sheet.Cells[startRow, startCol + 2].Value = "女性平均分數";
-            sheet.Cells[startRow, startCol, startRow, startCol + 2].Style.Font.Bold = true;
+            //sheet.Cells[startRow, startCol].Value = "類別";
+            //sheet.Cells[startRow, startCol + 1].Value = "男性平均分數";
+            //sheet.Cells[startRow, startCol + 2].Value = "女性平均分數";
+            //sheet.Cells[startRow, startCol, startRow, startCol + 2].Style.Font.Bold = true;
 
             for (int i = 0; i < categories.Count; i++)
             {
