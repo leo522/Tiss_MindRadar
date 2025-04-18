@@ -360,10 +360,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         minIndices.includes(i) ? "blue" : "black"),
                 pointRadius: scores.map((v, i) =>
                     maxIndices.includes(i) || minIndices.includes(i) ? 7 : 5),
-                pointHoverRadius: 9,
-                font: {
-                    size: 30 // 調整字體大小
-                }
+                pointHoverRadius: 9
             };
         });
 
@@ -381,10 +378,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         position: "top",
                         labels: {
                             font: {
-                                size: 18, // ← 這裡調整圖例字體大小
+                                size: 18, //這裡調整圖例字體大小
                                 weight: "bold"
                             },
-                            color: "#333" // ← 可選：讓文字更深色清晰
+                            color: "#333" //讓文字更深色清晰
                         }
                     },
                     tooltip: {
