@@ -2425,6 +2425,7 @@
     <Content Include="img\SmoothExperience.jpg" />
     <Content Include="img\TissLogo.jpg" />
     <Content Include="MindRadarCss\ChooseTeamStateStyle.css" />
+    <Content Include="MindRadarCss\MentalStateStyle.css" />
     <Content Include="MindRadarCss\ResetPasswordStyle.css" />
     <Content Include="MindRadarCss\PsychologicalDescriptionsStyle.css" />
     <Content Include="MindRadarCss\TeamReportStyle.css" />

@@ -13,54 +13,85 @@
     <script src="~/RadarChartJS/chart.js"></script>
     <script src="~/RadarChartJS/chartjs-plugin-datalabels@2.2.js"></script>
     <link href="~/MindRadarCss/MentalPhysicalStateRadarChart.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
     <div class="container mx-auto p-6 max-w-full">
-        <div class="header-container">
-            <div class="user-info">
-                受訪者: @ViewBag.UserName <span class="text-lg text-gray-600">(年齡: @ViewBag.Age 歲 | 隊伍: @ViewBag.TeamName)</span>
-            </div>
-            <div class="flex justify-end space-x-4 mb-4">
-                @if (Session["UserID"] != null)
-                {
-                    <a href="@Url.Action("Logout", "UserAccount")"
-                       class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">登出</a>
-                }
-                <a href="@Url.Action("MentalPhysicalState", "Survey")"
-                   class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md">
-                    返回身心狀態檢測題目頁
-                </a>
+        <div class="header-container bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-center justify-between w-full">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-user text-blue-600 text-xl"></i>
+                    </div>
+                    <div class="text-base md:text-xl">
+                        <h2 class="text-xl font-semibold text-gray-800">@ViewBag.UserName</h2>
+                        <p class="text-gray-700">
+                            <i class="fa-solid fa-cake-candles text-pink-400"></i> @ViewBag.Age 歲
+                            <span class="mx-2">|</span>
+                            <i class="fa-solid fa-people-group text-blue-500"></i> @ViewBag.TeamName
+                        </p>
+                    </div>
+                </div>
+                <div class="flex space-x-4 ml-auto">
+                    @if (Session["UserID"] != null)
+                    {
+                        <a href="@Url.Action("Logout", "UserAccount")"
+                           class="flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition duration-300">
+                            <i class="fas fa-sign-out-alt mr-2"></i>登出
+                        </a>
+                    }
+                    <a href="@Url.Action("MentalPhysicalState", "Survey")"
+                       class="flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition duration-300">
+                        <i class="fas fa-arrow-left mr-2"></i>返回檢測題目
+                    </a>
+                </div>
             </div>
         </div>
 
-        <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">身心狀態檢測向度雷達圖</h1>
-        <div id="mainContent">
-            <form id="radarChartForm" method="POST" action="@Url.Action("MentalPhysicalStateRadarChart", "ChartRadar")">
-                @Html.AntiForgeryToken()
-                <label class="block text-gray-700 font-bold mb-2">選擇要比較的日期：</label>
-                <div id="dateCheckboxContainer" class="flex flex-wrap gap-2 mb-4">
-                    @foreach (var date in ViewBag.SurveyDates as List<DateTime>)
-                    {
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="surveyDates" class="form-checkbox h-5 w-5 text-blue-600"
-                                   value="@date.ToString("yyyy-MM-dd")"
-                                   @(ViewBag.SelectedDates != null && ViewBag.SelectedDates.Contains(date) ? "checked" : "") />
-                            <span class="ml-2">@date.ToString("yyyy/MM/dd")</span>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h1 class="text-2xl font-bold text-center mb-6 text-gray-800 flex items-center justify-center">
+                <i class="fa-solid fa-notes-medical mr-3" style="color: #aa74ec;"></i>身心狀態檢測向度雷達圖
+
+            </h1>
+
+            <div id="mainContent">
+                <form id="radarChartForm" method="POST" action="@Url.Action("MentalPhysicalStateRadarChart", "ChartRadar")" class="mb-6">
+                    @Html.AntiForgeryToken()
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <label class="block text-gray-700 font-semibold mb-3 flex items-center">
+                            <i class="fas fa-calendar-alt text-blue-500 mr-2"></i>選擇要比較的日期：
                         </label>
-                    }
+                        <div id="dateCheckboxContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            @foreach (var date in ViewBag.SurveyDates as List<DateTime>)
+                            {
+                                <label class="flex items-center p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition duration-300 cursor-pointer">
+                                    <input type="checkbox" name="surveyDates" class="form-checkbox h-5 w-5 text-blue-600"
+                                           value="@date.ToString("yyyy-MM-dd")"
+                                           @(ViewBag.SelectedDates != null && ViewBag.SelectedDates.Contains(date) ? "checked" : "") />
+                                    <span class="ml-3 text-gray-700">
+                                        <i class="far fa-calendar-check text-blue-500 mr-2"></i>@date.ToString("yyyy/MM/dd")
+                                    </span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-center">
+                        <button type="button" id="updateChartBtn"
+                                class="flex items-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md transition duration-300">
+                            <i class="fas fa-sync-alt mr-2"></i>更新雷達圖
+                        </button>
+                    </div>
+                </form>
+
+                <div class="radar-chart-container mt-6 bg-gray-50 p-6 rounded-lg">
+                    <canvas id="radarChart" width="580" height="580"></canvas>
                 </div>
-                <button type="button" id="updateChartBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-                    更新雷達圖
-                </button>
-            </form>
 
-            <div class="radar-chart-container mt-4">
-                <canvas id="radarChart" width="580" height="580"></canvas>
+                <script id="radarData" type="application/json">
+                    @Html.Raw(JsonConvert.SerializeObject(Model))
+                </script>
             </div>
-
-            <script id="radarData" type="application/json">
-                @Html.Raw(JsonConvert.SerializeObject(Model))
-            </script>
         </div>
     </div>
 
@@ -241,7 +272,17 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: true, position: "top" },
+                        legend: {
+                            display: true,
+                            position: "top",
+                            labels: {
+                                font: {
+                                    size: 18, //這裡調整圖例字體大小
+                                    weight: "bold"
+                                },
+                                color: "#333" //讓文字更深色清晰
+                            }
+                        },
                         tooltip: {
                             enabled: true,
                             callbacks: {

@@ -10,147 +10,209 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>心理狀態檢測向度雷達圖</title>
+    <link href="~/MindRadarCss/MentalStateStyle.css" rel="stylesheet" />
     <script src="~/RadarChartJS/chart.js"></script>
     <script src="~/RadarChartJS/chartjs-plugin-datalabels@2.2.js"></script>
     <link href="~/MindRadarCss/MentalStateRadarChart.css" rel="stylesheet" />
     <link href="~/MindRadarCss/PsychologicalDescriptionsStyle.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto p-6 max-w-full">
-        <div class="header-container">
-            <div class="user-info">
-                受訪者: @ViewBag.UserName <span class="text-lg text-gray-600">(年齡: @ViewBag.Age 歲 | 隊伍: @ViewBag.TeamName)</span>
-            </div>
-            <div class="flex justify-end space-x-4 mb-4">
-                @if (Session["UserID"] != null)
-                {
-                    <a href="@Url.Action("Logout", "UserAccount")"
-                       class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">登出</a>
-                }
-                <a href="@Url.Action("MentalState", "Survey")"
-                   class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md">
-                    返回心理狀態檢測題目頁
-                </a>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header Section -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="flex justify-between items-center">
+                <div class="user-info">
+                    <h2 class="text-2xl font-bold text-gray-800">
+                        <i class="fas fa-user-circle text-blue-500 mr-2"></i>
+                        @ViewBag.UserName
+                    </h2>
+                    <p class="text-gray-600 mt-1">
+                        <i class="fas fa-birthday-cake text-pink-500 mr-2"></i>
+                        年齡: @ViewBag.Age 歲
+                        <i class="fas fa-users text-green-500 ml-4 mr-2"></i>
+                        隊伍: @ViewBag.TeamName
+                    </p>
+                </div>
+                <div class="flex space-x-3">
+                    @if (Session["UserID"] != null)
+                    {
+                        <a href="@Url.Action("Logout", "UserAccount")"
+                           class="btn-danger">
+                            <i class="fas fa-sign-out-alt mr-2"></i>登出
+                        </a>
+                    }
+                    <a href="@Url.Action("MentalState", "Survey")"
+                       class="btn-primary">
+                        <i class="fas fa-arrow-left mr-2"></i>返回心理狀態檢測題目頁
+                    </a>
+                </div>
             </div>
         </div>
 
-        <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">心理狀態檢測向度雷達圖</h1>
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column - Chart and Date Selection -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-chart-radar text-blue-500 mr-2"></i>
+                        心理狀態檢測向度雷達圖
+                    </h2>
+                    
+                    <form id="radarChartForm" class="mb-6">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold mb-3">
+                                <i class="fas fa-calendar-alt text-blue-500 mr-2"></i>
+                                選擇要比較的日期：
+                            </label>
+                            <div id="dateCheckboxContainer" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                @foreach (var date in ViewBag.SurveyDates as List<DateTime>)
+                                {
+                                    <label class="date-checkbox-label">
+                                        <input type="checkbox" name="surveyDates" 
+                                               value="@date.ToString("yyyy-MM-dd")"
+                                               @(ViewBag.SelectedDates != null && ViewBag.SelectedDates.Contains(date) ? "checked" : "") />
+                                        <span class="date-text">
+                                            <i class="far fa-calendar-check mr-2"></i>
+                                            @date.ToString("yyyy/MM/dd")
+                                        </span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                        <button type="button" id="updateChartBtn" class="btn-success">
+                            <i class="fas fa-sync-alt mr-2"></i>更新雷達圖
+                        </button>
+                    </form>
 
-        <div id="mainContent">
-            <form id="radarChartForm" method="POST" action="@Url.Action("MentalStateRadarChart", "ChartRadar")">
-                @Html.AntiForgeryToken()
-                <label class="block text-gray-700 font-bold mb-2">選擇要比較的日期：</label>
-                <div id="dateCheckboxContainer" class="flex flex-wrap gap-2 mb-4">
-                    @foreach (var date in ViewBag.SurveyDates as List<DateTime>)
+                    <div class="radar-chart-container">
+                        <canvas id="radarChart" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Comments Section -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-comments text-blue-500 mr-2"></i>
+                        留言與回覆區
+                    </h2>
+                    <p class="text-sm text-gray-500 mb-4">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        僅顯示當前勾選日期
+                    </p>
+
+                    <div id="commentSection" class="space-y-4 mb-6"></div>
+
+                    @if (Session["UserID"] != null && (Session["UserRole"]?.ToString() == "Player" || Session["UserRole"].ToString() == "Coach" || Session["UserRole"].ToString() == "Referee"))
                     {
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="surveyDates" class="form-checkbox h-5 w-5 text-blue-600"
-                                   value="@date.ToString("yyyy-MM-dd")"
-                                   @(ViewBag.SelectedDates != null && ViewBag.SelectedDates.Contains(date) ? "checked" : "") />
-                            <span class="ml-2">@date.ToString("yyyy/MM/dd")</span>
-                        </label>
+                        <div class="mt-4">
+                            <label for="commentText" class="block font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-pen-alt text-blue-500 mr-2"></i>
+                                我要留言
+                            </label>
+                            <textarea id="commentText" 
+                                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                    rows="3" 
+                                    placeholder="請輸入留言內容..."></textarea>
+                            <button id="submitCommentBtn" class="btn-primary mt-3">
+                                <i class="fas fa-paper-plane mr-2"></i>送出留言
+                            </button>
+                        </div>
                     }
                 </div>
-                <button type="button" id="updateChartBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-                    更新雷達圖
-                </button>
-            </form>
-
-            <div class="radar-chart-container mt-4">
-                <canvas id="radarChart" width="400" height="400" style="max-width: 100%; max-height:100%;"></canvas>
             </div>
-
-            <div class="mt-12">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">留言與回覆區（僅顯示當前勾選日期）</h2>
-
-                <div id="commentSection" class="space-y-4"></div>
-
-                @if (Session["UserID"] != null && (Session["UserRole"]?.ToString() == "Player" || Session["UserRole"].ToString() == "Coach" || Session["UserRole"].ToString() == "Referee"))
-                {
-                    <div class="mt-4">
-                        <label for="commentText" class="block font-bold text-gray-700 mb-1">我要留言（針對選取日期）</label>
-                        <textarea id="commentText" class="form-textarea w-full border border-gray-300 rounded p-2" rows="3" placeholder="請輸入留言內容..."></textarea>
-                        <button id="submitCommentBtn" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                            送出留言
-                        </button>
-                    </div>
-                }
-            </div>
-
-
-            <script id="radarData" type="application/json">
-                @Html.Raw(JsonConvert.SerializeObject(Model))
-            </script>
         </div>
 
-        <div class="mt-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">運動心理技能說明</h2>
-            <table class="min-w-full w-full bg-white shadow-md rounded border border-gray-300">
-                <tbody>
-                    @if (ViewBag.PsychologicalHeaders != null && ViewBag.PsychologicalDescriptions != null && ViewBag.MentalStateQuestions != null)
-                    {
-                        var descriptions = ViewBag.PsychologicalDescriptions as List<Tiss_MindRadar.Models.PsychologicalStateDescription>;
-                        var questions = ViewBag.MentalStateQuestions as List<Tiss_MindRadar.Models.MentalState>;
-
-                        string currentCategory = null;
-                        var categoryRowSpans = descriptions.GroupBy(d => d.CategoryName)
-                            .ToDictionary(g => g.Key, g => g.Count());
-                        var categoryItemIndex = new Dictionary<string, int>();
-
-                        foreach (var header in ViewBag.PsychologicalHeaders)
-                        {
-                            var firstCategory = descriptions.FirstOrDefault(d => d.HeaderID == header.ID)?.CategoryName ?? "";
-                            string headerClass = firstCategory.Contains("基礎") ? "bg-yellow-200" :
-                                                 firstCategory.Contains("身體") ? "bg-orange-300" :
-                                                 firstCategory.Contains("認知") ? "bg-blue-300" : "bg-gray-200";
-
-                            <tr class="@headerClass">
-                                <td colspan="4" class="py-3 px-6 font-bold text-lg">@header.HeaderText</td>
-                            </tr>
-
-                            var filteredDescriptions = descriptions.Where(d => d.HeaderID == header.ID).ToList();
-                            foreach (var item in filteredDescriptions)
+        <!-- Psychological Descriptions Section -->
+        <div class="mt-8">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-book text-blue-500 mr-2"></i>
+                    運動心理技能說明
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white rounded-lg overflow-hidden">
+                        <tbody>
+                            @if (ViewBag.PsychologicalHeaders != null && ViewBag.PsychologicalDescriptions != null && ViewBag.MentalStateQuestions != null)
                             {
-                                string categoryClass = item.CategoryName.Contains("基礎") ? "bg-yellow-200" :
-                                                       item.CategoryName.Contains("身體") ? "bg-orange-300" :
-                                                       item.CategoryName.Contains("認知") ? "bg-blue-300" : "";
+                                var descriptions = ViewBag.PsychologicalDescriptions as List<Tiss_MindRadar.Models.PsychologicalStateDescription>;
+                                var questions = ViewBag.MentalStateQuestions as List<Tiss_MindRadar.Models.MentalState>;
 
-                                if (!categoryItemIndex.ContainsKey(item.CategoryName))
-                                {
-                                    categoryItemIndex[item.CategoryName] = 1;
-                                }
-                                else
-                                {
-                                    categoryItemIndex[item.CategoryName]++;
-                                }
+                                string currentCategory = null;
+                                var categoryRowSpans = descriptions.GroupBy(d => d.CategoryName)
+                                    .ToDictionary(g => g.Key, g => g.Count());
+                                var categoryItemIndex = new Dictionary<string, int>();
 
-                                <tr class="border-b border-gray-200">
-                                    @if (currentCategory != item.CategoryName)
-                                    {
-                                        int rowspan = categoryRowSpans[item.CategoryName];
-                                        <td class="py-3 px-6 text-left font-bold @categoryClass" rowspan="@rowspan">
-                                            @item.CategoryName
+                                foreach (var header in ViewBag.PsychologicalHeaders)
+                                {
+                                    var firstCategory = descriptions.FirstOrDefault(d => d.HeaderID == header.ID)?.CategoryName ?? "";
+                                    string headerClass = firstCategory.Contains("基礎") ? "bg-yellow-100" :
+                                                         firstCategory.Contains("身體") ? "bg-orange-100" :
+                                                         firstCategory.Contains("認知") ? "bg-blue-100" : "bg-gray-100";
+
+                                    <tr class="@headerClass">
+                                        <td colspan="4" class="py-4 px-6 font-bold text-lg">
+                                            <i class="fas fa-tag mr-2"></i>@header.HeaderText
                                         </td>
-                                        currentCategory = item.CategoryName;
-                                    }
-                                    <td class="py-3 px-6">@categoryItemIndex[item.CategoryName]. @item.SubCategory</td>
-                                    <td class="py-3 px-6">@item.DescriptionContent</td>
-                                    <td class="py-3 px-6">
-                                        <ul class="list-disc ml-5">
-                                            @foreach (var q in questions.Where(q => q.CategoryID == item.ID).OrderBy(q => q.QuestionNumber))
+                                    </tr>
+
+                                    var filteredDescriptions = descriptions.Where(d => d.HeaderID == header.ID).ToList();
+                                    foreach (var item in filteredDescriptions)
+                                    {
+                                        string categoryClass = item.CategoryName.Contains("基礎") ? "bg-yellow-50" :
+                                                               item.CategoryName.Contains("身體") ? "bg-orange-50" :
+                                                               item.CategoryName.Contains("認知") ? "bg-blue-50" : "";
+
+                                        if (!categoryItemIndex.ContainsKey(item.CategoryName))
+                                        {
+                                            categoryItemIndex[item.CategoryName] = 1;
+                                        }
+                                        else
+                                        {
+                                            categoryItemIndex[item.CategoryName]++;
+                                        }
+
+                                        <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                            @if (currentCategory != item.CategoryName)
                                             {
-                                                <li>@q.QuestionNumber. @q.QuestionText</li>
+                                                int rowspan = categoryRowSpans[item.CategoryName];
+                                                <td class="py-3 px-6 text-left font-bold @categoryClass" rowspan="@rowspan">
+                                                    <i class="fas fa-folder-open mr-2"></i>@item.CategoryName
+                                                </td>
+                                                currentCategory = item.CategoryName;
                                             }
-                                        </ul>
-                                    </td>
-                                </tr>
+                                            <td class="py-3 px-6">
+                                                @categoryItemIndex[item.CategoryName]. @item.SubCategory
+                                            </td>
+                                            <td class="py-3 px-6">@item.DescriptionContent</td>
+                                            <td class="py-3 px-6">
+                                                <ul class="list-none space-y-1">
+                                                    @foreach (var q in questions.Where(q => q.CategoryID == item.ID).OrderBy(q => q.QuestionNumber))
+                                                    {
+                                                        <li class="flex items-start">
+                                                            <span>@q.QuestionNumber. @q.QuestionText</span>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
                             }
-                        }
-                    }
-                </tbody>
-            </table>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script id="radarData" type="application/json">
+        @Html.Raw(JsonConvert.SerializeObject(Model))
+    </script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -252,7 +314,17 @@
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: { display: true },
+                        legend: {
+                            display: true,
+                            position: "top",
+                            labels: {
+                                font: {
+                                    size: 18, //這裡調整圖例字體大小
+                                    weight: "bold"
+                                },
+                                color: "#333" //讓文字更深色清晰
+                            }
+                        },
                         tooltip: { callbacks: { label: ctx => `分數: ${ctx.raw}` } },
                         datalabels: {
                             color: "#000", font: { size: 12, weight: "bold" },
