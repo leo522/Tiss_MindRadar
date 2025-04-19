@@ -1,18 +1,145 @@
-﻿body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #1A2A4F;
+﻿.background-wrapper {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    background: linear-gradient(135deg, #e0f2ff, #f0f8ff);
 }
 
-.login-container {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+.blur-circle {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(120px);
+    opacity: 0.4;
+    transform: scale(1.2);
 }
 
-.form-group {
-    margin-bottom: 15px;
+    .blur-circle.one {
+        width: 400px;
+        height: 400px;
+        background: #60a5fa;
+        top: -100px;
+        left: -100px;
+        animation: float1 30s infinite linear;
+    }
+
+    .blur-circle.two {
+        width: 300px;
+        height: 300px;
+        background: #a5b4fc;
+        bottom: -80px;
+        right: -80px;
+        animation: float2 40s infinite linear;
+    }
+
+.animated-gradient {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: repeating-radial-gradient(circle at 40px 40px, #bfdbfe 1px, transparent 0);
+    background-size: 80px 80px;
+    opacity: 0.3;
+    animation: gridMove 90s linear infinite;
+}
+
+@keyframes float1 {
+    0% {
+        transform: scale(1.2) translate(0, 0);
+    }
+
+    50% {
+        transform: scale(1.3) translate(40px, 30px);
+    }
+
+    100% {
+        transform: scale(1.2) translate(0, 0);
+    }
+}
+
+@keyframes float2 {
+    0% {
+        transform: scale(1.2) translate(0, 0);
+    }
+
+    50% {
+        transform: scale(1.3) translate(-30px, -20px);
+    }
+
+    100% {
+        transform: scale(1.2) translate(0, 0);
+    }
+}
+
+@keyframes gridMove {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 80px 80px;
+    }
+}
+
+.custom-bg {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #e0f2ff 0%, #f5faff 100%);
+    overflow: hidden;
+    z-index: 0;
+}
+
+/* 半透明圓球 */
+.floating-sphere {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    top: 10%;
+    left: -10%;
+    background: radial-gradient(circle at center, #3b82f6 0%, #60a5fa 50%, transparent 80%);
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: float-sphere 25s ease-in-out infinite;
+    filter: blur(40px);
+}
+
+/* 放射光暈模糊背景 */
+.floating-glow {
+    position: absolute;
+    bottom: -150px;
+    right: -100px;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(165,180,252,0.4), transparent 70%);
+    border-radius: 50%;
+    animation: float-glow 40s ease-in-out infinite;
+    filter: blur(100px);
+    opacity: 0.35;
+}
+
+@keyframes float-sphere {
+    0% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(30px) scale(1.05);
+    }
+
+    100% {
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes float-glow {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(-30px, -30px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
 }

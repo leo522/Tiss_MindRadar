@@ -14,193 +14,193 @@
     <script src="~/RadarChartJS/TeamChartRawData.js"></script> @*計算最高 & 最低分*@
 </head>
 <body>
-    <div class="relative py-8 mb-8">
-        <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 opacity-10 rounded-lg"></div>
-        <div class="relative">
-            <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">心理狀態檢測</h2>
-            <p class="text-lg text-center text-gray-600">各隊伍成員分數</p>
-            <div class="w-24 h-1 bg-blue-500 mx-auto mt-4 rounded"></div>
+    <div class="bg-gradient-to-br from-blue-100 to-white min-h-screen py-8 px-4 md:px-10">
+        <!-- 頁面標題 -->
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-blue-800 mb-2">
+                <i class="fa-solid fa-heart-pulse" style="color: #f55cad;"></i>心理狀態檢測
+                @*<i class="fas fa-brain mr-3"></i>*@
+            </h1>
+            <p class="text-lg text-gray-600">各隊伍成員分數</p>
+            <div class="h-1 w-24 bg-blue-500 mx-auto mt-4 rounded"></div>
         </div>
-    </div>
-    <div class="text-right mb-4 flex justify-end space-x-4">
-        <a href="@Url.Action("TeamReportData", "ReportRawData")"
-           class="inline-flex items-center px-6 py-2.5 bg-blue-500 hover:bg-blue-600
-              text-white font-medium rounded-lg transition duration-300 ease-in-out
-              shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-            <i class="fas fa-search mr-2"></i>
-            查詢各隊伍選手明細
-        </a>
-        @if (Session["UserID"] != null)
-        {
-            <a href="@Url.Action("Logout", "UserAccount")"
-               class="inline-flex items-center px-6 py-2.5 bg-red-500 hover:bg-red-600
-                  text-white font-medium rounded-lg transition duration-300 ease-in-out
-                  shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                <i class="fas fa-sign-out-alt mr-2"></i>
-                登出
+
+        <!-- 功能按鈕列 -->
+        <div class="flex flex-col sm:flex-row justify-end gap-4 mb-6">
+            <a href="@Url.Action("TeamReportData", "ReportRawData")"
+               class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow">
+                <i class="fas fa-search"></i><span>隊伍選手明細</span>
             </a>
+            @if (Session["UserID"] != null)
+            {
+                <a href="@Url.Action("Logout", "UserAccount")"
+                   class="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-lg shadow">
+                    <i class="fas fa-sign-out-alt"></i><span>登出</span>
+                </a>
+            }
+        </div>
+
+        <!-- 搜尋區塊 -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <form id="teamForm" method="post" action="@Url.Action("GetMentalStateTeamRawData", "TeamRawData")">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="teamSelect" class="block text-lg font-semibold text-gray-700 mb-1">
+                            <i class="fas fa-users mr-1 text-blue-500"></i>選擇隊伍
+                        </label>
+                        @Html.DropDownList("teamId", ViewBag.Teams as SelectList, "請選擇隊伍",
+                            new { @class = "w-full border rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-300", id = "teamSelect" })
+                    </div>
+                    <div>
+                        <label for="userSelect" class="block text-lg font-semibold text-gray-700 mb-1">
+                            <i class="fas fa-user mr-1 text-blue-500"></i>選擇選手
+                        </label>
+                        <select id="userSelect" name="userId"
+                                class="w-full border rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-300"
+                                disabled data-placeholder="請選擇選手"></select>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        @if (Model.Any())
+        {
+            <!-- 分數表格 -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-10">
+                <h2 class="text-xl font-bold text-blue-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-bar mr-2"></i>選手分數列表
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full table-auto text-left border-collapse">
+                        <thead class="bg-gray-100 text-gray-700 text-sm">
+                            <tr>
+                                <th class="p-3">選手</th>
+                                <th class="p-3">心理類別</th>
+                                <th class="p-3">分數</th>
+                                <th class="p-3">檢測日期</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-600 text-sm">
+                            @{
+                                var groupedData = Model.GroupBy(m => new { m.UserName, SurveyDate = m.SurveyDate?.ToString("yyyy/MM/dd") }).ToList();
+                            }
+                            @foreach (var group in groupedData)
+                            {
+                                int userRowSpan = group.Count();
+                                int dateRowSpan = group.Count();
+                                foreach (var (item, index) in group.Select((value, i) => (value, i)))
+                                {
+                                    <tr class="hover:bg-blue-50">
+                                        @if (index == 0)
+                                        {
+                                            <td class="p-3 font-semibold text-blue-700" rowspan="@userRowSpan">@item.UserName</td>
+                                        }
+                                        <td class="p-3">@item.Category</td>
+                                        <td class="p-3">@item.Score</td>
+                                        @if (index == 0)
+                                        {
+                                            <td class="p-3 text-gray-500" rowspan="@dateRowSpan">@item.SurveyDate.Value.ToString("yyyy/MM/dd")</td>
+                                        }
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        @if (ViewBag.RadarData != null)
+        {
+            <div class="bg-white rounded-xl shadow-md p-6 mb-10">
+                <h3 class="text-xl font-bold text-blue-800 text-center mb-2">
+                   <i class="fa-solid fa-chart-pie mr-2" style="color: #55dbdd;"></i>心理狀態檢測向度雷達圖
+                </h3>
+                <p class="text-center text-gray-600 text-base mb-4">
+                    選手：<strong class="text-blue-600">@ViewBag.MaskedUserName</strong>
+                </p>
+                <div class="flex justify-center">
+                    <canvas id="radarChart" class="max-w-[600px] max-h-[600px]"></canvas>
+                </div>
+                <script id="radarData" type="application/json">
+                @Html.Raw(JsonConvert.SerializeObject(ViewBag.RadarData))
+                </script>
+            </div>
+        }
+
+        @if (ViewBag.PsychologicalHeaders != null && ViewBag.PsychologicalDescriptions != null && ViewBag.MentalStateQuestions != null)
+        {
+            <div class="bg-white rounded-xl shadow-md p-6 mb-10">
+                <h2 class="text-xl font-bold text-blue-800 mb-4">
+                    <i class="fas fa-book-open mr-2"></i>運動心理技能說明
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full table-auto border border-gray-300">
+                        <tbody class="text-gray-700 text-sm">
+                            @{
+                                var descriptions = ViewBag.PsychologicalDescriptions as List<Tiss_MindRadar.Models.PsychologicalStateDescription>;
+                                var questions = ViewBag.MentalStateQuestions as List<Tiss_MindRadar.Models.MentalState>;
+                                string currentCategory = null;
+                                var categoryRowSpans = descriptions.GroupBy(d => d.CategoryName).ToDictionary(g => g.Key, g => g.Count());
+                                var categoryItemIndex = new Dictionary<string, int>();
+
+                                foreach (var header in ViewBag.PsychologicalHeaders)
+                                {
+                                    var firstCategory = descriptions.FirstOrDefault(d => d.HeaderID == header.ID)?.CategoryName ?? "";
+                                    string headerClass = firstCategory.Contains("基礎") ? "bg-yellow-200" :
+                                                         firstCategory.Contains("身體") ? "bg-orange-200" :
+                                                         firstCategory.Contains("認知") ? "bg-blue-200" : "bg-gray-200";
+
+                                    <tr class="@headerClass">
+                                        <td colspan="4" class="p-3 font-bold text-lg">@header.HeaderText</td>
+                                    </tr>
+
+                                    var filteredDescriptions = descriptions.Where(d => d.HeaderID == header.ID).ToList();
+                                    foreach (var item in filteredDescriptions)
+                                    {
+                                        string categoryClass = item.CategoryName.Contains("基礎") ? "bg-yellow-50" :
+                                                               item.CategoryName.Contains("身體") ? "bg-orange-50" :
+                                                               item.CategoryName.Contains("認知") ? "bg-blue-50" : "";
+
+                                        if (!categoryItemIndex.ContainsKey(item.CategoryName))
+                                        {
+                                            categoryItemIndex[item.CategoryName] = 1;
+                                        }
+                                        else
+                                        {
+                                            categoryItemIndex[item.CategoryName]++;
+                                        }
+
+                                        <tr class="border-b border-gray-200">
+                                            @if (currentCategory != item.CategoryName)
+                                            {
+                                                int rowspan = categoryRowSpans[item.CategoryName];
+                                                <td class="p-3 font-bold @categoryClass" rowspan="@rowspan">
+                                                    @item.CategoryName
+                                                </td>
+                                                currentCategory = item.CategoryName;
+                                            }
+                                            <td class="p-3">@categoryItemIndex[item.CategoryName]. @item.SubCategory</td>
+                                            <td class="p-3">@item.DescriptionContent</td>
+                                            <td class="p-3">
+                                                <ul class="list-disc ml-4">
+                                                    @foreach (var q in questions.Where(q => q.CategoryID == item.ID).OrderBy(q => q.QuestionNumber))
+                                                    {
+                                                        <li>@q.QuestionNumber. @q.QuestionText</li>
+                                                    }
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         }
     </div>
 
-    <!-- 搜尋表單 -->
-    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-        <form id="teamForm" method="post" action="@Url.Action("GetMentalStateTeamRawData", "TeamRawData")">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="teamSelect" class="block text-lg font-medium text-gray-700 mb-2">
-                        <i class="fas fa-users mr-2"></i>選擇隊伍
-                    </label>
-                    @Html.DropDownList("teamId", ViewBag.Teams as SelectList, "請選擇隊伍",
-                        new { @class = "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500", id = "teamSelect" })
-                </div>
-                <div>
-                    <label for="userSelect" class="block text-lg font-medium text-gray-700 mb-2">
-                        <i class="fas fa-user mr-2"></i>選擇選手
-                    </label>
-                    <select id="userSelect" name="userId"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                            disabled data-placeholder="請選擇選手"></select>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    @if (Model.Any())
-    {
-        <!-- 選手分數資料 -->
-        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                <i class="fas fa-chart-bar mr-3 text-blue-600"></i>選手分數資料
-            </h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th class="px-6 py-3 text-left text-lg font-medium text-gray-500 uppercase tracking-wider">選手</th>
-                            <th class="px-6 py-3 text-left text-lg font-medium text-gray-500 uppercase tracking-wider">心理類別</th>
-                            <th class="px-6 py-3 text-left text-lg font-medium text-gray-500 uppercase tracking-wider">分數</th>
-                            <th class="px-6 py-3 text-left text-lg font-medium text-gray-500 uppercase tracking-wider">檢測日期</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @{
-                            var groupedData = Model.GroupBy(m => new { m.UserName, SurveyDate = m.SurveyDate?.ToString("yyyy/MM/dd") }).ToList();
-                        }
-
-                        @foreach (var group in groupedData)
-                        {
-                            int userRowSpan = group.Count();
-                            int dateRowSpan = group.Count();
-
-                            foreach (var (item, index) in group.Select((value, i) => (value, i)))
-                            {
-                                <tr class="hover:bg-gray-50">
-                                    @if (index == 0)
-                                    {
-                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900" rowspan="@userRowSpan">
-                                            @item.UserName
-                                        </td>
-                                    }
-                                    <td class="px-6 py-4 whitespace-nowrap text-base text-gray-500">@item.Category</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-base text-gray-500">@item.Score</td>
-                                    @if (index == 0)
-                                    {
-                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500" rowspan="@dateRowSpan">
-                                            @item.SurveyDate.Value.ToString("yyyy/MM/dd")
-                                        </td>
-                                    }
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    }
-
-    @if (ViewBag.RadarData != null)
-    {
-        <h3 class="text-xl font-bold text-center mt-6 text-gray-700">心理狀態檢測向度雷達圖</h3>
-        <p class="text-center text-gray-600 text-base" style="margin-top: 16px;">
-            選手：<strong style="color:blue">@ViewBag.MaskedUserName</strong>
-        </p>
-        <div class="radar-chart-container mt-4" style="display: flex; justify-content: center;">
-            @*產生雷達圖*@
-            <canvas id="radarChart" style="max-width: 600px; max-height: 600px;"></canvas>
-        </div>
-
-        <script id="radarData" type="application/json">
-        @Html.Raw(JsonConvert.SerializeObject(ViewBag.RadarData))
-        </script>
-    }
-    @if (ViewBag.PsychologicalHeaders != null && ViewBag.PsychologicalDescriptions != null && ViewBag.MentalStateQuestions != null)
-    {
-        <div class="mt-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">運動心理技能說明</h2>
-            <table class="min-w-full w-full bg-white shadow-md rounded border border-gray-300">
-                <tbody>
-                    @{
-                        var descriptions = ViewBag.PsychologicalDescriptions as List<Tiss_MindRadar.Models.PsychologicalStateDescription>;
-                        var questions = ViewBag.MentalStateQuestions as List<Tiss_MindRadar.Models.MentalState>;
-
-                        string currentCategory = null;
-                        var categoryRowSpans = descriptions.GroupBy(d => d.CategoryName).ToDictionary(g => g.Key, g => g.Count());
-                        var categoryItemIndex = new Dictionary<string, int>();
-
-                        foreach (var header in ViewBag.PsychologicalHeaders)
-                        {
-                            var firstCategory = descriptions.FirstOrDefault(d => d.HeaderID == header.ID)?.CategoryName ?? "";
-                            string headerClass = firstCategory.Contains("基礎") ? "bg-yellow-200" :
-                                                 firstCategory.Contains("身體") ? "bg-orange-300" :
-                                                 firstCategory.Contains("認知") ? "bg-blue-300" : "bg-gray-200";
-
-                            <tr class="@headerClass">
-                                <td colspan="4" class="py-3 px-6 font-bold text-lg">@header.HeaderText</td>
-                            </tr>
-
-                            var filteredDescriptions = descriptions.Where(d => d.HeaderID == header.ID).ToList();
-                            foreach (var item in filteredDescriptions)
-                            {
-                                string categoryClass = item.CategoryName.Contains("基礎") ? "bg-yellow-200" :
-                                                       item.CategoryName.Contains("身體") ? "bg-orange-300" :
-                                                       item.CategoryName.Contains("認知") ? "bg-blue-300" : "";
-
-                                if (!categoryItemIndex.ContainsKey(item.CategoryName))
-                                {
-                                    categoryItemIndex[item.CategoryName] = 1;
-                                }
-                                else
-                                {
-                                    categoryItemIndex[item.CategoryName]++;
-                                }
-
-                                <tr class="border-b border-gray-200">
-                                    @if (currentCategory != item.CategoryName)
-                                    {
-                                        int rowspan = categoryRowSpans[item.CategoryName];
-                                        <td class="py-3 px-6 text-left font-bold @categoryClass" rowspan="@rowspan">
-                                            @item.CategoryName
-                                        </td>
-                                        currentCategory = item.CategoryName;
-                                    }
-                                    <td class="py-3 px-6">@categoryItemIndex[item.CategoryName]. @item.SubCategory</td>
-                                    <td class="py-3 px-6">@item.DescriptionContent</td>
-                                    <td class="py-3 px-6">
-                                        <ul class="list-disc ml-5">
-                                            @foreach (var q in questions.Where(q => q.CategoryID == item.ID).OrderBy(q => q.QuestionNumber))
-                                            {
-                                                <li>@q.QuestionNumber. @q.QuestionText</li>
-                                            }
-                                        </ul>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
 
     <script>
 document.addEventListener("DOMContentLoaded", function () {

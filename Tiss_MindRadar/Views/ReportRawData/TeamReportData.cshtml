@@ -1,70 +1,85 @@
-﻿@model IEnumerable<Tiss_MindRadar.Models.TeamReportViewModel>
+﻿@model IEnumerable<Tiss_MindRadar.ViewModels.TeamReportViewModel>
 @{
     ViewBag.Title = "各隊伍選手明細";
     Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
 }
-<h1 class="text-2xl font-bold text-center mb-6 text-gray-800">各隊伍選手明細</h1>
-<form id="teamForm" method="post" action="@Url.Action("TeamReportData", "ReportRawData")">
-    <div class="mb-4 flex items-center space-x-4">
-        <div class="flex-1">
-            <label for="teamSelect" class="block text-gray-700 font-bold mb-1">選擇隊伍：</label>
-            @Html.DropDownList("teamId", ViewBag.Teams as SelectList, "請選擇隊伍", new { @class = "form-control", id = "teamSelect" })
+<link href="~/MindRadarCss/TeamReportStyle.css" rel="stylesheet" />
+
+<!-- 標題區塊 -->
+<div class="text-center mt-10 mb-6">
+    <h1 class="text-3xl font-extrabold text-blue-900 drop-shadow-md tracking-wide">各隊伍選手明細</h1>
+    <p class="text-gray-500 mt-2">可下載報表或查看詳細資料</p>
+</div>
+
+<!-- 查詢區塊 -->
+<form id="teamForm" method="post" action="@Url.Action("TeamReportData", "ReportRawData")" class="max-w-4xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row items-center gap-4 mb-4">
+        <div class="w-full md:flex-1">
+            <label for="teamSelect" class="block text-gray-700 font-medium mb-1">選擇隊伍：</label>
+            @Html.DropDownList("teamId", ViewBag.Teams as SelectList, "請選擇隊伍", new { @class = "form-input", id = "teamSelect" })
         </div>
-        <button type="button" id="downloadReport" class="bg-blue-500 text-white px-4 py-2 rounded">下載報表</button>
-        @if (Session["UserID"] != null)
-        {
-            <a href="@Url.Action("Logout", "UserAccount")"
-               class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">
-                登出
-            </a>
-        }
+        <div class="flex gap-3">
+            <button type="button" id="downloadReport" class="btn-primary">
+                下載報表
+            </button>
+            @if (Session["UserID"] != null)
+            {
+                <a href="@Url.Action("Logout", "UserAccount")" class="btn-danger">
+                    登出
+                </a>
+            }
+        </div>
     </div>
-    <p id="surveyCountText" class="text-gray-700 font-bold mt-2"></p>
+    <p id="surveyCountText" class="text-blue-800 font-medium mt-1"></p>
 </form>
+
+<!-- 表格資料呈現 -->
 @if (Model != null && Model.Any())
 {
-    <h3 class="text-xl font-bold text-center mt-6 text-gray-700">隊伍成員與分數</h3>
-    <table class="min-w-full bg-white shadow-md rounded border border-gray-300 mt-4">
-        <thead>
-            <tr class="bg-gray-200 text-gray-600 uppercase text-lg leading-normal">
-                <th class="py-3 px-6 text-left">選手</th>
-                <th class="py-3 px-6 text-left">性別</th>
-                <th class="py-3 px-6 text-left">心理類別</th>
-                <th class="py-3 px-6 text-left">分數</th>
-                <th class="py-3 px-6 text-left">填答日期</th>
-            </tr>
-        </thead>
-        <tbody>
-            @{
-                var groupedData = Model.GroupBy(m => new { m.UserName, m.SurveyDate }).ToList();
-            }
-            @foreach (var group in groupedData)
-            {
-                int rowSpanCount = group.Count();
-
-                foreach (var (item, index) in group.Select((value, i) => (value, i)))
-                {
-                    <tr class="border-b border-gray-200">
-                        @if (index == 0)
-                        {
-                            <td class="py-3 px-6 text-left font-bold" rowspan="@rowSpanCount">@item.UserName</td>
-                        }
-                        @if (index == 0)
-                        {
-                            <td class="py-3 px-6 text-left" rowspan="@rowSpanCount">@item.Gender</td>
-                        }
-                        <td class="py-3 px-6 text-left">@item.Category</td>
-                        <td class="py-3 px-6 text-left">@item.Score</td>
-                        @if (index == 0)
-                        {
-                            <td class="py-3 px-6 text-left" rowspan="@rowSpanCount">@item.SurveyDate.Value.ToString("yyyy/MM/dd")</td>
-                        }
+    <div class="max-w-6xl mx-auto px-6">
+        <h3 class="text-xl font-semibold text-blue-800 mb-3 mt-10">隊伍成員與分數</h3>
+        <div class="overflow-x-auto bg-white rounded-xl shadow-md">
+            <table class="table-auto w-full border border-gray-200">
+                <thead class="bg-blue-100 text-blue-900 text-sm font-semibold">
+                    <tr>
+                        <th class="px-6 py-3 text-left">選手</th>
+                        <th class="px-6 py-3 text-left">性別</th>
+                        <th class="px-6 py-3 text-left">心理類別</th>
+                        <th class="px-6 py-3 text-left">分數</th>
+                        <th class="px-6 py-3 text-left">填答日期</th>
                     </tr>
-                }
-            }
-        </tbody>
-    </table>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @{
+                        var groupedData = Model.GroupBy(m => new { m.UserName, m.SurveyDate }).ToList();
+                    }
+                    @foreach (var group in groupedData)
+                    {
+                        int rowSpanCount = group.Count();
+
+                        foreach (var (item, index) in group.Select((value, i) => (value, i)))
+                        {
+                            <tr class="hover:bg-blue-50 text-sm text-gray-700">
+                                @if (index == 0)
+                                {
+                                    <td class="px-6 py-3 font-medium" rowspan="@rowSpanCount" data-label="選手">@item.UserName</td>
+                                    <td class="px-6 py-3" rowspan="@rowSpanCount" data-label="性別">@item.Gender</td>
+                                }
+                                <td class="px-6 py-3" data-label="心理類別">@item.Category</td>
+                                <td class="px-6 py-3" data-label="分數">@item.Score</td>
+                                @if (index == 0)
+                                {
+                                    <td class="px-6 py-3" rowspan="@rowSpanCount" data-label="填答日期">@item.SurveyDate.Value.ToString("yyyy/MM/dd")</td>
+                                }
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const teamSelect = document.getElementById("teamSelect");

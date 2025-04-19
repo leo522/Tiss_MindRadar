@@ -2,88 +2,95 @@
     ViewBag.Title = "帳號登入";
     Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
 }
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>登入</title>
-    <link rel="icon" href="~/img/favicon.svg" />
-    <link href="~/MindRadarCss/LoginStyle.css" rel="stylesheet" />
-</head>
-<body>
-    <div class="login-container">
-        <div class="text-center">
-            <img src="~/img/logo.svg" style="height: 45px; width: 100%;">
+<link href="~/MindRadarCss/LoginStyle.css" rel="stylesheet" />
+<div class="custom-bg">
+    <div class="floating-sphere"></div>
+    <div class="floating-glow"></div>
+</div>
+<div class="min-h-screen flex items-center justify-center relative z-10 px-4">
+    <div class="w-full max-w-md bg-white/90 backdrop-blur-md border border-white/40 rounded-2xl shadow-2xl p-8">
+        <div class="text-center mb-6">
+            <img src="~/img/logo.svg" alt="系統 Logo" class="h-12 mx-auto mb-4">
+            <h2 class="text-2xl font-extrabold text-blue-800">登入您的帳號</h2>
+            <p class="text-gray-500 text-lg mt-1">請輸入帳號與密碼以進入系統</p>
         </div>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="Jobcode">帳號</label>
-                <input type="text" class="form-control" id="Jobcode" name="Jobcode" placeholder="請輸入帳號" required>
+
+        <form id="loginForm" class="space-y-5">
+            <div>
+                <label for="Jobcode" class="block text-lg font-semibold text-gray-700 mb-1">帳號</label>
+                <input type="text" id="Jobcode" name="Jobcode" placeholder="請輸入帳號"
+                       class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                       required />
             </div>
-            <div class="form-group">
-                <label for="Password">密碼</label>
-                <input type="password" class="form-control" id="pwd" name="pwd" placeholder="請輸入密碼" required>
+            <div>
+                <label for="pwd" class="block text-lg font-semibold text-gray-700 mb-1">密碼</label>
+                <input type="password" id="pwd" name="pwd" placeholder="請輸入密碼"
+                       class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                       required />
             </div>
-            <button type="submit" class="btn btn-primary btn-block">登入</button>
+            <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition duration-200 shadow">
+                <i class="fas fa-sign-in-alt mr-2"></i>登入
+            </button>
         </form>
-        <div class="text-center mt-3">
-            <a href="/UserAccount/Register" class="btn btn-link">註冊帳號</a>
-        </div>
-        <hr>
-        <div class="text-center">
-            <a href="/UserAccount/ForgotPassword" class="btn btn-link">忘記密碼</a>
+
+        <div class="flex justify-between mt-5 text-lg text-blue-600">
+            <a href="/UserAccount/Register" class="hover:underline">
+                <i class="fas fa-user-plus mr-1"></i>註冊帳號
+            </a>
+            <a href="/UserAccount/ForgotPassword" class="hover:underline">
+                <i class="fas fa-key mr-1"></i>忘記密碼
+            </a>
         </div>
     </div>
-    <script>
-        $(document).ready(function () {
-            $("#loginForm").submit(function (e) {
-                e.preventDefault(); //阻止表單默認提交
+</div>
 
-                const formData = $(this).serialize(); //將表單數據序列化
+<script>
+    $(document).ready(function () {
+        $("#loginForm").submit(function (e) {
+            e.preventDefault();
+            const formData = $(this).serialize();
 
-                $.ajax({
-                    url: "/UserAccount/Login",
-                    type: "POST",
-                    data: formData,
-                    success: function (response) {
-                        if (response.success) {
-                            Swal.fire({
-                                icon: "success",
-                                title: "成功",
-                                text: "登入成功！",
-                                timer: 2000,  // 提示顯示時間
-                                showConfirmButton: false,
-                                backdrop: false
-                            }).then(() => {
-                                // 從後端獲取跳轉的預定義 URL
-                                if (response.redirectUrl) {
-                                    location.replace(response.redirectUrl);
-                                } else {
-                                    Swal.fire({
-                                        icon: "error",
-                                        title: "錯誤",
-                                        text: "無法找到相關網頁！"
-                                    });
-                                }
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: "error",
-                                title: "錯誤",
-                                text: response.message || "帳號或密碼錯誤，請重新輸入！"
-                            });
-                        }
-                    },
-                    error: function () {
+            $.ajax({
+                url: "/UserAccount/Login",
+                type: "POST",
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "成功",
+                            text: "登入成功！",
+                            timer: 2000,
+                            showConfirmButton: false,
+                            backdrop: false
+                        }).then(() => {
+                            if (response.redirectUrl) {
+                                location.replace(response.redirectUrl);
+                            } else {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "錯誤",
+                                    text: "無法找到相關網頁！"
+                                });
+                            }
+                        });
+                    } else {
                         Swal.fire({
                             icon: "error",
                             title: "錯誤",
-                            text: "發生錯誤，請稍後再試！"
+                            text: response.message || "帳號或密碼錯誤，請重新輸入！"
                         });
                     }
-                });
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: "error",
+                        title: "錯誤",
+                        text: "發生錯誤，請稍後再試！"
+                    });
+                }
             });
         });
-    </script>
-</body>
-</html>
+    });
+</script>

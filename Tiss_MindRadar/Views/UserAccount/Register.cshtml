@@ -3,40 +3,43 @@
     ViewBag.Title = "帳號註冊";
     Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
 }
-<!DOCTYPE html>
-<html>
-<head>
-    <title>帳號註冊</title>
-    <link rel="icon" href="~/img/favicon.svg" />
-    <link href="~/MindRadarCss/RegisterStyle.css" rel="stylesheet" />
-</head>
-<body>
-    <div class="register-container">
-        <div class="text-center">
-            <img src="~/img/logo.svg" style="height: 45px; width: 100%;" />
+<link href="~/MindRadarCss/RegisterStyle.css" rel="stylesheet" />
+
+<!-- 背景裝飾 -->
+<div class="custom-register-bg">
+    <div class="blur-circle-blue"></div>
+    <div class="glow-gradient"></div>
+</div>
+
+<!-- 註冊表單卡片 -->
+<div class="min-h-screen flex items-center justify-center relative z-10 px-4">
+    <div class="w-full max-w-3xl bg-white/90 backdrop-blur-md border border-white/40 rounded-2xl shadow-2xl p-10">
+        <div class="text-center mb-6">
+            <img src="~/img/logo.svg" alt="系統 Logo" class="h-12 mx-auto mb-4">
+            <h2 class="text-3xl font-bold text-blue-800">建立帳號</h2>
+            <p class="text-gray-600 text-lg">請輸入基本資料以完成註冊</p>
         </div>
-        <form id="registerForm" action="/UserAccount/Register" method="post">
-            <div class="form-group">
-                <label for="AccountID" title="帳號">帳號</label>
-                <input type="text" class="form-control" id="AccountID" name="Jobcode" placeholder="請使用英文或中文" required>
-                <small id="jobcodeError" class="text-danger"></small>
+
+        <form id="registerForm" action="/UserAccount/Register" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="form-label" for="AccountID">帳號</label>
+                <input type="text" class="form-input" id="AccountID" name="Jobcode" placeholder="請使用英文或中文" required />
             </div>
-            <div class="form-group">
-                <label for="Username" title="姓名">姓名</label>
-                <input type="text" class="form-control" id="Username" name="UserName" placeholder="請輸入名稱" required>
+            <div>
+                <label class="form-label" for="Username">姓名</label>
+                <input type="text" class="form-input" id="Username" name="UserName" placeholder="請輸入名稱" required />
             </div>
-            <div class="form-group">
-                <label for="Password" title="密碼">密碼</label>
-                <input type="password" class="form-control" id="Password" name="pwd" placeholder="需含英文字母大小寫和最少6位" required>
-                <small id="passwordError" class="text-danger"></small>
+            <div>
+                <label class="form-label" for="Password">密碼</label>
+                <input type="password" class="form-input" id="Password" name="pwd" placeholder="需含英文字母大小寫和最少6位" required />
             </div>
-            <div class="form-group">
-                <label for="Email" title="電子郵件">電子郵件</label>
-                <input type="email" class="form-control" id="Email" name="Email" placeholder="請輸入電子郵件" required>
+            <div>
+                <label class="form-label" for="Email">電子郵件</label>
+                <input type="email" class="form-input" id="Email" name="Email" placeholder="請輸入電子郵件" required />
             </div>
-            <div class="form-group">
-                <label for="Role">角色</label>
-                <select class="form-control" id="Role" name="Role" required>
+            <div>
+                <label class="form-label" for="Role">角色</label>
+                <select class="form-input" id="Role" name="Role" required>
                     <option value="" disabled selected>請選擇註冊身份</option>
                     <option value="Player">選手</option>
                     <option value="Coach">教練</option>
@@ -44,52 +47,52 @@
                     <option value="Referee">裁判</option>
                 </select>
             </div>
-            <div class="form-group" id="inviteCodeField" style="display: none;">
-                <label for="InviteCode">驗證碼 (運動心理人員/裁判/教練專用)</label>
-                <input type="text" class="form-control" id="InviteCode" name="InviteCode" placeholder="請輸入驗證碼" />
-                <small id="inviteCodeError" class="text-danger"></small>
-            </div>
-            <div class="form-group" id="ageField">
-                <label for="Age" title="年齡">年齡</label>
-                <input type="number" class="form-control" id="Age" name="Age" placeholder="請輸入年齡" required>
-            </div>
-            <div class="form-group">
-                <label for="Gender" title="性別">性別</label>
-                <select class="form-control" id="Gender" name="Gender" required>
+            <div>
+                <label class="form-label" for="Gender">性別</label>
+                <select class="form-input" id="Gender" name="Gender" required>
                     <option value="" disabled selected>請選擇性別</option>
                     <option value="Female">女性</option>
                     <option value="Male">男性</option>
                 </select>
             </div>
-
-            <div class="form-group" id="teamField">
-                <label for="TeamID" title="所屬隊伍">所屬隊伍</label>
-                <select class="form-control" id="TeamID" name="TeamID" required>
+            <div id="inviteCodeField" style="display:none;">
+                <label class="form-label" for="InviteCode">驗證碼</label>
+                <input type="text" class="form-input" id="InviteCode" name="InviteCode" placeholder="請輸入驗證碼" />
+            </div>
+            <div id="ageField">
+                <label class="form-label" for="Age">年齡</label>
+                <input type="number" class="form-input" id="Age" name="Age" placeholder="請輸入年齡" required />
+            </div>
+            <div id="teamField">
+                <label class="form-label" for="TeamID">所屬隊伍</label>
+                <select class="form-input" id="TeamID" name="TeamID" required>
                     <option value="" disabled selected>請選擇隊伍</option>
                     @foreach (var team in ViewBag.Teams)
                     {
                         <option value="@team.TeamID">@team.TeamName</option>
                     }
                 </select>
-                <small id="teamError" class="text-danger"></small>
             </div>
-            <div class="form-group" id="refereeTeamField" style="display: none;">
-                <label for="RefereeTeamID" title="裁判所屬隊伍">裁判所屬隊伍</label>
-                <select class="form-control" id="RefereeTeamID" name="RefereeTeamID">
+            <div id="refereeTeamField" style="display:none;">
+                <label class="form-label" for="RefereeTeamID">裁判所屬隊伍</label>
+                <select class="form-input" id="RefereeTeamID" name="RefereeTeamID">
                     <option value="" disabled selected>請選擇裁判隊伍</option>
                     @foreach (var refereeTeam in ViewBag.RefereeTeams)
                     {
                         <option value="@refereeTeam.RefereeTeamID">@refereeTeam.RefereeTeamName</option>
                     }
                 </select>
-                <small id="refereeTeamError" class="text-danger"></small>
             </div>
-
-            <button type="submit" class="btn btn-primary btn-block" title="註冊">註冊</button>
+            <div class="col-span-1 md:col-span-2">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md font-semibold shadow-md">
+                    <i class="fas fa-user-plus mr-2"></i> 註冊
+                </button>
+            </div>
         </form>
     </div>
+</div>
 
-    <script>
+<script>
         document.addEventListener("DOMContentLoaded", function () {
             const roleField = document.getElementById("Role");
             const inviteCodeField = document.getElementById("inviteCodeField");
@@ -201,6 +204,4 @@
                 });
             });
         });
-    </script>
-</body>
-</html>
+</script>

@@ -35,12 +35,12 @@
 
     .wave-background::before {
         border: 2px solid rgba(52, 152, 219, 0.2); /* 更明顯線條 */
-        animation: spin 20s infinite linear; /* 原40s→20s，加快一點 */
+        animation: spin 35s infinite linear; /* 原40s→30s，加快一點 */
     }
 
     .wave-background::after {
         border: 2px solid rgba(41, 128, 185, 0.2);
-        animation: spin 15s infinite linear reverse; /* 原30s→15s 並反向轉，更有變化 */
+        animation: spin 25s infinite linear reverse; /* 原30s→20s 並反向轉，更有變化 */
         transform: translate3d(-50%, -50%, 0) rotate(200deg);
     }
 
