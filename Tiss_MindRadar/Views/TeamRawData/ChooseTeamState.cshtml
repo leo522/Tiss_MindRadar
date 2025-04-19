@@ -6,47 +6,34 @@
 <html>
 <head>
     <title>選擇隊伍檢測狀態</title>
-    <style>
-        .image-button {
-            cursor: pointer;
-            transition: transform 0.2s ease-in-out;
-        }
-
-            .image-button:hover {
-                transform: scale(1.1);
-            }
-
-        .image-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .image-label {
-            margin-top: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-            text-align: center;
-        }
-    </style>
+    <link href="~/MindRadarCss/ChooseTeamStateStyle.css" rel="stylesheet" />
 </head>
 <body>
+    <div class="wave-background"></div>
+    <div class="dots-background"></div>
     <div class="container">
-        <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">選擇隊伍檢測狀態</h1>
-
-        <div class="image-container">
-            <form id="redirectForm" action="@Url.Action("GetMentalStateTeamRawData", "TeamRawData")" method="post">
-                <button type="submit" class="image-button">
-                    <img src="~/img/heart-attack.png" alt="心理狀態檢測" title="心理狀態檢測">
-                    <p class="image-label">心理狀態檢測</p>
-                </button>
+        <div style="text-align:center;">
+            <h1 class="page-title">選擇隊伍檢測狀態</h1>
+        </div>
+        <div class="card-container">
+            <form action="@Url.Action("GetMentalStateTeamRawData", "TeamRawData")" method="post">
+                <div class="state-card">
+                    <div class="card-icon">
+                        <img src="~/img/heart-attack.png" alt="心理狀態檢測" title="心理狀態檢測">
+                    </div>
+                    <h2 class="card-title">心理狀態檢測</h2>
+                    <button type="submit" class="card-button">開始查看</button>
+                </div>
             </form>
-            <form id="redirectForm" action="@Url.Action("GetMentalPhysicalStateTeamRawData", "TeamRawData")" method="post">
-                <button type="submit" class="image-button">
-                    <img src="~/img/medical-checkup.png" alt="身心狀態檢測" title="身心狀態檢測">
-                    <p class="image-label">身心狀態檢測</p>
-                </button>
+
+            <form action="@Url.Action("GetMentalPhysicalStateTeamRawData", "TeamRawData")" method="post">
+                <div class="state-card">
+                    <div class="card-icon">
+                        <img src="~/img/medical-checkup.png" alt="身心狀態檢測" title="身心狀態檢測">
+                    </div>
+                    <h2 class="card-title">身心狀態檢測</h2>
+                    <button type="submit" class="card-button">開始查看</button>
+                </div>
             </form>
         </div>
     </div>

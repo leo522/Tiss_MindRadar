@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Tiss_MindRadar.Models;
+using Tiss_MindRadar.ViewModels;
 using Tiss_MindRadar.Utility;
 
 namespace Tiss_MindRadar.Controllers
@@ -148,10 +149,7 @@ namespace Tiss_MindRadar.Controllers
                             item.SurveyDate = date?.ToString("yyyy-MM-dd");
                         }
 
-                        ViewBag.MaskedUserName = MaskingHelper.MaskUserName(
-    _db.Users.Where(u => u.UserID == userId).Select(u => u.UserName).FirstOrDefault()
-);
-
+                        ViewBag.MaskedUserName = MaskingHelper.MaskUserName(_db.Users.Where(u => u.UserID == userId).Select(u => u.UserName).FirstOrDefault());
 
                         radarData.AddRange(data);
                     }

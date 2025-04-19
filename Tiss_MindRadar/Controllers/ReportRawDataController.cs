@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using System.Numerics;
 using System.ComponentModel;
 using Tiss_MindRadar.Utility;
+using Tiss_MindRadar.ViewModels;
 
 namespace Tiss_MindRadar.Controllers
 {

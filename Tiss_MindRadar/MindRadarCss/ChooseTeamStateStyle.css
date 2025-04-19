@@ -1,0 +1,234 @@
+﻿body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: linear-gradient(120deg, #f6f8ff 0%, #e5eeff 100%);
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* 添加動態波浪背景 */
+.wave-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    opacity: 0.9;
+}
+
+    .wave-background::before,
+    .wave-background::after {
+        content: '';
+        position: absolute;
+        width: 300vw;
+        height: 300vw;
+        top: -65vw;
+        left: 50%;
+        transform-origin: 50% 50%;
+        background-color: transparent;
+        border-radius: 38% 42%;
+        box-shadow: inset 0 0 10vw rgba(52, 152, 219, 0.2); /* 加強陰影可見度 */
+        mix-blend-mode: multiply;
+    }
+
+    .wave-background::before {
+        border: 2px solid rgba(52, 152, 219, 0.2); /* 更明顯線條 */
+        animation: spin 20s infinite linear; /* 原40s→20s，加快一點 */
+    }
+
+    .wave-background::after {
+        border: 2px solid rgba(41, 128, 185, 0.2);
+        animation: spin 15s infinite linear reverse; /* 原30s→15s 並反向轉，更有變化 */
+        transform: translate3d(-50%, -50%, 0) rotate(200deg);
+    }
+
+@keyframes spin {
+    100% {
+        transform: translate3d(-50%, -50%, 0) rotate(360deg);
+    }
+}
+
+/* 添加浮動圓點背景 */
+.dots-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.5;
+    background-image: radial-gradient(circle at 25px 25px, #3498db 2px, transparent 0), radial-gradient(circle at 75px 75px, #2980b9 2px, transparent 0);
+    background-size: 100px 100px;
+    animation: moveBackground 30s linear infinite;
+}
+
+@keyframes moveBackground {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 100px 100px;
+    }
+}
+
+/* 卡片容器背景效果（玻璃區塊） */
+.card-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 2rem;
+    padding: 20px;
+}
+
+    .card-container::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        z-index: -1;
+        backdrop-filter: blur(4px);
+        mix-blend-mode: lighten;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+    }
+
+/* 崁入式玻璃風卡片 */
+.state-card {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 20px;
+    padding: 2rem;
+    width: 280px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 30px rgba(52, 152, 219, 0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+    .state-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+    }
+
+    .state-card:hover::before {
+        left: 100%;
+    }
+
+    .state-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15), 0 0 0 2px #3498db inset, 0 0 30px rgba(52, 152, 219, 0.2);
+        border-color: #3498db;
+    }
+
+/* 改進按鈕樣式 */
+.card-button {
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 1rem;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3), 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+    .card-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+    }
+
+    .card-button:hover::before {
+        left: 100%;
+    }
+
+    .card-button:hover {
+        background: linear-gradient(45deg, #2980b9, #2573a7);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4), 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+/* 頁面標題樣式 */
+.page-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+    letter-spacing: 1px;
+}
+
+    .page-title::after {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 4px;
+        background-color: #60a5fa;
+        margin: 0.5rem auto 0;
+        border-radius: 2px;
+    }
+
+/* RWD：寬度小於 1024px，改為垂直排列 */
+@media (max-width: 1024px) {
+    .card-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+        padding: 10px;
+    }
+
+    .state-card {
+        width: 90%;
+        max-width: 320px;
+    }
+
+    .card-button {
+        width: 100%;
+    }
+}
+
+/* RWD：標題在小螢幕縮小字體 */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 2rem;
+    }
+
+        .page-title::after {
+            width: 40px;
+            height: 3px;
+        }
+}
+
+/* RWD：加強圖片的最大寬度限制，避免過大 */
+.state-card img {
+    max-width: 100%;
+    height: auto;
+}

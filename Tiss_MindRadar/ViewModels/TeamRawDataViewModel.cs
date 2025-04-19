@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace Tiss_MindRadar.Models
+namespace Tiss_MindRadar.ViewModels
 {
 	public class TeamRawDataViewModel
 	{
@@ -12,6 +12,7 @@ namespace Tiss_MindRadar.Models
         public string Category { get; set; }
         public int Score { get; set; }
         public DateTime? SurveyDate { get; set; }
+        public string Description { get; set; }
     }
 
     public class TeamReportViewModel
