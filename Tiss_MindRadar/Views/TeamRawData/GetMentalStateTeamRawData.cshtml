@@ -26,6 +26,10 @@
 
         <!-- 功能按鈕列 -->
         <div class="flex flex-col sm:flex-row justify-end gap-4 mb-6">
+            <a href="@Url.Action("ChooseTeamState", "TeamRawData")"
+               class="flex items-center justify-center gap-2 bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-lg shadow">
+                <i class="fas fa-arrow-left"></i><span>返回選擇隊伍檢測狀態</span>
+            </a>
             <a href="@Url.Action("TeamReportData", "ReportRawData")"
                class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow">
                 <i class="fas fa-search"></i><span>隊伍選手明細</span>
@@ -123,7 +127,7 @@
                         <span class="text-indigo-900 font-semibold">@ViewBag.MaskedUserName</span>
                     </div>
                 </div>
-                
+
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="flex justify-center items-center">
                         <canvas id="radarChart" class="max-w-[500px] max-h-[500px]"></canvas>
