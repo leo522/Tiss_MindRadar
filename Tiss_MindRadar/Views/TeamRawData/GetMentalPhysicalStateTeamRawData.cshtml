@@ -1,17 +1,235 @@
-﻿
+﻿@model IEnumerable<Tiss_MindRadar.ViewModels.TeamRawDataViewModel>
+@using Newtonsoft.Json
 @{
-    Layout = null;
+    ViewBag.Title = "身心狀態檢測_各隊伍成員分數";
+    Layout = "~/Views/Shared/_MindRadarLayout.cshtml";
 }
-
 <!DOCTYPE html>
-
-<html>
+<html lang="zh-Hant">
 <head>
-    <meta name="viewport" content="width=device-width" />
-    <title>GetMentalPhysicalStateTeamRawData</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="~/RadarChartJS/chart.js"></script>
+    <script src="~/RadarChartJS/chartjs-plugin-datalabels@2.2.js"></script>
+    <script src="~/RadarChartJS/MentalPhysicalTeamChart.js"></script>
 </head>
 <body>
-    <div> 
+    <div class="bg-gradient-to-br from-green-100 to-white min-h-screen py-8 px-4 md:px-10">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-green-800 mb-2">
+                <i class="fa-solid fa-person-circle-check" style="color: #00b894;"></i>身心狀態檢測
+            </h1>
+            <p class="text-lg text-gray-600">各隊伍成員分數</p>
+            <div class="h-1 w-24 bg-green-500 mx-auto mt-4 rounded"></div>
+        </div>
+
+        <!-- 功能按鈕 -->
+        <div class="flex flex-col sm:flex-row justify-end gap-4 mb-6">
+            <a href="@Url.Action("GetMentalPhysicalStateTeamRawData", "TeamRawData")"
+               class="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow">
+                <i class="fas fa-search"></i><span>隊伍選手明細</span>
+            </a>
+            @if (Session["UserID"] != null)
+            {
+                <a href="@Url.Action("Logout", "UserAccount")"
+                   class="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-lg shadow">
+                    <i class="fas fa-sign-out-alt"></i><span>登出</span>
+                </a>
+            }
+        </div>
+
+        <!-- 查詢表單 -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <form id="teamForm" method="post" action="@Url.Action("GetMentalPhysicalStateTeamRawData", "TeamRawData")">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="teamSelect" class="block text-lg font-semibold text-gray-700 mb-1">
+                            <i class="fas fa-users mr-1 text-green-500"></i>選擇隊伍
+                        </label>
+                        @Html.DropDownList("teamId", ViewBag.Teams as SelectList, "請選擇隊伍",
+                            new { @class = "w-full border rounded-md px-4 py-2 focus:ring-2 focus:ring-green-300", id = "teamSelect" })
+                    </div>
+                    <div>
+                        <label for="userSelect" class="block text-lg font-semibold text-gray-700 mb-1">
+                            <i class="fas fa-user mr-1 text-green-500"></i>選擇選手
+                        </label>
+                        <select id="userSelect" name="userId"
+                                class="w-full border rounded-md px-4 py-2 focus:ring-2 focus:ring-green-300"
+                                disabled data-placeholder="請選擇選手"></select>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 分數列表 -->
+        @if (Model.Any())
+        {
+            <div class="bg-white rounded-xl shadow-md p-6 mb-10">
+                <h2 class="text-xl font-bold text-green-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-bar mr-2"></i>選手分數列表
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full table-auto text-left border-collapse">
+                        <thead class="bg-gray-100 text-gray-700 text-lg">
+                            <tr>
+                                <th class="p-3">選手</th>
+                                <th class="p-3">身心類別</th>
+                                <th class="p-3">分數</th>
+                                <th class="p-3">檢測日期</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-600 text-lg">
+                            @{
+                                var groupedData = Model.GroupBy(m => new { m.UserName, SurveyDate = m.SurveyDate?.ToString("yyyy/MM/dd") }).ToList();
+                            }
+                            @foreach (var group in groupedData)
+                            {
+                                int rowSpan = group.Count();
+                                foreach (var (item, index) in group.Select((val, i) => (val, i)))
+                                {
+                                    <tr class="hover:bg-green-50">
+                                        @if (index == 0)
+                                        {
+                                            <td rowspan="@rowSpan" class="p-3 font-semibold text-green-700">@item.UserName</td>
+                                        }
+                                        <td class="p-3">@item.Category</td>
+                                        <td class="p-3">@item.Score</td>
+                                        @if (index == 0)
+                                        {
+                                            <td rowspan="@rowSpan" class="p-3 text-gray-500">@item.SurveyDate.Value.ToString("yyyy/MM/dd")</td>
+                                        }
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <!-- 雷達圖 -->
+        @if (ViewBag.RadarData != null)
+        {
+            <div class="bg-white rounded-xl shadow-md p-6 mb-10">
+                <div class="flex flex-col items-center mb-6">
+                    <div class="flex items-center justify-center gap-3 mb-4">
+                        <i class="fa-solid fa-child text-3xl text-green-600"></i>
+                        <h3 class="text-2xl font-bold text-green-800">身心狀態檢測分析</h3>
+                    </div>
+                    <div class="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-lg">
+                        <i class="fas fa-user text-green-600"></i>
+                        <span class="text-green-700 font-medium">選手：</span>
+                        <span class="text-green-900 font-semibold">@ViewBag.MaskedUserName</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="flex justify-center items-center">
+                        <canvas id="radarChart" class="max-w-[500px] max-h-[500px]"></canvas>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <div class="bg-green-50 rounded-lg p-4 mb-4">
+                            <h4 class="text-lg font-semibold text-green-800 mb-2 flex items-center gap-2">
+                                <i class="fas fa-info-circle text-green-600"></i>圖表說明
+                            </h4>
+                            <ul class="space-y-2 text-green-700">
+                                <li><i class="fas fa-dot-circle text-red-500"></i> 紅色點表示最高分</li>
+                                <li><i class="fas fa-dot-circle text-blue-500"></i> 藍色點表示最低分</li>
+                                <li><i class="fas fa-dot-circle text-gray-500"></i> 分數範圍 0～5</li>
+                            </ul>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-green-800 mb-2 flex items-center gap-2">
+                                <i class="fas fa-lightbulb text-green-600"></i>分析建議
+                            </h4>
+                            <p class="text-green-700">建議依據高分／低分進行心理或生理層面調整與訓練。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <script id="radarData" type="application/json">
+                @Html.Raw(JsonConvert.SerializeObject(ViewBag.RadarData))
+                </script>
+            </div>
+        }
     </div>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const teamSelect = document.getElementById("teamSelect");
+        const userSelect = document.getElementById("userSelect");
+        const form = document.getElementById("teamForm");
+
+        const fetchUsersUrl = '@Url.Action("MentalPhysical_GetUsersByTeam", "TeamRawData")';
+        const checkUserUrl = '@Url.Action("MentalPhysical_CheckUserData", "TeamRawData")';
+
+        // 初始化
+        function resetUserSelect() {
+            userSelect.innerHTML = '<option disabled selected>請選擇選手</option>';
+            userSelect.disabled = true;
+        }
+
+        // 載入選手
+        function loadUsers(teamId, selectedUserId = "") {
+            fetch(fetchUsersUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ teamId: teamId })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("載入選手清單失敗");
+                    return res.json();
+                })
+                .then(users => {
+                    resetUserSelect();
+                    users.forEach(user => {
+                        const opt = document.createElement("option");
+                        opt.value = user.UserID;
+                        opt.textContent = user.UserName;
+                        if (user.UserID.toString() === selectedUserId) opt.selected = true;
+                        userSelect.appendChild(opt);
+                    });
+                    userSelect.disabled = false;
+                })
+                .catch(err => {
+                    alert("選手載入失敗：" + err.message);
+                });
+        }
+
+        // 選擇隊伍後載入選手
+        teamSelect.addEventListener("change", () => {
+            resetUserSelect();
+            const teamId = teamSelect.value;
+            if (teamId) loadUsers(teamId);
+        });
+
+        // 選擇選手後檢查是否有資料，有就提交表單
+        userSelect.addEventListener("change", () => {
+            const userId = userSelect.value;
+            fetch(checkUserUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: userId })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("檢查資料失敗");
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.success) form.submit();
+                    else alert("該選手尚未填寫身心狀態問卷！");
+                })
+                .catch(err => {
+                    alert("無法確認選手是否有資料：" + err.message);
+                });
+        });
+
+        // 雷達圖初始化
+        const radarDataEl = document.getElementById("radarData");
+        if (radarDataEl) {
+            const radarData = JSON.parse(radarDataEl.textContent);
+            renderMentalPhysicalRadarChart("radarChart", radarData);
+        }
+    });
+    </script>
 </body>
 </html>

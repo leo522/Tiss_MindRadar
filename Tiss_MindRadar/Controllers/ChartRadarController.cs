@@ -7,9 +7,10 @@ using System.Web.Mvc;
 using Tiss_MindRadar.Models;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
-using static Tiss_MindRadar.Models.RadarChartVIewModel;
+using static Tiss_MindRadar.ViewModels.RadarChartViewModel;
 using System.Runtime.Remoting.Messaging;
 using Tiss_MindRadar.Utility;
+using Tiss_MindRadar.ViewModels;
 
 namespace Tiss_MindRadar.Controllers
 {
@@ -65,14 +66,14 @@ namespace Tiss_MindRadar.Controllers
                     catch (FormatException)
                     {
                         ViewBag.ErrorMessage = "提交失敗：日期格式錯誤";
-                        return View("MentalPhysicalStateRadarChart", new List<RadarChartVIewModel>());
+                        return View("MentalPhysicalStateRadarChart", new List<RadarChartViewModel>());
                     }
                 }
  
                 ViewBag.SelectedDates = selectedDates;
 
                 // 查詢所有選擇的日期的數據
-                List<RadarChartVIewModel> radarData = new List<RadarChartVIewModel>();
+                List<RadarChartViewModel> radarData = new List<RadarChartViewModel>();
                 foreach (var date in selectedDates)
                 {
                     string query = @"SELECT d.CategoryName AS Dimension, d.SubCategory AS CategoryName, 
@@ -88,7 +89,7 @@ namespace Tiss_MindRadar.Controllers
                                     ELSE 4 END, d.ID";
 
                     object[] parameters = { userId, date };
-                    var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();
+                    var data = _db.Database.SqlQuery<RadarChartViewModel>(query, parameters).ToList();
 
                     foreach (var item in data)
                     {
@@ -113,7 +114,7 @@ namespace Tiss_MindRadar.Controllers
             catch (Exception ex)
             {
                 ViewBag.ErrorMessage = $"生成雷達圖失敗：{ex.Message}";
-                return View(new List<RadarChartVIewModel>());
+                return View(new List<RadarChartViewModel>());
             }
         }
         #endregion
@@ -179,11 +180,11 @@ namespace Tiss_MindRadar.Controllers
                         CreatedAt = r.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
                         PsychologistName = r.Users.UserName
                     }).ToList()
+
                 }).ToList();
 
             return Json(new { success = true, comments }, JsonRequestBehavior.AllowGet);
         }
-
         #endregion
 
         #region 身心狀態檢測雷達圖
@@ -235,7 +236,7 @@ namespace Tiss_MindRadar.Controllers
                     catch (FormatException)
                     {
                         ViewBag.ErrorMessage = "提交失敗：日期格式錯誤";
-                        return View("MentalPhysicalStateRadarChart", new List<RadarChartVIewModel>());
+                        return View("MentalPhysicalStateRadarChart", new List<RadarChartViewModel>());
                     }
                 }
                 else if (surveyDatesList.Any())
@@ -246,7 +247,7 @@ namespace Tiss_MindRadar.Controllers
                 ViewBag.SelectedDates = selectedDates;
 
                 // 查詢所有選擇的日期的數據
-                List<RadarChartVIewModel> radarData = new List<RadarChartVIewModel>();
+                List<RadarChartViewModel> radarData = new List<RadarChartViewModel>();
 
                 foreach (var date in selectedDates)
                 {
@@ -256,7 +257,7 @@ namespace Tiss_MindRadar.Controllers
                                 GROUP BY c.CategoryName";
 
                     object[] parameters = { userId, date };
-                    var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();
+                    var data = _db.Database.SqlQuery<RadarChartViewModel>(query, parameters).ToList();
 
                     foreach (var item in data)
                     {
@@ -271,7 +272,7 @@ namespace Tiss_MindRadar.Controllers
             catch (Exception ex)
             {
                 ViewBag.ErrorMessage = $"生成雷達圖失敗：{ex.Message}";
-                return View(new List<RadarChartVIewModel>());
+                return View(new List<RadarChartViewModel>());
             }
         }
         #endregion

@@ -101,7 +101,7 @@ namespace Tiss_MindRadar.Controllers
                 }
 
                 List<TeamRawDataViewModel> rawData = new List<TeamRawDataViewModel>();
-                List<RadarChartVIewModel> radarData = new List<RadarChartVIewModel>();
+                List<RadarChartViewModel> radarData = new List<RadarChartViewModel>();
 
                 if (userId.HasValue)
                 {
@@ -142,7 +142,7 @@ namespace Tiss_MindRadar.Controllers
                                         WHEN d.CategoryName = '認知技能' THEN 3 ELSE 4 END, d.ID";
 
                         object[] parameters = { userId, date };
-                        var data = _db.Database.SqlQuery<RadarChartVIewModel>(query, parameters).ToList();
+                        var data = _db.Database.SqlQuery<RadarChartViewModel>(query, parameters).ToList();
 
                         foreach (var item in data)
                         {
@@ -178,9 +178,126 @@ namespace Tiss_MindRadar.Controllers
 
         #region 身心狀態檢測雷達圖_各隊選手分數
         [HttpPost]
-        public ActionResult GetMentalPhysicalStateTeamRawData()
+        public ActionResult GetMentalPhysicalStateTeamRawData(int? userId, int? teamId)
         {
-            return View();
+            if (Session["UserID"] == null || Session["UserRole"]?.ToString() != "Consultant")
+                return RedirectToAction("Login", "UserAccount");
+
+            ViewBag.Teams = new SelectList(_db.Team.Where(t => t.isenable), "TeamID", "TeamName", teamId);
+
+            // 取得選手清單
+            if (teamId.HasValue)
+            {
+                var userIds = _db.MentalStateResponse
+                    .Join(_db.Users, msr => msr.UserID, u => u.UserID, (msr, u) => new { msr, u })
+                    .Where(x => x.u.TeamID == teamId)
+                    .Select(x => x.u.UserID)
+                    .Distinct()
+                    .ToList();
+
+                var users = _db.Users
+                    .Where(u => userIds.Contains(u.UserID))
+                    .Select(u => new { u.UserID, u.UserName })
+                    .ToList();
+
+                ViewBag.Users = new SelectList(users, "UserID", "UserName", userId);
+            }
+            else
+            {
+                ViewBag.Users = new SelectList(new List<object>(), "UserID", "UserName");
+            }
+
+            var rawData = new List<TeamRawDataViewModel>();
+            var radarData = new List<RadarChartViewModel>();
+
+            if (userId.HasValue)
+            {
+                // 取得表格用的原始資料
+                rawData = _db.MentalStateResponse
+                    .Join(_db.Users, m => m.UserID, u => u.UserID, (m, u) => new { m, u })
+                    .Join(_db.MentalPhysicalState, temp => temp.m.CategoryID, q => q.QuestionNumber, (temp, q) => new { temp, q })
+                    .Where(x => x.temp.u.UserID == userId)
+                    .Select(x => new TeamRawDataViewModel
+                    {
+                        TeamName = x.temp.u.TeamName,
+                        UserName = x.temp.u.UserName,
+                        Category = x.q.QuestionText,
+                        Score = x.temp.m.Score,
+                        SurveyDate = x.temp.m.SurveyDate
+                    })
+                    .OrderBy(x => x.SurveyDate)
+                    .ToList();
+
+                // 取得最近一次測驗日期
+                var recentDate = _db.MentalStateResponse
+                    .Where(x => x.UserID == userId && x.SurveyDate != null)
+                    .Select(x => x.SurveyDate)
+                    .OrderByDescending(d => d)
+                    .FirstOrDefault();
+
+                // 將該次測驗的每題平均分數作為雷達圖資料
+                if (recentDate != null)
+                {
+                    radarData = _db.MentalStateResponse
+                        .Join(_db.MentalPhysicalState, r => r.CategoryID, q => q.QuestionNumber, (r, q) => new { r, q })
+                        .Where(x => x.r.UserID == userId && x.r.SurveyDate == recentDate)
+                        .GroupBy(x => x.q.QuestionText)
+                        .ToList()
+                        .Select(g => new RadarChartViewModel
+                        {
+                            CategoryName = g.Key,
+                            AverageScore = Convert.ToInt32(g.Average(x => x.r.Score)),
+                            SurveyDate = recentDate.Value.ToString("yyyy-MM-dd")
+                        })
+                        .ToList();
+                }
+
+                ViewBag.MaskedUserName = MaskingHelper.MaskUserName(
+                    _db.Users.FirstOrDefault(u => u.UserID == userId)?.UserName);
+            }
+
+            ViewBag.RadarData = radarData;
+            return View("GetMentalPhysicalStateTeamRawData", rawData);
+        }
+        #endregion
+
+        #region 身心狀態檢測_根據隊伍ID取得選手
+        [HttpPost]
+        public JsonResult MentalPhysical_GetUsersByTeam(int teamId)
+        {
+            try
+            {
+                var usersRaw = _db.Users
+                    .Where(u => u.TeamID == teamId && u.UserName != null)
+                    .ToList(); // 先從資料庫取出再進行處理
+
+                var users = usersRaw.Select(u => new
+                {
+                    u.UserID,
+                    UserName = MaskingHelper.MaskUserName(u.UserName)
+                }).ToList();
+
+                return Json(users);
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 500;
+                return Json(new { error = "伺服器錯誤：" + ex.Message });
+            }
+        }
+        #endregion
+
+        #region 身心狀態檢測_檢查選手是否有身心狀態數據
+        [HttpPost]
+        public JsonResult MentalPhysical_CheckUserData(int? userId)
+        {
+            if (!userId.HasValue)
+                return Json(new { success = false });
+
+            var hasData = _db.MentalStateResponse
+                            .Any(p => p.UserID == userId && p.SurveyDate != null);
+
+            return Json(new { success = hasData });
         }
         #endregion
 

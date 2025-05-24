@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace Tiss_MindRadar.Models
+namespace Tiss_MindRadar.ViewModels
 {
-    public class RadarChartVIewModel
+    public class RadarChartViewModel
     {
         public string CategoryName { get; set; } // 分類名稱
         public int AverageScore { get; set; } // 平均分數

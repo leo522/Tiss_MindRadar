@@ -268,7 +268,7 @@
     <Compile Include="Models\RadarChartReply.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\RadarChartVIewModel.cs" />
+    <Compile Include="ViewModels\RadarChartVIewModel.cs" />
     <Compile Include="Models\RadarCommentLog.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
