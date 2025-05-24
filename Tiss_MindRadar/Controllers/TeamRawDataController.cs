@@ -224,9 +224,11 @@ namespace Tiss_MindRadar.Controllers
                         Category = x.q.QuestionText,
                         Score = x.temp.m.Score,
                         SurveyDate = x.temp.m.SurveyDate
-                    })
-                    .OrderBy(x => x.SurveyDate)
-                    .ToList();
+                    }).AsEnumerable()
+                    .Select(x => 
+                    {x.UserName = MaskingHelper.MaskUserName(x.UserName);
+                        return x;
+                    }).ToList();
 
                 // 取得最近一次測驗日期
                 var recentDate = _db.MentalStateResponse

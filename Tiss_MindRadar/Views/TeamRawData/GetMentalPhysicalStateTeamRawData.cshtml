@@ -25,6 +25,10 @@
 
         <!-- 功能按鈕 -->
         <div class="flex flex-col sm:flex-row justify-end gap-4 mb-6">
+            <a href="@Url.Action("ChooseTeamState", "TeamRawData")"
+               class="flex items-center justify-center gap-2 bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-lg shadow">
+                <i class="fas fa-arrow-left"></i><span>返回選擇隊伍檢測狀態</span>
+            </a>
             <a href="@Url.Action("GetMentalPhysicalStateTeamRawData", "TeamRawData")"
                class="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow">
                 <i class="fas fa-search"></i><span>隊伍選手明細</span>
@@ -39,26 +43,26 @@
         </div>
 
         <!-- 查詢表單 -->
+        <!-- 查詢表單 -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <form id="teamForm" method="post" action="@Url.Action("GetMentalPhysicalStateTeamRawData", "TeamRawData")">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="teamSelect" class="block text-lg font-semibold text-gray-700 mb-1">
-                            <i class="fas fa-users mr-1 text-green-500"></i>選擇隊伍
-                        </label>
-                        @Html.DropDownList("teamId", ViewBag.Teams as SelectList, "請選擇隊伍",
-                            new { @class = "w-full border rounded-md px-4 py-2 focus:ring-2 focus:ring-green-300", id = "teamSelect" })
-                    </div>
-                    <div>
-                        <label for="userSelect" class="block text-lg font-semibold text-gray-700 mb-1">
-                            <i class="fas fa-user mr-1 text-green-500"></i>選擇選手
-                        </label>
-                        <select id="userSelect" name="userId"
-                                class="w-full border rounded-md px-4 py-2 focus:ring-2 focus:ring-green-300"
-                                disabled data-placeholder="請選擇選手"></select>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="teamSelect" class="block text-lg font-semibold text-gray-700 mb-1">
+                        <i class="fas fa-users mr-1 text-green-500"></i>選擇隊伍
+                    </label>
+                    @Html.DropDownList("teamId", ViewBag.Teams as SelectList, "請選擇隊伍",
+                        new { @class = "w-full border rounded-md px-4 py-2 focus:ring-2 focus:ring-green-300", id = "teamSelect" })
                 </div>
-            </form>
+                <div>
+                    <label for="userSelect" class="block text-lg font-semibold text-gray-700 mb-1">
+                        <i class="fas fa-user mr-1 text-green-500"></i>選擇選手
+                    </label>
+                    <select id="userSelect"
+                            class="w-full border rounded-md px-4 py-2 focus:ring-2 focus:ring-green-300"
+                            data-placeholder="請選擇選手">
+                    </select>
+                </div>
+            </div>
         </div>
 
         <!-- 分數列表 -->
@@ -154,82 +158,110 @@
         }
     </div>
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const teamSelect = document.getElementById("teamSelect");
-        const userSelect = document.getElementById("userSelect");
-        const form = document.getElementById("teamForm");
+document.addEventListener("DOMContentLoaded", function () {
+    const teamSelect = document.getElementById("teamSelect");
+    const userSelect = document.getElementById("userSelect");
 
-        const fetchUsersUrl = '@Url.Action("MentalPhysical_GetUsersByTeam", "TeamRawData")';
-        const checkUserUrl = '@Url.Action("MentalPhysical_CheckUserData", "TeamRawData")';
+    const fetchUsersUrl = '@Url.Action("MentalPhysical_GetUsersByTeam", "TeamRawData")';
+    const checkUserUrl = '@Url.Action("MentalPhysical_CheckUserData", "TeamRawData")';
+    const fetchRadarUrl = '@Url.Action("GetMentalPhysicalStateTeamRawData", "TeamRawData")';
 
-        // 初始化
-        function resetUserSelect() {
-            userSelect.innerHTML = '<option disabled selected>請選擇選手</option>';
-            userSelect.disabled = true;
-        }
+    const selectedTeamId = '@Request["teamId"]';
+    const selectedUserId = '@Request["userId"]';
 
-        // 載入選手
-        function loadUsers(teamId, selectedUserId = "") {
-            fetch(fetchUsersUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ teamId: teamId })
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error("載入選手清單失敗");
-                    return res.json();
-                })
-                .then(users => {
-                    resetUserSelect();
-                    users.forEach(user => {
-                        const opt = document.createElement("option");
-                        opt.value = user.UserID;
-                        opt.textContent = user.UserName;
-                        if (user.UserID.toString() === selectedUserId) opt.selected = true;
-                        userSelect.appendChild(opt);
-                    });
-                    userSelect.disabled = false;
-                })
-                .catch(err => {
-                    alert("選手載入失敗：" + err.message);
-                });
-        }
+    function resetUserSelect() {
+        userSelect.innerHTML = '<option disabled selected>請選擇選手</option>';
+        userSelect.disabled = true;
+    }
 
-        // 選擇隊伍後載入選手
-        teamSelect.addEventListener("change", () => {
+    function loadUsers(teamId, selectedUserId = "") {
+        fetch(fetchUsersUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ teamId: teamId })
+        })
+        .then(res => res.json())
+        .then(users => {
             resetUserSelect();
-            const teamId = teamSelect.value;
-            if (teamId) loadUsers(teamId);
+            users.forEach(user => {
+                const opt = document.createElement("option");
+                opt.value = user.UserID;
+                opt.textContent = user.UserName;
+                if (user.UserID.toString() === selectedUserId) opt.selected = true;
+                userSelect.appendChild(opt);
+            });
+            userSelect.disabled = false;
+        })
+        .catch(err => {
+            alert("選手載入失敗：" + err.message);
         });
+    }
 
-        // 選擇選手後檢查是否有資料，有就提交表單
-        userSelect.addEventListener("change", () => {
-            const userId = userSelect.value;
-            fetch(checkUserUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: userId })
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error("檢查資料失敗");
-                    return res.json();
-                })
-                .then(data => {
-                    if (data.success) form.submit();
-                    else alert("該選手尚未填寫身心狀態問卷！");
-                })
-                .catch(err => {
-                    alert("無法確認選手是否有資料：" + err.message);
-                });
-        });
+    // 初始化載入選手
+    if (selectedTeamId) {
+        teamSelect.value = selectedTeamId;
+        loadUsers(selectedTeamId, selectedUserId);
+    }
 
-        // 雷達圖初始化
-        const radarDataEl = document.getElementById("radarData");
-        if (radarDataEl) {
-            const radarData = JSON.parse(radarDataEl.textContent);
-            renderMentalPhysicalRadarChart("radarChart", radarData);
+    // 當隊伍變更時
+    teamSelect.addEventListener("change", () => {
+        const teamId = teamSelect.value;
+        if (teamId) {
+            resetUserSelect();
+            loadUsers(teamId);
         }
     });
+
+    // 當選手變更時
+    userSelect.addEventListener("change", () => {
+        const userId = userSelect.value;
+        const teamId = teamSelect.value;
+
+        fetch(checkUserUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // 建立並送出表單
+                const form = document.createElement("form");
+                form.method = "POST";
+                form.action = fetchRadarUrl;
+
+                const teamInput = document.createElement("input");
+                teamInput.type = "hidden";
+                teamInput.name = "teamId";
+                teamInput.value = teamId;
+
+                const userInput = document.createElement("input");
+                userInput.type = "hidden";
+                userInput.name = "userId";
+                userInput.value = userId;
+
+                form.appendChild(teamInput);
+                form.appendChild(userInput);
+                document.body.appendChild(form);
+                form.submit();
+            } else {
+                alert("該選手尚未填寫資料！");
+                userSelect.value = ""; // reset
+            }
+        })
+        .catch(err => {
+            alert("檢查資料失敗：" + err.message);
+        });
+    });
+
+    // 初始化雷達圖
+    const radarDataEl = document.getElementById("radarData");
+    if (radarDataEl) {
+        const radarData = JSON.parse(radarDataEl.textContent);
+        renderMentalPhysicalRadarChart("radarChart", radarData);
+    }
+});
+
     </script>
 </body>
 </html>
