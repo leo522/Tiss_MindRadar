@@ -12,27 +12,25 @@ namespace Tiss_MindRadar.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class MentalPhysicalState
+    public partial class HealthSurveyQuestion
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public MentalPhysicalState()
+        public HealthSurveyQuestion()
         {
-            this.Category = new HashSet<Category>();
+            this.HealthSurveyResponse = new HashSet<HealthSurveyResponse>();
         }
     
-        public int ID { get; set; }
-        public int QuestionNumber { get; set; }
-        public string QuestionText { get; set; }
-        public int ScoreOption0 { get; set; }
-        public int ScoreOption1 { get; set; }
-        public int ScoreOption2 { get; set; }
-        public int ScoreOption3 { get; set; }
-        public int ScoreOption4 { get; set; }
-        public int ScoreOption5 { get; set; }
-        public int ScoreOption6 { get; set; }
-        public Nullable<int> CategoryID { get; set; }
+        public int QuestionID { get; set; }
+        public int DisplayOrder { get; set; }
+        public string QuestionTitle { get; set; }
+        public string Score5Description { get; set; }
+        public string Score4Description { get; set; }
+        public string Score3Description { get; set; }
+        public string Score2Description { get; set; }
+        public string Score1Description { get; set; }
+        public string CategoryName { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Category> Category { get; set; }
+        public virtual ICollection<HealthSurveyResponse> HealthSurveyResponse { get; set; }
     }
 }

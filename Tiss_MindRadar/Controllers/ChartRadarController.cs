@@ -215,7 +215,7 @@ namespace Tiss_MindRadar.Controllers
                 ViewBag.TeamName = Session["TeamName"];
 
                 // 改為由舊到新排序
-                List<DateTime> surveyDatesList = _db.UserResponse
+                List<DateTime> surveyDatesList = _db.MentalStateResponse
                     .Where(ur => ur.UserID == userId && ur.SurveyDate.HasValue)
                     .Select(ur => ur.SurveyDate.Value).Distinct().OrderBy(d => d).ToList();
 
@@ -251,7 +251,7 @@ namespace Tiss_MindRadar.Controllers
                 foreach (var date in selectedDates)
                 {
                     string query = @"SELECT c.CategoryName, CAST(ROUND(AVG(ur.Score), 0) AS INT) AS AverageScore
-                                FROM UserResponse ur INNER JOIN QuestionCategory qc ON ur.QuestionID = qc.QuestionID
+                                FROM MentalStateResponse ur INNER JOIN QuestionCategory qc ON ur.QuestionID = qc.QuestionID
                                 INNER JOIN Category c ON qc.CategoryID = c.ID WHERE ur.UserID = @p0 AND ur.SurveyDate = @p1
                                 GROUP BY c.CategoryName";
 

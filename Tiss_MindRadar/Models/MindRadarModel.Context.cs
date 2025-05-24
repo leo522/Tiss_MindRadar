@@ -28,10 +28,13 @@ namespace Tiss_MindRadar.Models
         public virtual DbSet<Category> Category { get; set; }
         public virtual DbSet<ConsultantTeams> ConsultantTeams { get; set; }
         public virtual DbSet<Fatigue> Fatigue { get; set; }
+        public virtual DbSet<HealthSurveyQuestion> HealthSurveyQuestion { get; set; }
+        public virtual DbSet<HealthSurveyResponse> HealthSurveyResponse { get; set; }
         public virtual DbSet<LackOfEnergy> LackOfEnergy { get; set; }
         public virtual DbSet<MentalPhysicalState> MentalPhysicalState { get; set; }
         public virtual DbSet<MentalRelaxation> MentalRelaxation { get; set; }
         public virtual DbSet<MentalState> MentalState { get; set; }
+        public virtual DbSet<MentalStateResponse> MentalStateResponse { get; set; }
         public virtual DbSet<OverallSelfRegulation> OverallSelfRegulation { get; set; }
         public virtual DbSet<OverallStress> OverallStress { get; set; }
         public virtual DbSet<PersonalAchievement> PersonalAchievement { get; set; }
@@ -57,7 +60,6 @@ namespace Tiss_MindRadar.Models
         public virtual DbSet<Successful> Successful { get; set; }
         public virtual DbSet<Team> Team { get; set; }
         public virtual DbSet<UserProfile> UserProfile { get; set; }
-        public virtual DbSet<UserResponse> UserResponse { get; set; }
         public virtual DbSet<Users> Users { get; set; }
     }
 }

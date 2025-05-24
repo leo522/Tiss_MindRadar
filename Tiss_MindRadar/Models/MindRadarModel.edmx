@@ -30,6 +30,32 @@
           <Property Name="QuestionText" Type="nvarchar" MaxLength="20" Nullable="false" />
           <Property Name="Score" Type="int" />
         </EntityType>
+        <EntityType Name="HealthSurveyQuestion">
+          <Key>
+            <PropertyRef Name="QuestionID" />
+          </Key>
+          <Property Name="QuestionID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DisplayOrder" Type="int" Nullable="false" />
+          <Property Name="QuestionTitle" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Score5Description" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Score4Description" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Score3Description" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Score2Description" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Score1Description" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="CategoryName" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="HealthSurveyResponse">
+          <Key>
+            <PropertyRef Name="ResponseID" />
+          </Key>
+          <Property Name="ResponseID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="QuestionID" Type="int" Nullable="false" />
+          <Property Name="Score" Type="int" Nullable="false" />
+          <Property Name="SurveyDate" Type="date" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="BatchID" Type="uniqueidentifier" Nullable="false" />
+        </EntityType>
         <EntityType Name="LackOfEnergy">
           <Key>
             <PropertyRef Name="ID" />
@@ -53,6 +79,7 @@
           <Property Name="ScoreOption4" Type="int" Nullable="false" />
           <Property Name="ScoreOption5" Type="int" Nullable="false" />
           <Property Name="ScoreOption6" Type="int" Nullable="false" />
+          <Property Name="CategoryID" Type="int" />
         </EntityType>
         <EntityType Name="MentalRelaxation">
           <Key>
@@ -76,6 +103,19 @@
           <Property Name="Option4" Type="nvarchar" MaxLength="10" Nullable="false" />
           <Property Name="Option5" Type="nvarchar" MaxLength="10" Nullable="false" />
           <Property Name="CategoryID" Type="int" />
+        </EntityType>
+        <EntityType Name="MentalStateResponse">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="QuestionID" Type="int" Nullable="false" />
+          <Property Name="CategoryID" Type="int" Nullable="false" />
+          <Property Name="Score" Type="int" Nullable="false" />
+          <Property Name="BatchID" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="SurveyDate" Type="date" />
         </EntityType>
         <EntityType Name="OverallSelfRegulation">
           <Key>
@@ -232,7 +272,7 @@
           <Property Name="ReplyID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="CommentID" Type="int" Nullable="false" />
           <Property Name="PsychologistID" Type="int" Nullable="false" />
-          <Property Name="ReplyText" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="ReplyText" Type="nvarchar(max)" Nullable="false" />
           <Property Name="CreatedAt" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="RadarCommentLog">
@@ -240,7 +280,7 @@
             <PropertyRef Name="LogID" />
           </Key>
           <Property Name="LogID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="ActionType" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="ActionType" Type="nvarchar" MaxLength="50" Nullable="false" />
           <Property Name="TargetType" Type="nvarchar" MaxLength="20" Nullable="false" />
           <Property Name="TargetID" Type="int" Nullable="false" />
           <Property Name="PerformedBy" Type="int" Nullable="false" />
@@ -323,19 +363,6 @@
           <Property Name="IsVerified" Type="bit" Nullable="false" />
           <Property Name="Gender" Type="nvarchar" MaxLength="5" />
           <Property Name="RefereeTeamID" Type="int" />
-        </EntityType>
-        <EntityType Name="UserResponse">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="UserID" Type="int" Nullable="false" />
-          <Property Name="QuestionID" Type="int" Nullable="false" />
-          <Property Name="CategoryID" Type="int" Nullable="false" />
-          <Property Name="Score" Type="int" Nullable="false" />
-          <Property Name="BatchID" Type="uniqueidentifier" Nullable="false" />
-          <Property Name="CreatedDate" Type="datetime2" Precision="7" Nullable="false" />
-          <Property Name="SurveyDate" Type="date" />
         </EntityType>
         <EntityType Name="Users">
           <Key>
@@ -426,12 +453,12 @@
         </Association>
         <Association Name="FK__UserRespo__UserI__778AC167">
           <End Role="Users" Type="Self.Users" Multiplicity="1" />
-          <End Role="UserResponse" Type="Self.UserResponse" Multiplicity="*" />
+          <End Role="MentalStateResponse" Type="Self.MentalStateResponse" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Users">
               <PropertyRef Name="UserID" />
             </Principal>
-            <Dependent Role="UserResponse">
+            <Dependent Role="MentalStateResponse">
               <PropertyRef Name="UserID" />
             </Dependent>
           </ReferentialConstraint>
@@ -457,6 +484,30 @@
             </Principal>
             <Dependent Role="ConsultantTeams">
               <PropertyRef Name="TeamID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_HealthSurveyResponse_Question">
+          <End Role="HealthSurveyQuestion" Type="Self.HealthSurveyQuestion" Multiplicity="1" />
+          <End Role="HealthSurveyResponse" Type="Self.HealthSurveyResponse" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="HealthSurveyQuestion">
+              <PropertyRef Name="QuestionID" />
+            </Principal>
+            <Dependent Role="HealthSurveyResponse">
+              <PropertyRef Name="QuestionID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_HealthSurveyResponse_User">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="HealthSurveyResponse" Type="Self.HealthSurveyResponse" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="HealthSurveyResponse">
+              <PropertyRef Name="UserID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -632,10 +683,13 @@
           <EntitySet Name="Category" EntityType="Self.Category" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ConsultantTeams" EntityType="Self.ConsultantTeams" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Fatigue" EntityType="Self.Fatigue" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="HealthSurveyQuestion" EntityType="Self.HealthSurveyQuestion" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="HealthSurveyResponse" EntityType="Self.HealthSurveyResponse" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="LackOfEnergy" EntityType="Self.LackOfEnergy" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MentalPhysicalState" EntityType="Self.MentalPhysicalState" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MentalRelaxation" EntityType="Self.MentalRelaxation" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MentalState" EntityType="Self.MentalState" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="MentalStateResponse" EntityType="Self.MentalStateResponse" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="OverallSelfRegulation" EntityType="Self.OverallSelfRegulation" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="OverallStress" EntityType="Self.OverallStress" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="PersonalAchievement" EntityType="Self.PersonalAchievement" Schema="dbo" store:Type="Tables" />
@@ -662,7 +716,6 @@
           <EntitySet Name="Successful" EntityType="Self.Successful" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Team" EntityType="Self.Team" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserProfile" EntityType="Self.UserProfile" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="UserResponse" EntityType="Self.UserResponse" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK__Psycholog__Categ__29221CFB" Association="Self.FK__Psycholog__Categ__29221CFB">
             <End Role="PsychologicalStateCategory" EntitySet="PsychologicalStateCategory" />
@@ -690,7 +743,7 @@
           </AssociationSet>
           <AssociationSet Name="FK__UserRespo__UserI__778AC167" Association="Self.FK__UserRespo__UserI__778AC167">
             <End Role="Users" EntitySet="Users" />
-            <End Role="UserResponse" EntitySet="UserResponse" />
+            <End Role="MentalStateResponse" EntitySet="MentalStateResponse" />
           </AssociationSet>
           <AssociationSet Name="FK_ConsultantTeams_ConsultantID" Association="Self.FK_ConsultantTeams_ConsultantID">
             <End Role="Users" EntitySet="Users" />
@@ -699,6 +752,14 @@
           <AssociationSet Name="FK_ConsultantTeams_TeamID" Association="Self.FK_ConsultantTeams_TeamID">
             <End Role="Team" EntitySet="Team" />
             <End Role="ConsultantTeams" EntitySet="ConsultantTeams" />
+          </AssociationSet>
+          <AssociationSet Name="FK_HealthSurveyResponse_Question" Association="Self.FK_HealthSurveyResponse_Question">
+            <End Role="HealthSurveyQuestion" EntitySet="HealthSurveyQuestion" />
+            <End Role="HealthSurveyResponse" EntitySet="HealthSurveyResponse" />
+          </AssociationSet>
+          <AssociationSet Name="FK_HealthSurveyResponse_User" Association="Self.FK_HealthSurveyResponse_User">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="HealthSurveyResponse" EntitySet="HealthSurveyResponse" />
           </AssociationSet>
           <AssociationSet Name="FK_MentalState_Category" Association="Self.FK_MentalState_Category">
             <End Role="PsychologicalStateCategory" EntitySet="PsychologicalStateCategory" />
@@ -765,10 +826,13 @@
           <EntitySet Name="Category" EntityType="TISS_MindRadarModel.Category" />
           <EntitySet Name="ConsultantTeams" EntityType="TISS_MindRadarModel.ConsultantTeams" />
           <EntitySet Name="Fatigue" EntityType="TISS_MindRadarModel.Fatigue" />
+          <EntitySet Name="HealthSurveyQuestion" EntityType="TISS_MindRadarModel.HealthSurveyQuestion" />
+          <EntitySet Name="HealthSurveyResponse" EntityType="TISS_MindRadarModel.HealthSurveyResponse" />
           <EntitySet Name="LackOfEnergy" EntityType="TISS_MindRadarModel.LackOfEnergy" />
           <EntitySet Name="MentalPhysicalState" EntityType="TISS_MindRadarModel.MentalPhysicalState" />
           <EntitySet Name="MentalRelaxation" EntityType="TISS_MindRadarModel.MentalRelaxation" />
           <EntitySet Name="MentalState" EntityType="TISS_MindRadarModel.MentalState" />
+          <EntitySet Name="MentalStateResponse" EntityType="TISS_MindRadarModel.MentalStateResponse" />
           <EntitySet Name="OverallSelfRegulation" EntityType="TISS_MindRadarModel.OverallSelfRegulation" />
           <EntitySet Name="OverallStress" EntityType="TISS_MindRadarModel.OverallStress" />
           <EntitySet Name="PersonalAchievement" EntityType="TISS_MindRadarModel.PersonalAchievement" />
@@ -794,7 +858,6 @@
           <EntitySet Name="Successful" EntityType="TISS_MindRadarModel.Successful" />
           <EntitySet Name="Team" EntityType="TISS_MindRadarModel.Team" />
           <EntitySet Name="UserProfile" EntityType="TISS_MindRadarModel.UserProfile" />
-          <EntitySet Name="UserResponse" EntityType="TISS_MindRadarModel.UserResponse" />
           <EntitySet Name="Users" EntityType="TISS_MindRadarModel.Users" />
           <AssociationSet Name="FK_ConsultantTeams_ConsultantID" Association="TISS_MindRadarModel.FK_ConsultantTeams_ConsultantID">
             <End Role="Users" EntitySet="Users" />
@@ -803,6 +866,14 @@
           <AssociationSet Name="FK_ConsultantTeams_TeamID" Association="TISS_MindRadarModel.FK_ConsultantTeams_TeamID">
             <End Role="Team" EntitySet="Team" />
             <End Role="ConsultantTeams" EntitySet="ConsultantTeams" />
+          </AssociationSet>
+          <AssociationSet Name="FK_HealthSurveyResponse_Question" Association="TISS_MindRadarModel.FK_HealthSurveyResponse_Question">
+            <End Role="HealthSurveyQuestion" EntitySet="HealthSurveyQuestion" />
+            <End Role="HealthSurveyResponse" EntitySet="HealthSurveyResponse" />
+          </AssociationSet>
+          <AssociationSet Name="FK_HealthSurveyResponse_User" Association="TISS_MindRadarModel.FK_HealthSurveyResponse_User">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="HealthSurveyResponse" EntitySet="HealthSurveyResponse" />
           </AssociationSet>
           <AssociationSet Name="FK__Psycholog__Quest__282DF8C2" Association="TISS_MindRadarModel.FK__Psycholog__Quest__282DF8C2">
             <End Role="MentalState" EntitySet="MentalState" />
@@ -815,6 +886,10 @@
           <AssociationSet Name="FK_PsychologicalResponse_QuestionID" Association="TISS_MindRadarModel.FK_PsychologicalResponse_QuestionID">
             <End Role="MentalState" EntitySet="MentalState" />
             <End Role="PsychologicalResponse" EntitySet="PsychologicalResponse" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UserRespo__UserI__778AC167" Association="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="MentalStateResponse" EntitySet="MentalStateResponse" />
           </AssociationSet>
           <AssociationSet Name="FK_ProfessionalCapabilities_Category" Association="TISS_MindRadarModel.FK_ProfessionalCapabilities_Category">
             <End Role="ProfessionalCapabilitiesCategory" EntitySet="ProfessionalCapabilitiesCategory" />
@@ -876,10 +951,6 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="UserProfile" EntitySet="UserProfile" />
           </AssociationSet>
-          <AssociationSet Name="FK__UserRespo__UserI__778AC167" Association="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167">
-            <End Role="Users" EntitySet="Users" />
-            <End Role="UserResponse" EntitySet="UserResponse" />
-          </AssociationSet>
           <AssociationSet Name="QuestionCategory" Association="TISS_MindRadarModel.QuestionCategory">
             <End Role="Category" EntitySet="Category" />
             <End Role="MentalPhysicalState" EntitySet="MentalPhysicalState" />
@@ -913,6 +984,35 @@
           <Property Name="QuestionText" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
           <Property Name="Score" Type="Int32" />
         </EntityType>
+        <EntityType Name="HealthSurveyQuestion">
+          <Key>
+            <PropertyRef Name="QuestionID" />
+          </Key>
+          <Property Name="QuestionID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DisplayOrder" Type="Int32" Nullable="false" />
+          <Property Name="QuestionTitle" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Score5Description" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Score4Description" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Score3Description" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Score2Description" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Score1Description" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="CategoryName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="HealthSurveyResponse" Relationship="TISS_MindRadarModel.FK_HealthSurveyResponse_Question" FromRole="HealthSurveyQuestion" ToRole="HealthSurveyResponse" />
+        </EntityType>
+        <EntityType Name="HealthSurveyResponse">
+          <Key>
+            <PropertyRef Name="ResponseID" />
+          </Key>
+          <Property Name="ResponseID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="QuestionID" Type="Int32" Nullable="false" />
+          <Property Name="Score" Type="Int32" Nullable="false" />
+          <Property Name="SurveyDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="BatchID" Type="Guid" Nullable="false" />
+          <NavigationProperty Name="HealthSurveyQuestion" Relationship="TISS_MindRadarModel.FK_HealthSurveyResponse_Question" FromRole="HealthSurveyResponse" ToRole="HealthSurveyQuestion" />
+          <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK_HealthSurveyResponse_User" FromRole="HealthSurveyResponse" ToRole="Users" />
+        </EntityType>
         <EntityType Name="LackOfEnergy">
           <Key>
             <PropertyRef Name="ID" />
@@ -936,6 +1036,7 @@
           <Property Name="ScoreOption4" Type="Int32" Nullable="false" />
           <Property Name="ScoreOption5" Type="Int32" Nullable="false" />
           <Property Name="ScoreOption6" Type="Int32" Nullable="false" />
+          <Property Name="CategoryID" Type="Int32" />
           <NavigationProperty Name="Category" Relationship="TISS_MindRadarModel.QuestionCategory" FromRole="MentalPhysicalState" ToRole="Category" />
         </EntityType>
         <EntityType Name="MentalRelaxation">
@@ -963,6 +1064,20 @@
           <NavigationProperty Name="PsychologicalStateQuestionCategory" Relationship="TISS_MindRadarModel.FK__Psycholog__Quest__282DF8C2" FromRole="MentalState" ToRole="PsychologicalStateQuestionCategory" />
           <NavigationProperty Name="PsychologicalStateCategory" Relationship="TISS_MindRadarModel.FK_MentalState_Category" FromRole="MentalState" ToRole="PsychologicalStateCategory" />
           <NavigationProperty Name="PsychologicalResponse" Relationship="TISS_MindRadarModel.FK_PsychologicalResponse_QuestionID" FromRole="MentalState" ToRole="PsychologicalResponse" />
+        </EntityType>
+        <EntityType Name="MentalStateResponse">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="QuestionID" Type="Int32" Nullable="false" />
+          <Property Name="CategoryID" Type="Int32" Nullable="false" />
+          <Property Name="Score" Type="Int32" Nullable="false" />
+          <Property Name="BatchID" Type="Guid" Nullable="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="SurveyDate" Type="DateTime" Precision="0" />
+          <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" FromRole="MentalStateResponse" ToRole="Users" />
         </EntityType>
         <EntityType Name="OverallSelfRegulation">
           <Key>
@@ -1125,7 +1240,7 @@
           <Property Name="ReplyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="CommentID" Type="Int32" Nullable="false" />
           <Property Name="PsychologistID" Type="Int32" Nullable="false" />
-          <Property Name="ReplyText" Type="String" Nullable="false" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="ReplyText" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="RadarChartComment" Relationship="TISS_MindRadarModel.FK_RadarChartReply_Comment" FromRole="RadarChartReply" ToRole="RadarChartComment" />
           <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK_RadarChartReply_Psychologist" FromRole="RadarChartReply" ToRole="Users" />
@@ -1135,7 +1250,7 @@
             <PropertyRef Name="LogID" />
           </Key>
           <Property Name="LogID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="ActionType" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="ActionType" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="TargetType" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
           <Property Name="TargetID" Type="Int32" Nullable="false" />
           <Property Name="PerformedBy" Type="Int32" Nullable="false" />
@@ -1231,20 +1346,6 @@
           <NavigationProperty Name="Team" Relationship="TISS_MindRadarModel.FK__UserProfi__TeamI__19DFD96B" FromRole="UserProfile" ToRole="Team" />
           <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" FromRole="UserProfile" ToRole="Users" />
         </EntityType>
-        <EntityType Name="UserResponse">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="UserID" Type="Int32" Nullable="false" />
-          <Property Name="QuestionID" Type="Int32" Nullable="false" />
-          <Property Name="CategoryID" Type="Int32" Nullable="false" />
-          <Property Name="Score" Type="Int32" Nullable="false" />
-          <Property Name="BatchID" Type="Guid" Nullable="false" />
-          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="7" />
-          <Property Name="SurveyDate" Type="DateTime" Precision="0" />
-          <NavigationProperty Name="Users" Relationship="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" FromRole="UserResponse" ToRole="Users" />
-        </EntityType>
         <EntityType Name="Users">
           <Key>
             <PropertyRef Name="UserID" />
@@ -1260,13 +1361,14 @@
           <Property Name="TeamID" Type="Int32" />
           <Property Name="RefereeTeamID" Type="Int32" />
           <NavigationProperty Name="ConsultantTeams" Relationship="TISS_MindRadarModel.FK_ConsultantTeams_ConsultantID" FromRole="Users" ToRole="ConsultantTeams" />
+          <NavigationProperty Name="HealthSurveyResponse" Relationship="TISS_MindRadarModel.FK_HealthSurveyResponse_User" FromRole="Users" ToRole="HealthSurveyResponse" />
+          <NavigationProperty Name="MentalStateResponse" Relationship="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" FromRole="Users" ToRole="MentalStateResponse" />
           <NavigationProperty Name="PsychologicalResponse" Relationship="TISS_MindRadarModel.FK_PsychologicalResponse_UserID" FromRole="Users" ToRole="PsychologicalResponse" />
           <NavigationProperty Name="RadarChartComment" Relationship="TISS_MindRadarModel.FK_RadarChartComment_User" FromRole="Users" ToRole="RadarChartComment" />
           <NavigationProperty Name="RadarChartReply" Relationship="TISS_MindRadarModel.FK_RadarChartReply_Psychologist" FromRole="Users" ToRole="RadarChartReply" />
           <NavigationProperty Name="RadarCommentLog" Relationship="TISS_MindRadarModel.FK_RadarCommentLog_User" FromRole="Users" ToRole="RadarCommentLog" />
           <NavigationProperty Name="RefereeTeam" Relationship="TISS_MindRadarModel.FK_Users_RefereeTeam" FromRole="Users" ToRole="RefereeTeam" />
           <NavigationProperty Name="UserProfile" Relationship="TISS_MindRadarModel.FK__UserProfi__UserI__18EBB532" FromRole="Users" ToRole="UserProfile" />
-          <NavigationProperty Name="UserResponse" Relationship="TISS_MindRadarModel.FK__UserRespo__UserI__778AC167" FromRole="Users" ToRole="UserResponse" />
         </EntityType>
         <Association Name="FK_ConsultantTeams_ConsultantID">
           <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
@@ -1289,6 +1391,30 @@
             </Principal>
             <Dependent Role="ConsultantTeams">
               <PropertyRef Name="TeamID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_HealthSurveyResponse_Question">
+          <End Type="TISS_MindRadarModel.HealthSurveyQuestion" Role="HealthSurveyQuestion" Multiplicity="1" />
+          <End Type="TISS_MindRadarModel.HealthSurveyResponse" Role="HealthSurveyResponse" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="HealthSurveyQuestion">
+              <PropertyRef Name="QuestionID" />
+            </Principal>
+            <Dependent Role="HealthSurveyResponse">
+              <PropertyRef Name="QuestionID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_HealthSurveyResponse_User">
+          <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="TISS_MindRadarModel.HealthSurveyResponse" Role="HealthSurveyResponse" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="HealthSurveyResponse">
+              <PropertyRef Name="UserID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1325,6 +1451,18 @@
             </Principal>
             <Dependent Role="PsychologicalResponse">
               <PropertyRef Name="QuestionID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UserRespo__UserI__778AC167">
+          <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="TISS_MindRadarModel.MentalStateResponse" Role="MentalStateResponse" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="MentalStateResponse">
+              <PropertyRef Name="UserID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1508,18 +1646,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__UserRespo__UserI__778AC167">
-          <End Type="TISS_MindRadarModel.Users" Role="Users" Multiplicity="1" />
-          <End Type="TISS_MindRadarModel.UserResponse" Role="UserResponse" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Users">
-              <PropertyRef Name="UserID" />
-            </Principal>
-            <Dependent Role="UserResponse">
-              <PropertyRef Name="UserID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="QuestionCategory">
           <End Type="TISS_MindRadarModel.Category" Role="Category" Multiplicity="*" />
           <End Type="TISS_MindRadarModel.MentalPhysicalState" Role="MentalPhysicalState" Multiplicity="*" />
@@ -1557,6 +1683,34 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="HealthSurveyQuestion">
+            <EntityTypeMapping TypeName="TISS_MindRadarModel.HealthSurveyQuestion">
+              <MappingFragment StoreEntitySet="HealthSurveyQuestion">
+                <ScalarProperty Name="CategoryName" ColumnName="CategoryName" />
+                <ScalarProperty Name="Score1Description" ColumnName="Score1Description" />
+                <ScalarProperty Name="Score2Description" ColumnName="Score2Description" />
+                <ScalarProperty Name="Score3Description" ColumnName="Score3Description" />
+                <ScalarProperty Name="Score4Description" ColumnName="Score4Description" />
+                <ScalarProperty Name="Score5Description" ColumnName="Score5Description" />
+                <ScalarProperty Name="QuestionTitle" ColumnName="QuestionTitle" />
+                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
+                <ScalarProperty Name="QuestionID" ColumnName="QuestionID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="HealthSurveyResponse">
+            <EntityTypeMapping TypeName="TISS_MindRadarModel.HealthSurveyResponse">
+              <MappingFragment StoreEntitySet="HealthSurveyResponse">
+                <ScalarProperty Name="BatchID" ColumnName="BatchID" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="SurveyDate" ColumnName="SurveyDate" />
+                <ScalarProperty Name="Score" ColumnName="Score" />
+                <ScalarProperty Name="QuestionID" ColumnName="QuestionID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="ResponseID" ColumnName="ResponseID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="LackOfEnergy">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.LackOfEnergy">
               <MappingFragment StoreEntitySet="LackOfEnergy">
@@ -1570,6 +1724,7 @@
           <EntitySetMapping Name="MentalPhysicalState">
             <EntityTypeMapping TypeName="TISS_MindRadarModel.MentalPhysicalState">
               <MappingFragment StoreEntitySet="MentalPhysicalState">
+                <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
                 <ScalarProperty Name="ScoreOption6" ColumnName="ScoreOption6" />
                 <ScalarProperty Name="ScoreOption5" ColumnName="ScoreOption5" />
                 <ScalarProperty Name="ScoreOption4" ColumnName="ScoreOption4" />
@@ -1604,6 +1759,20 @@
                 <ScalarProperty Name="Option1" ColumnName="Option1" />
                 <ScalarProperty Name="QuestionText" ColumnName="QuestionText" />
                 <ScalarProperty Name="QuestionNumber" ColumnName="QuestionNumber" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MentalStateResponse">
+            <EntityTypeMapping TypeName="TISS_MindRadarModel.MentalStateResponse">
+              <MappingFragment StoreEntitySet="MentalStateResponse">
+                <ScalarProperty Name="SurveyDate" ColumnName="SurveyDate" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="BatchID" ColumnName="BatchID" />
+                <ScalarProperty Name="Score" ColumnName="Score" />
+                <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
+                <ScalarProperty Name="QuestionID" ColumnName="QuestionID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>
@@ -1867,20 +2036,6 @@
                 <ScalarProperty Name="Role" ColumnName="Role" />
                 <ScalarProperty Name="TeamID" ColumnName="TeamID" />
                 <ScalarProperty Name="Age" ColumnName="Age" />
-                <ScalarProperty Name="UserID" ColumnName="UserID" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="UserResponse">
-            <EntityTypeMapping TypeName="TISS_MindRadarModel.UserResponse">
-              <MappingFragment StoreEntitySet="UserResponse">
-                <ScalarProperty Name="SurveyDate" ColumnName="SurveyDate" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="BatchID" ColumnName="BatchID" />
-                <ScalarProperty Name="Score" ColumnName="Score" />
-                <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
-                <ScalarProperty Name="QuestionID" ColumnName="QuestionID" />
                 <ScalarProperty Name="UserID" ColumnName="UserID" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>

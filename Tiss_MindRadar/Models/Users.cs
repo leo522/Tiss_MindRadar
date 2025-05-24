@@ -18,12 +18,13 @@ namespace Tiss_MindRadar.Models
         public Users()
         {
             this.ConsultantTeams = new HashSet<ConsultantTeams>();
+            this.HealthSurveyResponse = new HashSet<HealthSurveyResponse>();
+            this.MentalStateResponse = new HashSet<MentalStateResponse>();
             this.PsychologicalResponse = new HashSet<PsychologicalResponse>();
             this.RadarChartComment = new HashSet<RadarChartComment>();
             this.RadarChartReply = new HashSet<RadarChartReply>();
             this.RadarCommentLog = new HashSet<RadarCommentLog>();
             this.UserProfile = new HashSet<UserProfile>();
-            this.UserResponse = new HashSet<UserResponse>();
         }
     
         public int UserID { get; set; }
@@ -40,6 +41,10 @@ namespace Tiss_MindRadar.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ConsultantTeams> ConsultantTeams { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<HealthSurveyResponse> HealthSurveyResponse { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<MentalStateResponse> MentalStateResponse { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PsychologicalResponse> PsychologicalResponse { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<RadarChartComment> RadarChartComment { get; set; }
@@ -50,7 +55,5 @@ namespace Tiss_MindRadar.Models
         public virtual RefereeTeam RefereeTeam { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UserProfile> UserProfile { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<UserResponse> UserResponse { get; set; }
     }
 }

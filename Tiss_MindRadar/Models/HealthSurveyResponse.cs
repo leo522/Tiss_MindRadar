@@ -12,17 +12,17 @@ namespace Tiss_MindRadar.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class UserResponse
+    public partial class HealthSurveyResponse
     {
-        public int ID { get; set; }
+        public int ResponseID { get; set; }
         public int UserID { get; set; }
         public int QuestionID { get; set; }
-        public int CategoryID { get; set; }
         public int Score { get; set; }
-        public System.Guid BatchID { get; set; }
+        public System.DateTime SurveyDate { get; set; }
         public System.DateTime CreatedDate { get; set; }
-        public Nullable<System.DateTime> SurveyDate { get; set; }
+        public System.Guid BatchID { get; set; }
     
+        public virtual HealthSurveyQuestion HealthSurveyQuestion { get; set; }
         public virtual Users Users { get; set; }
     }
 }

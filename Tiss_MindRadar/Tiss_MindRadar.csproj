@@ -183,6 +183,12 @@
     <Compile Include="Models\Fatigue.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\HealthSurveyQuestion.cs">
+      <DependentUpon>MindRadarModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\HealthSurveyResponse.cs">
+      <DependentUpon>MindRadarModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\LackOfEnergy.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
@@ -193,6 +199,9 @@
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\MentalState.cs">
+      <DependentUpon>MindRadarModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\MentalStateResponse.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\MindRadarModel.Context.cs">
@@ -289,9 +298,6 @@
     </Compile>
     <Compile Include="ViewModels\TeamRawDataViewModel.cs" />
     <Compile Include="Models\UserProfile.cs">
-      <DependentUpon>MindRadarModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\UserResponse.cs">
       <DependentUpon>MindRadarModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Users.cs">

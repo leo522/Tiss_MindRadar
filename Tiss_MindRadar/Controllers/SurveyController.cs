@@ -27,7 +27,7 @@ namespace Tiss_MindRadar.Controllers
         }
         #endregion
 
-        #region 提交身心狀態檢測數據並保存到 UserResponse 表
+        #region 提交身心狀態檢測數據並保存到 MentalStateResponse 表
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SubmitMentalPhysicalState(FormCollection form)
@@ -55,7 +55,7 @@ namespace Tiss_MindRadar.Controllers
 
                 foreach (var response in responses)
                 {
-                    var userResponse = new UserResponse
+                    var userResponse = new MentalStateResponse
                     {
                         QuestionID = response.Key,
                         UserID = userId,
@@ -65,7 +65,7 @@ namespace Tiss_MindRadar.Controllers
                         SurveyDate = surveyDate, // 儲存填寫日期
                         CreatedDate = DateTime.Now
                     };
-                    _db.UserResponse.Add(userResponse);
+                    _db.MentalStateResponse.Add(userResponse);
                 }
 
                 _db.SaveChanges();
