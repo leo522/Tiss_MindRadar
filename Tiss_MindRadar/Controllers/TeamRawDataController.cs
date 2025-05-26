@@ -86,7 +86,7 @@ namespace Tiss_MindRadar.Controllers
                 var teams = _db.Team.Where(t => t.isenable == true).ToList();
                 ViewBag.Teams = new SelectList(teams, "TeamID", "TeamName", teamId);
 
-                // 取得隊伍的選手
+                // 取得選手清單
                 if (teamId.HasValue)
                 {
                     var users = _db.Users
@@ -116,9 +116,12 @@ namespace Tiss_MindRadar.Controllers
                             Category = result.ms.QuestionText,
                             Score = result.temp.pr.Score,
                             SurveyDate = result.temp.pr.SurveyDate
-                        })
-                        .OrderBy(r => r.SurveyDate)
-                        .ToList();
+                        }).AsEnumerable()
+                        .Select(result => 
+                        {
+                            result.UserName = MaskingHelper.MaskUserName(result.UserName);
+                            return result;
+                        }).ToList();
 
                     // 查詢該選手的雷達圖數據（最近 3 筆測試日期）
                     var recentDates = _db.PsychologicalResponse
@@ -181,7 +184,9 @@ namespace Tiss_MindRadar.Controllers
         public ActionResult GetMentalPhysicalStateTeamRawData(int? userId, int? teamId)
         {
             if (Session["UserID"] == null || Session["UserRole"]?.ToString() != "Consultant")
+            {
                 return RedirectToAction("Login", "UserAccount");
+            }
 
             ViewBag.Teams = new SelectList(_db.Team.Where(t => t.isenable), "TeamID", "TeamName", teamId);
 
